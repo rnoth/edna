@@ -1,0 +1,33 @@
+edna is a work in progress text editor inspired by the UNIX standard, ed.
+
+(note: this document is correct as of commit ea9591 ("Initial commit.") if this
+is not the lastest commit, edna may have diverged from what is described here)
+
+at the moment edna is quite barebones -- the supported commands are:
+	- 'i' to insert a single line, advancing the cursor one line
+	- 'p' to print the current line
+	- 'q' to free the buffer and exit successfully
+
+hacking guide:
+	- the text document is represented as a doubly linked list, with functions
+	  acting as manipulations on this object
+	- system calls (malloc, memcpy, printf, etc.) are invoked as macros with check
+	  their return value and print errno if something happens. please follow this
+	  convention
+
+known issues:
+	- most functions don't sanity check their arguments, meaning any errors will
+	  cascade and compound on each other
+	- printline (the 'p' command) probably does something silly if it's called
+	  before a line is inserted
+	- 'bumplines()' is bloated and should be split into two distinct functions
+
+planned features:
+	- explicit UTF-8 support
+	- reading and writing files
+	- line-by-line navigation
+	- global navigation (':34', etc.)
+	- regex support
+	- commands take arguments
+	- a config.h
+	- plugin support
