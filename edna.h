@@ -48,10 +48,10 @@ extern int	print	(Position *, char *);
 extern int	quit	(Position *, char *);
 
 /* defined in line.c */
-extern Line*	appendline	(Line *, char *, size_t);
 extern Line*	freelines	(Line *, Line *);
 extern Line*	linklines	(Line *, Line*);
 extern Line*	makeline	();
+extern Line*	putline		(Line *, char *, size_t, int option);
 extern size_t	readline	(char **);
 
 /* defined in util.c */
