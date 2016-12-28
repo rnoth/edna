@@ -140,25 +140,37 @@ main (/*int argc, char** argv*/)
 		for(i = 0; ch = buf[i], ch == ' ' || ch == '\t';  ++i)
 			; /* nop */
 		switch(buf[i]) {
+		Line *tmp;
+		case 'd':
+			tmp = curline->next ? curline->next : curline->prev;
+			linklines(curline->prev, curline->next);
+			freelines(curline, curline->next);
+			curline = tmp;
+			if (tmp)
+				goto update;
+			break;
+		case 'i':
+			GETLINE (buf, bufsiz, stdin);
+			curline = insertline (buf, bufsiz, curline);
+			goto update;
+			break;
+		case 'p':
+			printline (curline);
+			break;
 		case 'q':
 			PRINTF ("quitting\n");
 			freelines(topline, NULL);
 			free(buf);
 			exit (0);
-			break; // not reached
-		case 'i':
-			GETLINE (buf, bufsiz, stdin);
-			curline = insertline (buf, bufsiz, curline);
+			break; /* not reached */
+		default:
+			printf("?\n");
+			break;
+		update:
 			if (!curline->prev)
 				topline = curline;
 			if (!curline->next)
 				bottomline = curline;
-			break;
-		case 'p':
-			printline (curline);
-			break;
-		default:
-			printf("?\n");
 			break;
 		}
 	}
