@@ -9,7 +9,9 @@
 extern int LINESIZE;
 
 extern int	append	(Position *pos, char *);
+extern int	back	(Position *pos, char *);
 extern int	delete	(Position *pos, char *);
+extern int	forward	(Position *pos, char *);
 extern int	print	(Position *pos, char *);
 extern int	quit	(Position *pos, char *);
 
@@ -30,6 +32,18 @@ append (Position *pos, char *error)
 }
 
 int
+back (Position *pos, char *error)
+{
+	if (!pos->line->prev) {
+		strcpy (error, "begining of file");
+		return 1;
+	}
+	pos->line = pos->line->prev;
+	--pos->lineno;
+	return 0;
+}
+
+int
 delete (Position *pos, char *error)
 {
 	Line *tmp;
@@ -46,6 +60,18 @@ delete (Position *pos, char *error)
 	pos->line = tmp;
 	if (!pos->line->next)	/* lineno only decreases at the buffer end */
 		--pos->lineno;
+	return 0;
+}
+
+int
+forward (Position *pos, char *error)
+{
+	if (!pos->line->next) {
+		strcpy (error, "end of file");
+		return 1;
+	}
+	pos->line = pos->line->next;
+	++pos->lineno;
 	return 0;
 }
 
