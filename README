@@ -1,6 +1,6 @@
 edna is a work in progress text editor inspired by the UNIX standard, ed.
 
-(note: this document is correct as of commit 1f4bf75 ("complete overhaul") if
+(note: this document is correct as of commit 40a1333 ("forgot to commit all the new files") if
  this is not the lastest commit, edna may have diverged from what is described
  here)
 
