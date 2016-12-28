@@ -1,7 +1,8 @@
 edna is a work in progress text editor inspired by the UNIX standard, ed.
 
-(note: this document is correct as of commit ea9591 ("Initial commit.") if this
-is not the lastest commit, edna may have diverged from what is described here)
+(note: this document is correct as of commit 4e0be1 ("remove bumplines, add
+ linklines() and pushbuffer() as replacement") if this is not the lastest
+ commit, edna may have diverged from what is described here)
 
 at the moment edna is quite barebones -- the supported commands are:
 	- 'i' to insert a single line, advancing the cursor one line
