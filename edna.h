@@ -41,7 +41,9 @@ struct Command {
 
 /* defined in commands.c */
 extern int	append	(Position *, char *);
+extern int	back	(Position *, char *);
 extern int	delete	(Position *, char *);
+extern int	forward	(Position *, char *);
 extern int	help	(Position *, char *);
 extern int	nop	(Position *, char *);
 extern int	print	(Position *, char *);
