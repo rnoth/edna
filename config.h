@@ -11,4 +11,6 @@ const struct Command commands[] = {
 	{ "h",	help },
 	{ "p",	print },
 	{ "q",	quit },
+	{ "-",	back },
+	{ "+",	forward },
 };
