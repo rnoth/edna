@@ -5,11 +5,13 @@ edna is a work in progress text editor inspired by the UNIX standard, ed.
  here)
 
 at the moment edna is quite barebones -- the supported commands are:
+	- 'a' to append a single line, advancing the cursor one line
 	- 'd' to unlink and free and single line
 	- 'h' to explain the last error
-	- 'i' to insert a single line, advancing the cursor one line
 	- 'p' to print the current line
 	- 'q' to free the buffer and exit successfully
+	- '-' to go back one line in the buffer
+	- '+' to go forward one line in the buffer
 
 hacking guide:
 	- the text document is represented as a doubly linked list, with functions
@@ -20,14 +22,13 @@ hacking guide:
 
 known issues:
 	- most functions don't sanity check their arguments, meaning any errors will
-	  cascade and compound on each other
+	  cascade and compound on each other (is this still the case?)
 	- strcpy(3), memcpy(3) and MEMCPY are used inconsistently
-	- 'i' is really 'a'
+	- there is always an empty string as the first line in the buffer
 
 planned features:
 	- explicit UTF-8 support
 	- reading and writing files
-	- line-by-line navigation
 	- global navigation ('34', etc.)
 	- regex support
 	- commands take arguments
