@@ -28,14 +28,13 @@ main (/*int argc, char** argv*/)
 {
 	char *buf, *error;
 	size_t bufsiz;
-	Line *topline, *bottomline;
 	Position *pos;
 	MALLOC (buf, LINESIZE * sizeof *buf);
 	bufsiz = LINESIZE * sizeof *buf;
 	MALLOC (error, LINESIZE * sizeof *error);
 	CALLOC (pos, 1, sizeof *pos);
 
-	pos->line = topline = bottomline = makeline ();
+	pos->line = makeline ();
 
 	for(;;) {
 		size_t i, cmd;
@@ -60,16 +59,14 @@ main (/*int argc, char** argv*/)
 
 		if (!pos->line)
 			pos->line = makeline ();
-		if (!pos->line->prev)
-			topline = pos->line;
-		if (!pos->line->next)
-			bottomline = pos->line;
 	}
 
 	PRINTF ("quitting\n");
-	if (pos->line)
-		freelines(topline, NULL);
-	free(buf);
+	for (; pos->line->prev; pos->line = pos->line->prev)
+		; /* nop */
+	freelines(pos->line, NULL);
+	free (buf);
+	free (error);
 
 	return 0;
 }
