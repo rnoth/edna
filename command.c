@@ -21,7 +21,7 @@ append (Position *pos, char *error)
 	MALLOC (buf, LINESIZE * sizeof *buf);
 	bufsiz = LINESIZE;
 	bufsiz = readline (&buf);
-	if(!(pos->line = appendline (pos->line, buf, bufsiz))) {
+	if(!(pos->line = putline (pos->line, buf, bufsiz, 1))) {
 		strcpy (error, "insertion failed");
 		return 1; /* error */
 	}
@@ -32,18 +32,16 @@ append (Position *pos, char *error)
 int
 delete (Position *pos, char *error)
 {
-	Line *tmp, *l;
+	Line *tmp;
 	if (!pos->line) {
 		strcpy (error, "empty buffer");
 		return 1;
 	}
-	l = pos->line;	/* alias */
-	tmp = l->next ? l->next : l->prev;
+	tmp = pos->line->next ? pos->line->next : pos->line->prev;
 	if (!tmp)
 		tmp = makeline ();
 
-	linklines(l->prev, l->next);
-	freelines(l, l->next);
+	freelines(pos->line, pos->line->next);
 
 	pos->line = tmp;
 	if (!pos->line->next)	/* lineno only decreases at the buffer end */
