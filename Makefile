@@ -1,5 +1,4 @@
 CC ?= cc
-LD ?= ld
 CFLAGS ?= -g -Wall -Wextra -pedantic
 LDFLAGS ?= -lc
 
