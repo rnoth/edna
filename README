@@ -1,10 +1,11 @@
 edna is a work in progress text editor inspired by the UNIX standard, ed.
 
-(note: this document is correct as of commit 4e0be1 ("remove bumplines, add
- linklines() and pushbuffer() as replacement") if this is not the lastest
- commit, edna may have diverged from what is described here)
+(note: this document is correct as of commit 84da346 ("add the 'd' command") if
+ this is not the lastest commit, edna may have diverged from what is described
+ here)
 
 at the moment edna is quite barebones -- the supported commands are:
+	- 'd' to unlink and free and single line
 	- 'i' to insert a single line, advancing the cursor one line
 	- 'p' to print the current line
 	- 'q' to free the buffer and exit successfully
