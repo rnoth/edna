@@ -1,7 +1,4 @@
 /* edna.c -- ed-like text editor */
-/* TODO:
-	- bumplines() hasn't been testing with lines > 1
-*/
 #include <fcntl.h>
 #include <signal.h>
 #include <stdint.h>
@@ -24,7 +21,6 @@
 
 typedef struct Line Line;
 struct Line {
-	//char dirty;
 	int lineno;
 	size_t len;
 	char* str;
@@ -32,42 +28,13 @@ struct Line {
 	Line* prev;
 };
 
-static Line*	bumplines	(Line *, int, Line **);
-static Line*	freelines	(Line *, Line *);
-static Line*	insertline	(char *, size_t, Line *);
-static Line*	makeline	();
+static Line	*freelines	(Line *, Line *);
+static Line	*insertline	(char *, size_t, Line *);
+static Line	*makeline	();
+static void	linklines	(Line *, Line*);
+static Line	*pushbuffer	(Line *, size_t);
 static void	printline	(Line *);
 static void	warn		();
-
-Line*
-bumplines (Line *start, int offset, Line **lines)
-{
-	Line *line, *end;
-	line = *lines;
-
-	line->prev = start;
-	end = (start ? start->next : NULL);
-	if (start)
-		start->next = line;
-	
-	line->next = (offset > 1 ? line + 1 : NULL);
-	line->lineno = (start ? start->lineno + 1 : 1);
-	for (int i = 1; i < offset; ++i, ++line) {
-		line->prev = line - 1;
-		if (i < offset - 1)
-			line->next = line + 1;
-		line->lineno = (line - 1)->lineno + 1;
-	}
-	if (offset > 1) {
-		line->prev = line - 1;
-		line->lineno = (line - 1)->lineno + 1;
-	}
-	if (end)
-		end->lineno += offset;
-	line->next = end;
-	return end ? end : line;
-		
-}
 
 Line *
 freelines(Line *start, Line *stop)
@@ -78,8 +45,6 @@ freelines(Line *start, Line *stop)
 	cur = start;
 	next = cur->next;
 	do {
-		PRINTF("freeing line: \n\t")
-		printline(cur);
 		tmp = (next ? next->next : NULL);
 		free (cur->str);
 		free (cur);
@@ -90,19 +55,31 @@ freelines(Line *start, Line *stop)
 }
 
 Line*
-insertline(char* buf, size_t bufsiz, Line *position)
+insertline (char* buf, size_t bufsiz, Line *position)
 {
 	Line *new;
-	new = makeline();
-	MALLOC(new->str, sizeof new->str * LINESIZE);
-	MEMCPY(new->str, buf, bufsiz + 1); /* + 1 for the terminating 0 byte */
+	new = makeline ();
+	MALLOC (new->str, sizeof new->str * LINESIZE);
+	MEMCPY (new->str, buf, bufsiz + 1); /* + 1 for the terminating 0 byte */
 	new->len = bufsiz;
-	return bumplines(position, 1, &new);
+	new->lineno = position ? position->lineno + 1 : 1;
+	if (position) {
+		linklines (new, position->next);
+		linklines (position, new);
+		pushbuffer (position->next, 1);
+	}
+	return new;
 }
 
-Line*
+void
 linklines(Line *left, Line *right)
 {
+	if (left)
+		left->next = right;
+	if (right)
+		right->prev = left;
+
+	return;
 }
 
 Line*
@@ -127,6 +104,16 @@ printline (Line *line)
 	return;
 }
 
+Line *
+pushbuffer(Line *start, size_t offset)
+{
+	Line *l;
+	l = start;
+	for (; l && (l = l->next);)
+		l->lineno += offset;
+	return l;
+}
+
 void
 warn ()
 {
@@ -137,7 +124,7 @@ warn ()
 int
 main (/*int argc, char** argv*/)
 {
-	char ch, *buf;
+	char *buf;
 	Line *curline, *topline, *bottomline;
 	size_t bufsiz;
 	MALLOC (buf, 80 * sizeof *buf);
@@ -147,6 +134,7 @@ main (/*int argc, char** argv*/)
 
 	for(;;){
 		int i;
+		char ch;
 		PRINTF (": ");
 		GETLINE (buf, bufsiz, stdin);
 		for(i = 0; ch = buf[i], ch == ' ' || ch == '\t';  ++i)

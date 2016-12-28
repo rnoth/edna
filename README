@@ -20,7 +20,6 @@ known issues:
 	  cascade and compound on each other
 	- printline (the 'p' command) probably does something silly if it's called
 	  before a line is inserted
-	- 'bumplines()' is bloated and should be split into two distinct functions
 
 planned features:
 	- explicit UTF-8 support
