@@ -30,9 +30,9 @@ changeline (Line *targ, char *buf, size_t bufsiz)
 Line *
 freelines (Line *start, Line *stop)
 {
-	Line *cur, *next, *tmp;
-	if (start->prev) /* link around the region to be freed */
-		(start->prev)->next = stop;
+	Line *cur, *next, *prev, *tmp;
+
+	prev = start->prev;
 	cur = start;
 	next = cur->next;
 	do {
@@ -42,19 +42,11 @@ freelines (Line *start, Line *stop)
 		cur = next;
 		next = tmp;
 	} while (cur && cur != stop);
-	return stop;
-}
 
-Line*
-appendline (Line *cur, char* buf, size_t bufsiz)
-{
-	Line *new;
-	new = makeline ();
-	changeline (new, buf, bufsiz);
-	if (cur->next)
-		linklines (new, cur->next);
-	linklines (cur, new);
-	return new;
+	/* line around freed region */
+	linklines (prev, stop);
+
+	return stop;
 }
 
 Line *
@@ -73,6 +65,33 @@ makeline ()
 {
 	Line* new;
 	CALLOC (new, 1, sizeof *new);
+	return new;
+}
+
+Line*
+putline (Line *cur, char* buf, size_t bufsiz, int option)
+{
+	Line *new, *targ;
+
+	new = makeline ();
+	changeline (new, buf, bufsiz);
+	switch (option) {
+	case 1:	/* append */
+		targ = cur;
+		break;
+	case 0:	/* change */
+		linklines (cur->prev, new);
+		linklines (new, cur->next);
+		freelines (cur, cur->next);
+		return new;
+	case -1: /* insert */
+		targ = cur->prev;
+		break;
+	}
+	if (targ->next)
+		linklines (new, targ->next);
+	if (targ)
+		linklines (targ, new);
 	return new;
 }
 
