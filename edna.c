@@ -11,6 +11,8 @@
 			warn();
 #define PRINTF(...) if (!printf (__VA_ARGS__))\
 			warn();
+#define FPRINTF(...) if (!fprintf (__VA_ARGS__))\
+			warn();
 #define MEMCPY(X, Y, Z) if (!memcpy(X, Y, Z))\
 			warn();
 #define GETLINE(X, Y, Z) if (!(Y = getline(&X, &Y, Z)))\
@@ -21,11 +23,16 @@
 
 typedef struct Line Line;
 struct Line {
-	int lineno;
 	size_t len;
-	char* str;
-	Line* next;
-	Line* prev;
+	char *str;
+	Line *next;
+	Line *prev;
+};
+
+typedef struct Position 
+struct Position {
+	size_t lineno;
+	Line *line;
 };
 
 static Line	*freelines	(Line *, Line *);
@@ -36,6 +43,19 @@ static Line	*pushbuffer	(Line *, size_t);
 static void	printline	(Line *);
 static void	warn		();
 
+Line *
+deleteline(Line *l)
+{
+	Line *tmp;
+	if (l) {
+		tmp = l->next ? l->next : l->prev;
+		linklines(l->prev, l->next);
+		freelines(l, l->next);
+	} else
+		FPRINTF(stderr, "?\n");
+	return tmp;
+}
+	
 Line *
 freelines(Line *start, Line *stop)
 {
@@ -100,7 +120,10 @@ makeline ()
 void
 printline (Line *line)
 {
-	printf ("%s", line->str);
+	if (line) {
+		PRINTF ("%s", line->str);
+	} else
+		FPRINTF (stderr, "?\n");
 	return;
 }
 
@@ -126,6 +149,7 @@ main (/*int argc, char** argv*/)
 {
 	char *buf;
 	Line *curline, *topline, *bottomline;
+	Position pos;
 	size_t bufsiz;
 	MALLOC (buf, 80 * sizeof *buf);
 	bufsiz = 80 * sizeof *buf;
@@ -140,13 +164,9 @@ main (/*int argc, char** argv*/)
 		for(i = 0; ch = buf[i], ch == ' ' || ch == '\t';  ++i)
 			; /* nop */
 		switch(buf[i]) {
-		Line *tmp;
 		case 'd':
-			tmp = curline->next ? curline->next : curline->prev;
-			linklines(curline->prev, curline->next);
-			freelines(curline, curline->next);
-			curline = tmp;
-			if (tmp)
+			curline = deleteline(curline);
+			if (curline)
 				goto update;
 			break;
 		case 'i':
@@ -159,7 +179,8 @@ main (/*int argc, char** argv*/)
 			break;
 		case 'q':
 			PRINTF ("quitting\n");
-			freelines(topline, NULL);
+			if (curline)
+				freelines(topline, NULL);
 			free(buf);
 			exit (0);
 			break; /* not reached */
