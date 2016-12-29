@@ -13,6 +13,14 @@ chomp(char *buf, size_t bufsiz)
 }
 
 void
+die ()
+{
+	perror("edna");
+	exit(1);
+}
+	
+
+void
 warn ()
 {
 	perror("edna");
