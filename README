@@ -1,8 +1,8 @@
 edna is a work in progress text editor inspired by the UNIX standard, ed.
 
-(note: this document is correct as of commit d9e50a8 ("remove the empty line
- always at start of buffer") if this is not the lastest commit, edna may have
- diverged from what is described here)
+(note: this document is correct as of commit 51e2f53 ("actually use line
+ addresses properly always at start of buffer") if this is not the lastest
+ commit, edna may have diverged from what is described here)
 
 at the moment edna is quite barebones -- the supported commands are:
 	- 'a' to append a single line, advancing the cursor one line
@@ -10,25 +10,20 @@ at the moment edna is quite barebones -- the supported commands are:
 	- 'h' to explain the last error
 	- 'p' to print the current line
 	- 'q' to free the buffer and exit successfully
-	- '-' to go back one line in the buffer
-	- '+' to go forward one line in the buffer
 
 hacking guide:
 	- the text document is represented as a doubly linked list, with functions
 	  acting as manipulations on this object
-	- system calls (malloc, memcpy, printf, etc.) are invoked as macros with check
-	  their return value and print errno if something happens. please follow this
-	  convention
 
 known issues:
 	- most functions don't sanity check their arguments, meaning any errors will
-	  cascade and compound on each other (is this still the case?)
+	  cascade and compound on each other
 	- strcpy(3), memcpy(3) and MEMCPY are used inconsistently
+	- doesn't detect and properly react to eof on stdin (^D)
 
 planned features:
 	- explicit UTF-8 support
 	- reading and writing files
-	- global navigation ('34', etc.)
 	- regex support
 	- commands take arguments
 	- plugin support
