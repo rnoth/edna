@@ -36,20 +36,28 @@ struct Position {
 	Line *line;
 };
 
+typedef struct Arg Arg;
+struct Arg {
+	int addr;
+};
+
+typedef struct Command Command;
 struct Command {
 	char *handle;
-	int (*func)(Position *, char *);
+	int (*func)(Position *, Arg *, char *);
 };
 
 /* defined in commands.c */
-extern int	append	(Position *, char *);
-extern int	back	(Position *, char *);
-extern int	delete	(Position *, char *);
-extern int	forward	(Position *, char *);
-extern int	help	(Position *, char *);
-extern int	nop	(Position *, char *);
-extern int	print	(Position *, char *);
-extern int	quit	(Position *, char *);
+extern int	append	(Position *, Arg *, char *arg);
+extern int	back	(Position *, Arg *, char *arg);
+extern int	change	(Position *, Arg *, char *arg);
+extern int	delete	(Position *, Arg *, char *arg);
+extern int	forward	(Position *, Arg *, char *arg);
+extern int	help	(Position *, Arg *, char *arg);
+extern int	insert	(Position *, Arg *, char *arg);
+extern int	nop	(Position *, Arg *, char *arg);
+extern int	print	(Position *, Arg *, char *arg);
+extern int	quit	(Position *, Arg *, char *arg);
 
 /* defined in line.c */
 extern Line*	freelines	(Line *, Line *);
@@ -57,6 +65,7 @@ extern Line*	linklines	(Line *, Line*);
 extern Line*	makeline	();
 extern Line*	putline		(Line *, char *, size_t, int option);
 extern size_t	readline	(char **);
+extern Line*	walk		(Line *, int, char *);
 
 /* defined in util.c */
 extern void	chomp		(char *, size_t);
