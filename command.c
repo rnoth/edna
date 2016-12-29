@@ -10,7 +10,7 @@ extern int	append	(Position *, Arg *, char *);
 extern int	back	(Position *, Arg *, char *);
 extern int	delete	(Position *, Arg *, char *);
 extern int	forward	(Position *, Arg *, char *);
-extern int	insert	(Position *, Arg *, char *)
+extern int	insert	(Position *, Arg *, char *);
 extern int	print	(Position *, Arg *, char *);
 extern int	quit	(Position *, Arg *, char *);
 
