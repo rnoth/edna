@@ -6,23 +6,24 @@
 
 #include "edna.h"
 
-extern int	append	(Position *pos, char *);
-extern int	back	(Position *pos, char *);
-extern int	delete	(Position *pos, char *);
-extern int	forward	(Position *pos, char *);
-extern int	print	(Position *pos, char *);
-extern int	quit	(Position *pos, char *);
+extern int	append	(Position *, Arg *, char *);
+extern int	back	(Position *, Arg *, char *);
+extern int	delete	(Position *, Arg *, char *);
+extern int	forward	(Position *, Arg *, char *);
+extern int	insert	(Position *, Arg *, char *)
+extern int	print	(Position *, Arg *, char *);
+extern int	quit	(Position *, Arg *, char *);
 
 int
-append (Position *pos, char *error)
+append (Position *pos, Arg *arg, char *error)
 {
 	char *buf;
 	size_t bufsiz;
 	MALLOC (buf, LINESIZE * sizeof *buf);
-	bufsiz = LINESIZE;
+	PRINTF ("%ld\t", pos->lineno + 1);
 	bufsiz = readline (&buf);
 	if(!(pos->line = putline (pos->line, buf, bufsiz, 1))) {
-		strcpy (error, "insertion failed");
+		strcpy (error, "append failed");
 		return 1; /* error */
 	}
 	++pos->lineno;
@@ -30,7 +31,7 @@ append (Position *pos, char *error)
 }
 
 int
-back (Position *pos, char *error)
+back (Position *pos, Arg *arg, char *error)
 {
 	if (!pos->line->prev) {
 		strcpy (error, "begining of file");
@@ -42,7 +43,22 @@ back (Position *pos, char *error)
 }
 
 int
-delete (Position *pos, char *error)
+change (Position *pos, Arg *arg, char *error)
+{
+	char *buf;
+	size_t bufsiz;
+	MALLOC (buf, LINESIZE * sizeof *buf);
+	PRINTF ("%ld\t", pos->lineno);
+	bufsiz = readline (&buf);
+	if(!(pos->line = putline (pos->line, buf, bufsiz, 0))) {
+		strcpy (error, "changeline failed");
+		return 1; /* error */
+	}
+	return 0;
+}
+
+int
+delete (Position *pos, Arg *arg, char *error)
 {
 	Line *tmp;
 	if (!pos->line) {
@@ -62,7 +78,7 @@ delete (Position *pos, char *error)
 }
 
 int
-forward (Position *pos, char *error)
+forward (Position *pos, Arg *arg, char *error)
 {
 	if (!pos->line->next) {
 		strcpy (error, "end of file");
@@ -74,36 +90,55 @@ forward (Position *pos, char *error)
 }
 
 int
-help (Position *pos, char *error)
+insert (Position *pos, Arg *arg, char *error)
+{
+	char *buf;
+	size_t bufsiz;
+	MALLOC (buf, LINESIZE * sizeof *buf);
+	PRINTF ("%ld\t", pos->lineno);
+	bufsiz = readline (&buf);
+	if(!(pos->line = putline (pos->line, buf, bufsiz, -1))) {
+		strcpy (error, "insertion failed");
+		return 1; /* error */
+	}
+	return 0;
+}
+
+int
+help (Position *pos, Arg *arg, char *error)
 {
 	PRINTF ("%s\n", error);
 	return 0;
 }
 
 int
-nop (Position *pos, char *error)
+nop (Position *pos, Arg *arg, char *error)
 {
 	strcpy (error, "unknown command");
 	return 1;
 }
 
 int
-print (Position *pos, char *error)
+print (Position *pos, Arg *arg, char *error)
 {
+	Line *l;
 	if (!pos->line) {
 		strcpy (error, "empty buffer");
 		return 1;
 	}
-	if (!pos->line->str) {
+	l = walk (pos->line, arg->addr, error);
+	if (!l)
+		return 1;
+	if (!l->str) {
 		strcpy (error, "null string");
 		return 1;
 	}
-	PRINTF ("%s", pos->line->str);
+	PRINTF ("%ld\t%s", pos->lineno + arg->addr, l->str);
 	return 0;
 }
 
 int
-quit (Position *pos, char *error)
+quit (Position *pos, Arg *arg, char *error)
 {
 	strcpy (error, "quit");
 	return 0;

@@ -2,11 +2,13 @@
 
 #define PROMPT ":"
 
-const struct Command commands[] = {
+const Command commands[] = {
 	{ "",	nop },
 	{ "a",	append },
+	{ "c",	change },
 	{ "d",	delete },
 	{ "h",	help },
+	{ "i",	insert },
 	{ "p",	print },
 	{ "q",	quit },
 	{ "-",	back },
