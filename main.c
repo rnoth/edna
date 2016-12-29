@@ -19,14 +19,17 @@ main (/*int argc, char** argv*/)
 	Arg *arg;
 
 	MALLOC (buf, LINESIZE * sizeof *buf);
+	bufsiz = LINESIZE * sizeof *buf;
+
 	MALLOC (error, LINESIZE * sizeof *error);
 	strcpy (error, "everything is ok");
 	CALLOC (name, LINESIZE, sizeof *name);
-	bufsiz = LINESIZE * sizeof *buf;
-	CALLOC (pos, 1, sizeof *pos);
+
+	MALLOC (pos, sizeof *pos);
 	MALLOC (arg, sizeof *arg);
 
 	pos->line = makeline ();
+	pos->lineno = 0;
 
 	for(;;) {
 		size_t cmd;
@@ -68,10 +71,13 @@ main (/*int argc, char** argv*/)
 				for (; ch = buf[i], ch >= '0' && ch <= '9'; ++i, ++j)
 					tmp[j] = ch;
 				tmp[j] = 0;
-				if (relative) {
-					arg->addr = strtol (tmp, NULL, 10);
-				} else
-					arg->addr = strtol (tmp, NULL, 10) - pos->lineno;
+				arg->addr =  strtol (tmp, NULL, 10)
+					   - (!relative ? pos->lineno : 0);
+				/* addr is an offset, because 'Line's have no
+				 * intrinsic addresses. Thus, if the user gave
+				 * us an absolute address, we have to convert
+				 * it to a relative address to use it.
+				 */
 				--i; /* push back last read char */
 				break;
 			cmd:
