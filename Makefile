@@ -1,12 +1,21 @@
 CC ?= cc
+LD ?= ld
 CFLAGS ?= -g -Wall -Wextra -pedantic
+LDFLAGS ?= -lc
 
-SRC = *.c
+SRC = command.c line.c main.c util.c
+OBJ = ${SRC:.c=.o}
+DEPS = *.h
 
-all:
-	${CC} ${CFLAGS} -o edna ${SRC}
-	chmod -w edna
-test:
-	./edna
+edna: $(OBJ)
+	@echo CC $(LDFLAGS) -o edna *.o
+	@$(CC) $(LDFLAGS) -o edna *.o
+
+%.o: %.c $(DEPS)
+	@echo CC $(CFLAGS) -o $@ -c $<
+	@$(CC) $(CFLAGS) -o $@ -c $<
+
+command.o: CFLAGS += -Wno-unused-parameter
+
 clean:
-	rm -f edna
+	rm -f edna log *.o 

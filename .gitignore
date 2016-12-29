@@ -1,3 +1,4 @@
 edna
 *.o
 *~
+cscope.out
