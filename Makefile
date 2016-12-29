@@ -4,7 +4,7 @@ LDFLAGS ?= -lc
 
 SRC = command.c line.c main.c util.c
 OBJ = ${SRC:.c=.o}
-DEPS = *.h
+DEPS = edna.h
 
 edna: $(OBJ)
 	@echo CC $(LDFLAGS) -o edna *.o
@@ -15,6 +15,8 @@ edna: $(OBJ)
 	@$(CC) $(CFLAGS) -o $@ -c $<
 
 command.o: CFLAGS += -Wno-unused-parameter
+
+main.o: config.h
 
 clean:
 	rm -f edna log *.o 
