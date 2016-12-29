@@ -71,7 +71,8 @@ putline (Line *cur, char* buf, size_t bufsiz, int option)
 {
 	Line *new, *targ;
 
-	new = makeline ();
+	/* only call makeline() when buffer isn't empty */
+	new = cur->str ? makeline() : cur;
 	changeline (new, buf, bufsiz);
 	switch (option) {
 	case 1:	/* append */
@@ -88,7 +89,7 @@ putline (Line *cur, char* buf, size_t bufsiz, int option)
 	}
 	if (targ->next)
 		linklines (new, targ->next);
-	if (targ)
+	if (targ && targ != new)
 		linklines (targ, new);
 	return new;
 }
