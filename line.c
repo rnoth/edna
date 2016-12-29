@@ -6,8 +6,6 @@
 
 #include "edna.h"
 
-extern size_t LINESIZE;
-
 extern Line*	changeline	(Line *, char *, size_t);
 extern Line*	freelines	(Line *, Line *);
 extern Line*	insertline	(Line *, char *, size_t);

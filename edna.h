@@ -20,6 +20,8 @@
 
 #define LEN(X) (sizeof X / sizeof *X)
 
+#define LINESIZE 80
+
 typedef struct Line Line;
 struct Line {
 	size_t len;

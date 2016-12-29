@@ -6,8 +6,6 @@
 
 #include "edna.h"
 
-extern int LINESIZE;
-
 extern int	append	(Position *pos, char *);
 extern int	back	(Position *pos, char *);
 extern int	delete	(Position *pos, char *);
