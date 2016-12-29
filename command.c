@@ -10,6 +10,7 @@ extern int	append	(Position *, Arg *, char *);
 extern int	back	(Position *, Arg *, char *);
 extern int	delete	(Position *, Arg *, char *);
 extern int	forward	(Position *, Arg *, char *);
+extern int	gotol	(Position *, Arg *, char *);
 extern int	insert	(Position *, Arg *, char *);
 extern int	print	(Position *, Arg *, char *);
 extern int	quit	(Position *, Arg *, char *);
@@ -19,11 +20,12 @@ append (Position *pos, Arg *arg, char *error)
 {
 	char *buf;
 	size_t bufsiz;
-	Line *l = pos->line;
+	Line *l;
+	pos->lineno += arg->addr;
 	++pos->lineno;
 	PRINTF ("%ld\t", pos->lineno + arg->addr);
 	bufsiz = readline (&buf);
-	l = walk (l, arg->addr, error);
+	l = walk (pos->line, arg->addr, error);
 	if(!(pos->line = putline (l, buf, bufsiz, 1))) {
 		strcpy (error, "append failed");
 		return 1; /* error */
@@ -48,11 +50,14 @@ change (Position *pos, Arg *arg, char *error)
 {
 	char *buf;
 	size_t bufsiz;
+	Line *l;
 	if (pos->lineno == 0)
 		++pos->lineno;
+	pos->lineno += arg->addr;
 	PRINTF ("%ld\t", pos->lineno);
 	bufsiz = readline (&buf);
-	if(!(pos->line = putline (pos->line, buf, bufsiz, 0))) {
+	l = walk (pos->line, arg->addr, error);
+	if(!(pos->line = putline (l, buf, bufsiz, 0))) {
 		strcpy (error, "changeline failed");
 		return 1; /* error */
 	}
@@ -68,6 +73,7 @@ delete (Position *pos, Arg *arg, char *error)
 		return 1;
 	}
 	l = walk (pos->line, arg->addr, error);
+	pos->lineno += arg->addr;
 	tmp = l->next ? l->next : l->prev;
 	if (!tmp)
 		tmp = makeline ();
@@ -104,11 +110,14 @@ insert (Position *pos, Arg *arg, char *error)
 {
 	char *buf;
 	size_t bufsiz;
+	Line *l;
 	if (pos->lineno == 0)
 		++pos->lineno;
+	pos->lineno += arg->addr;
 	PRINTF ("%ld\t", pos->lineno);
 	bufsiz = readline (&buf);
-	if(!(pos->line = putline (pos->line, buf, bufsiz, -1))) {
+	l = walk (pos->line, arg->addr, error);
+	if(!(pos->line = putline (l, buf, bufsiz, -1))) {
 		strcpy (error, "insertion failed");
 		return 1; /* error */
 	}
@@ -133,7 +142,8 @@ print (Position *pos, Arg *arg, char *error)
 		strcpy (error, "empty buffer");
 		return 1;
 	}
-	PRINTF ("%ld\t%s", pos->lineno + arg->addr, l->str);
+	pos->lineno += arg->addr;
+	PRINTF ("%ld\t%s", pos->lineno, l->str);
 	return 0;
 }
 
