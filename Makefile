@@ -20,3 +20,9 @@ main.o: config.h
 
 clean:
 	rm -f edna log *.o 
+
+lint:
+	mkdir -p /tmp/report
+	scan-build -o /tmp make
+
+.PHONY: clean lint
