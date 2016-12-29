@@ -19,14 +19,15 @@ append (Position *pos, Arg *arg, char *error)
 {
 	char *buf;
 	size_t bufsiz;
-	MALLOC (buf, LINESIZE * sizeof *buf);
-	PRINTF ("%ld\t", pos->lineno + 1);
+	Line *l = pos->line;
+	++pos->lineno;
+	PRINTF ("%ld\t", pos->lineno + arg->addr);
 	bufsiz = readline (&buf);
-	if(!(pos->line = putline (pos->line, buf, bufsiz, 1))) {
+	l = walk (l, arg->addr, error);
+	if(!(pos->line = putline (l, buf, bufsiz, 1))) {
 		strcpy (error, "append failed");
 		return 1; /* error */
 	}
-	++pos->lineno;
 	return 0;
 }
 
@@ -47,7 +48,8 @@ change (Position *pos, Arg *arg, char *error)
 {
 	char *buf;
 	size_t bufsiz;
-	MALLOC (buf, LINESIZE * sizeof *buf);
+	if (pos->lineno == 0)
+		++pos->lineno;
 	PRINTF ("%ld\t", pos->lineno);
 	bufsiz = readline (&buf);
 	if(!(pos->line = putline (pos->line, buf, bufsiz, 0))) {
@@ -60,16 +62,17 @@ change (Position *pos, Arg *arg, char *error)
 int
 delete (Position *pos, Arg *arg, char *error)
 {
-	Line *tmp;
-	if (!pos->line) {
+	Line *tmp, *l;
+	if (!pos->line->str) {
 		strcpy (error, "empty buffer");
 		return 1;
 	}
-	tmp = pos->line->next ? pos->line->next : pos->line->prev;
+	l = walk (pos->line, arg->addr, error);
+	tmp = l->next ? l->next : l->prev;
 	if (!tmp)
 		tmp = makeline ();
 
-	freelines(pos->line, pos->line->next);
+	freelines(l, l->next);
 
 	pos->line = tmp;
 	if (!pos->line->next)	/* lineno only decreases at the buffer end */
@@ -90,24 +93,25 @@ forward (Position *pos, Arg *arg, char *error)
 }
 
 int
+help (Position *pos, Arg *arg, char *error)
+{
+	PRINTF ("%s\n", error);
+	return 0;
+}
+
+int
 insert (Position *pos, Arg *arg, char *error)
 {
 	char *buf;
 	size_t bufsiz;
-	MALLOC (buf, LINESIZE * sizeof *buf);
+	if (pos->lineno == 0)
+		++pos->lineno;
 	PRINTF ("%ld\t", pos->lineno);
 	bufsiz = readline (&buf);
 	if(!(pos->line = putline (pos->line, buf, bufsiz, -1))) {
 		strcpy (error, "insertion failed");
 		return 1; /* error */
 	}
-	return 0;
-}
-
-int
-help (Position *pos, Arg *arg, char *error)
-{
-	PRINTF ("%s\n", error);
 	return 0;
 }
 
@@ -122,15 +126,11 @@ int
 print (Position *pos, Arg *arg, char *error)
 {
 	Line *l;
-	if (!pos->line) {
-		strcpy (error, "empty buffer");
-		return 1;
-	}
 	l = walk (pos->line, arg->addr, error);
 	if (!l)
 		return 1;
 	if (!l->str) {
-		strcpy (error, "null string");
+		strcpy (error, "empty buffer");
 		return 1;
 	}
 	PRINTF ("%ld\t%s", pos->lineno + arg->addr, l->str);
