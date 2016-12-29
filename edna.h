@@ -1,22 +1,22 @@
 /* edna.h -- header information */
 
 #define MALLOC(X, Y) if (!(X = malloc (Y)))\
-			warn ()
+			die ()
 #define CALLOC(X, Y, Z) if (!(X = calloc (Y, Z)))\
-			warn ()
+			die ()
 #define REALLOC(X, Y) if (!(X = realloc (X, Y)))\
-			warn ()
+			die ()
 /* man 3 printf says ``If an output error is encountered, a negative value is
  * returned.'', not necessarily -1
  */
 #define PRINTF(...) if (0 > printf (__VA_ARGS__))\
-			warn ()
+			die ()
 #define FPRINTF(...) if (!fprintf (__VA_ARGS__))\
-			warn ()
+			die ()
 #define MEMCPY(X, Y, Z) if (!memcpy(X, Y, Z))\
-			warn ()
+			die ()
 #define GETLINE(X, Y, Z) if (-1 == getline(&X, &Y, Z))\
-			warn ()
+			die () /* could be eof */
 
 #define LEN(X) (sizeof X / sizeof *X)
 
@@ -69,4 +69,5 @@ extern Line*	walk		(Line *, int, char *);
 
 /* defined in util.c */
 extern void	chomp		(char *, size_t);
+extern void	die		();
 extern void	warn		();
