@@ -106,6 +106,7 @@ size_t
 readline (char **buf)
 {
 	size_t bufsiz = LINESIZE;
+	MALLOC (*buf, sizeof **buf * LINESIZE);
 	GETLINE (*buf, bufsiz, stdin);
 	return bufsiz;
 }
