@@ -8,18 +8,22 @@
 
 extern Line*	changeline	(Line *, char *, size_t);
 extern Line*	freelines	(Line *, Line *);
-extern Line*	insertline	(Line *, char *, size_t);
 extern Line*	linklines	(Line *, Line*);
 extern Line*	makeline	();
 extern size_t	readline	(char **); /* FIXME: put this in it's own file */
+extern Line*	walk		(Line *, int, char *error);
 
 Line *
 changeline (Line *targ, char *buf, size_t bufsiz)
 {
 	if (!targ->str)
-		MALLOC (targ->str, sizeof targ->str * bufsiz);
+		MALLOC (targ->str, sizeof *targ->str * bufsiz);
+	if (!targ->str) /* malloc failed, let's bail */
+		return NULL;
 	if (targ->len && targ->len < bufsiz)
 		REALLOC (targ->str, sizeof *targ->str * bufsiz);
+	if (!targ->str)	/* realloc failed, get out of here */
+		return NULL;
 	MEMCPY (targ->str, buf, bufsiz + 1); /* + 1 for the terminating 0 byte */
 	targ->len = bufsiz;
 	return targ;
@@ -69,28 +73,32 @@ makeline ()
 Line*
 putline (Line *cur, char* buf, size_t bufsiz, int option)
 {
-	Line *new, *targ;
+	Line *new;
 
-	/* only call makeline() when buffer isn't empty */
+	/* only call makeline() when buffer isn't already empty */
 	new = cur->str ? makeline() : cur;
-	changeline (new, buf, bufsiz);
+	if (!changeline (new, buf, bufsiz)) {
+		free (new);
+		return NULL;
+	}
 	switch (option) {
 	case 1:	/* append */
-		targ = cur;
+		linklines (new, cur->next);
+		if (new != cur)	/* don't make a infinite loop */
+			linklines (cur, new);
 		break;
 	case 0:	/* change */
 		linklines (cur->prev, new);
 		linklines (new, cur->next);
-		freelines (cur, cur->next);
-		return new;
+		if (new != cur) /* no use-after-free, please */
+			freelines (cur, cur->next);
+		break;
 	case -1: /* insert */
-		targ = cur->prev;
+		linklines (cur->prev, new);
+		if (new != cur)
+			linklines (new, cur);
 		break;
 	}
-	if (targ->next)
-		linklines (new, targ->next);
-	if (targ && targ != new)
-		linklines (targ, new);
 	return new;
 }
 
@@ -100,4 +108,25 @@ readline (char **buf)
 	size_t bufsiz = LINESIZE;
 	GETLINE (*buf, bufsiz, stdin);
 	return bufsiz;
+}
+
+Line *
+walk (Line *cur, int offset, char *error)
+{
+	Line *l = cur;
+	if (0 < offset) {
+		while ((l = l->next))
+			if (!--offset)
+				return l;
+		strcpy (error, "end of file");
+		return NULL;
+	}
+	if (0 > offset) {
+		while ((l = l->prev))
+			if (!++offset)
+				return l;
+		strcpy (error, "start of file");
+		return NULL;
+	}
+	return cur;		
 }
