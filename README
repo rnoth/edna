@@ -1,8 +1,8 @@
 edna is a work in progress text editor inspired by the UNIX standard, ed.
 
-(note: this document is correct as of commit 40a1333 ("forgot to commit all the new files") if
- this is not the lastest commit, edna may have diverged from what is described
- here)
+(note: this document is correct as of commit d9e50a8 ("remove the empty line
+ always at start of buffer") if this is not the lastest commit, edna may have
+ diverged from what is described here)
 
 at the moment edna is quite barebones -- the supported commands are:
 	- 'a' to append a single line, advancing the cursor one line
@@ -24,7 +24,6 @@ known issues:
 	- most functions don't sanity check their arguments, meaning any errors will
 	  cascade and compound on each other (is this still the case?)
 	- strcpy(3), memcpy(3) and MEMCPY are used inconsistently
-	- there is always an empty string as the first line in the buffer
 
 planned features:
 	- explicit UTF-8 support
