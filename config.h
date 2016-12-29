@@ -1,5 +1,7 @@
 /* config.h - configuration for edna(1) */
 
+#define PROMPT ":"
+
 const struct Command commands[] = {
 	{ "",	nop },
 	{ "a",	append },

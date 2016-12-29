@@ -29,7 +29,7 @@ main (/*int argc, char** argv*/)
 		char ch;
 
 		cmd = 0;
-		PRINTF (": ");
+		PRINTF (PROMPT);
 		GETLINE (buf, bufsiz, stdin);
 
 		for (i = 0; ch = buf[i], ch == ' ' || ch == '\t';  ++i)
