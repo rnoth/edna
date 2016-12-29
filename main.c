@@ -10,25 +10,13 @@
 #include "edna.h"
 #include "config.h"
 
-static Line*	runcmd		(size_t, Position *, char *);
-
-/* this should be inline'd */
-Line *
-runcmd (size_t cmd, Position *pos, char *error)
-{
-	int status;
-	status = (*commands[cmd].func)(pos, error);
-	if (status)
-		FPRINTF(stderr, "?\n");
-	return pos->line;
-}
-
 int
 main (/*int argc, char** argv*/)
 {
 	char *buf, *error;
 	size_t bufsiz;
 	Position *pos;
+
 	MALLOC (buf, LINESIZE * sizeof *buf);
 	bufsiz = LINESIZE * sizeof *buf;
 	MALLOC (error, LINESIZE * sizeof *error);
@@ -43,16 +31,19 @@ main (/*int argc, char** argv*/)
 		cmd = 0;
 		PRINTF (": ");
 		GETLINE (buf, bufsiz, stdin);
+
 		for (i = 0; ch = buf[i], ch == ' ' || ch == '\t';  ++i)
 			; /* nop */
 		chomp (buf + i, bufsiz - i);
+
 		for (size_t j = 1; j < LEN(commands); ++j)
 			if (!strcmp (commands[j].handle, buf + i)) {
 				cmd = j;
 				break;
 			}
-		/* FIXME: cmd should update line position */
-		pos->line = runcmd (cmd, pos, error);
+
+		if ((*commands[cmd].func) (pos, error))
+			FPRINTF(stderr, "?\n");
 
 		if (!strcmp (error, "quit"))
 			break;
@@ -64,7 +55,7 @@ main (/*int argc, char** argv*/)
 	PRINTF ("quitting\n");
 	for (; pos->line->prev; pos->line = pos->line->prev)
 		; /* nop */
-	freelines(pos->line, NULL);
+	freelines (pos->line, NULL);
 	free (buf);
 	free (error);
 
