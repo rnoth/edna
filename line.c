@@ -10,7 +10,6 @@ extern Line*	changeline	(Line *, char *, size_t);
 extern Line*	freelines	(Line *, Line *);
 extern Line*	linklines	(Line *, Line*);
 extern Line*	makeline	();
-extern size_t	readline	(char **); /* FIXME: put this in it's own file */
 extern Line*	walk		(Line *, int, char *error);
 
 Line *
@@ -100,15 +99,6 @@ putline (Line *cur, char* buf, size_t bufsiz, int option)
 		break;
 	}
 	return new;
-}
-
-size_t
-readline (char **buf)
-{
-	size_t bufsiz = LINESIZE;
-	MALLOC (*buf, sizeof **buf * LINESIZE);
-	GETLINE (*buf, bufsiz, stdin);
-	return bufsiz;
 }
 
 Line *
