@@ -6,158 +6,164 @@
 
 #include "edna.h"
 
-extern int	append	(Position *, Arg *, char *);
-extern int	back	(Position *, Arg *, char *);
-extern int	delete	(Position *, Arg *, char *);
-extern int	forward	(Position *, Arg *, char *);
-extern int	gotol	(Position *, Arg *, char *);
-extern int	insert	(Position *, Arg *, char *);
-extern int	print	(Position *, Arg *, char *);
-extern int	quit	(Position *, Arg *, char *);
+extern int	back		(State *, Arg *, char *);
+extern int	delete		(State *, Arg *, char *);
+extern int	forward		(State *, Arg *, char *);
+extern int	gotol		(State *, Arg *, char *);
+extern int	insert		(State *, Arg *, char *);
+extern int	print		(State *, Arg *, char *);
+extern int	quit		(State *, Arg *, char *);
+extern int	write		(State *, Arg *, char *);
 
 int
-append (Position *pos, Arg *arg, char *error)
+delete (State *st, Arg *arg, char *error)
 {
-	char *buf;
-	size_t bufsiz;
+	Line *tmp;
 
-	if (!gotol(pos, arg, error))
-		return 1;
-	++pos->lineno;
-	
-	buf = malloc (sizeof *buf * LINESIZE);
-	bufsiz = LINESIZE;
-	readline (&buf, &bufsiz, "%ld\t", pos->lineno);
-
-	if(!(pos->line = putline (pos->line, buf, bufsiz, 1))) {
-		strcpy (error, "append failed");
-		return 1; /* error */
-	}
-
-	return 0;
-}
-
-int
-change (Position *pos, Arg *arg, char *error)
-{
-	char *buf;
-	size_t bufsiz;
-
-	if (!gotol(pos, arg, error))
-		return 1;
-
-	if (pos->lineno == 0)
-		++pos->lineno;
-
-	buf = malloc (sizeof *buf * LINESIZE);
-	bufsiz = LINESIZE;
-	readline (&buf, &bufsiz, "%ld\t", pos->lineno + arg->addr);
-
-	if(!(pos->line = putline (pos->line, buf, bufsiz, 0))) {
-		strcpy (error, "changeline failed");
-		return 1; /* error */
-	}
-
-	return 0;
-}
-
-int
-delete (Position *pos, Arg *arg, char *error)
-{
-	Line *tmp, *l;
-	if (!pos->line->str) {
+	if (!st->curline->str) {
 		strcpy (error, "empty buffer");
 		return 1;
 	}
-	l = walk (pos->line, arg->addr, error);
-	pos->lineno += arg->addr;
-	tmp = l->next ? l->next : l->prev;
+
+	if (arg->addr)
+		if (gotol (st, arg, error))
+			return 1;
+
+	st->dirty = 1;
+
+	tmp = st->curline->next ? st->curline->next : st->curline->prev;
 	if (!tmp)
 		tmp = makeline ();
 
-	freelines(l, l->next);
+	if (!st->curline->next)
+		--st->lineno;
+	(void) freelines(st->curline, st->curline->next);
 
-	pos->line = tmp;
-	if (!pos->line->next)	/* lineno only decreases at the buffer end */
-		--pos->lineno;
+	st->curline = tmp;
 	return 0;
 }
 
 int
-gotol (Position *pos, Arg *arg, char *error)
+gotol (State *st, Arg *arg, char *error)
 {
 	Line *l;
 
 	if (!arg->addr)
 		++arg->addr;
-	if (!arg->rel)
-		arg->addr -= pos->lineno;
 
-	l = walk (pos->line, arg->addr, error);
+	l = walk (st->curline, arg->addr, error);
 	if (!l)
 		return 1;
-	pos->lineno += arg->addr;
-	pos->line = l;
+	st->lineno += arg->addr;
+	st->curline = l;
 	return 0;
 }
 
 int
-help (Position *pos, Arg *arg, char *error)
+help (State *st, Arg *arg, char *error)
 {
-	PRINTF ("%s\n", error);
+	if (0 > printf ("%s\n", error))
+		die("printf");
 	return 0;
 }
 
 int
-insert (Position *pos, Arg *arg, char *error)
+insert (State *st, Arg *arg, char *error)
 {
 	char *buf;
 	size_t bufsiz;
+	int option;
 
-	if (!gotol(pos, arg, error))
-		return 1;
+	option = INSERT; /* -1 is putline's insert mode */
 
-	if (pos->lineno == 0)
-		++pos->lineno;
+	if (arg->mode) {
+		if (!strcmp (arg->mode, "insert")) {
+			; /* insert mode is redundant */
+		} else if (!strcmp (arg->mode, "append")) {
+			option = APPEND;
+		} else if (!strcmp (arg->mode, "change")) {
+			option = CHANGE;
+		} else {
+			strcpy (error, "unknown option");
+			return 1;
+		}
+	}
+
+	if (arg->addr)
+		if (gotol(st, arg, error))
+			return 1;
+
+	if (st->lineno == 0 || option == APPEND)
+		++st->lineno;
+
+	st->dirty = 1;
 
 	buf = malloc (sizeof *buf * LINESIZE);
 	bufsiz = LINESIZE;
-	readline (&buf, &bufsiz, "%ld\t", pos->lineno);
+	readline (&buf, &bufsiz, "%ld\t", st->lineno);
 
-	if(!(pos->line = putline (pos->line, buf, bufsiz, -1))) {
+	if(!(st->curline = putline (st->curline, buf, bufsiz, option))) {
+		free (buf);
 		strcpy (error, "insertion failed");
 		return 1; /* error */
 	}
 
+	free (buf);
 	return 0;
 }
 
 int
-nop (Position *pos, Arg *arg, char *error)
+nop (State *st, Arg *arg, char *error)
 {
 	strcpy (error, "unknown command");
 	return 1;
 }
 
 int
-print (Position *pos, Arg *arg, char *error)
+print (State *st, Arg *arg, char *error)
 {
 	if (arg->addr)
-		if (gotol (pos, arg, error))
+		if (gotol (st, arg, error))
 			return 1;
 
-	if (!pos->line->str) {
+	if (!st->curline->str) {
 		strcpy (error, "empty buffer");
 		return 1;
 	}
 
-	PRINTF ("%ld\t%s", pos->lineno, pos->line->str);
+	if (0 > printf ("%ld\t%s", st->lineno, st->curline->str))
+		die("printf");
 	return 0;
 }
 
 int
-quit (Position *pos, Arg *arg, char *error)
+quit (State *st, Arg *arg, char *error)
 {
+	if (arg->mode) {
+		if (!strcmp (arg->mode, "force"))
+			goto end;
+		if (!strcmp (arg->mode, "write"))
+			write (st, arg, error);
+		strcpy (error, "unknown option");
+		return 1;
+	}
+
+	if (st->dirty) {
+		strcpy (error, "buffer has unsaved changes");
+		return 1;
+	}
+
+end:
 	strcpy (error, "quit");
 	return 0;
 }	
+
+int
+write (State *st, Arg *arg, char *error)
+{
+	arg->addr = -st->lineno + 1; /* go to start of buffer */
+	gotol (st, arg, error);
+	writefile (st);
+	st->dirty = 0;
+	return 0;
+}
