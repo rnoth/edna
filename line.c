@@ -16,14 +16,17 @@ Line *
 changeline (Line *targ, char *buf, size_t bufsiz)
 {
 	if (!targ->str)
-		MALLOC (targ->str, sizeof *targ->str * bufsiz);
+		if (!(targ->str = malloc (sizeof *targ->str * bufsiz)))
+			die("malloc");
 	if (!targ->str) /* malloc failed, let's bail */
 		return NULL;
 	if (targ->len && targ->len < bufsiz)
-		REALLOC (targ->str, sizeof *targ->str * bufsiz);
+		if (!(targ->str = realloc (targ->str, sizeof *targ->str * bufsiz)))
+			die("realloc");
 	if (!targ->str)	/* realloc failed, get out of here */
 		return NULL;
-	MEMCPY (targ->str, buf, bufsiz + 1); /* + 1 for the terminating 0 byte */
+	if (!memcpy (targ->str, buf, bufsiz + 1)) /* + 1 for the terminating 0 byte */
+		die("memcpy");
 	targ->len = bufsiz;
 	return targ;
 }
@@ -65,7 +68,8 @@ Line*
 makeline ()
 {
 	Line* new;
-	CALLOC (new, 1, sizeof *new);
+	if (!(new = calloc (1, sizeof *new)))
+		die("calloc");
 	return new;
 }
 
