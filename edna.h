@@ -36,14 +36,21 @@ struct Position {
 	Line *line;
 };
 
+typedef struct State State;
+struct State {
+	FILE *file;
+	Position *pos;
+};
+
 typedef struct Arg Arg;
 struct Arg {
+	short rel;	/* is address relative? */
 	int addr;
 };
 
 typedef struct Command Command;
 struct Command {
-	char *handle;
+	char *name;
 	int (*func)(Position *, Arg *, char *);
 };
 
@@ -53,18 +60,25 @@ extern int	back	(Position *, Arg *, char *arg);
 extern int	change	(Position *, Arg *, char *arg);
 extern int	delete	(Position *, Arg *, char *arg);
 extern int	forward	(Position *, Arg *, char *arg);
+extern int	gotol	(Position *, Arg *, char *arg);
 extern int	help	(Position *, Arg *, char *arg);
 extern int	insert	(Position *, Arg *, char *arg);
 extern int	nop	(Position *, Arg *, char *arg);
 extern int	print	(Position *, Arg *, char *arg);
 extern int	quit	(Position *, Arg *, char *arg);
 
+/* defined in file.c */
+extern void	readfile	(State *, char *);
+
+/* defined in input.c */
+extern void	readline	(char **, size_t *, char *, ...);
+extern void	parseline	(char *, char *, Arg *);
+
 /* defined in line.c */
 extern Line*	freelines	(Line *, Line *);
 extern Line*	linklines	(Line *, Line*);
 extern Line*	makeline	();
 extern Line*	putline		(Line *, char *, size_t, int option);
-extern size_t	readline	(char **);
 extern Line*	walk		(Line *, int, char *);
 
 /* defined in util.c */
