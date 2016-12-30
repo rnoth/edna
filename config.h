@@ -1,9 +1,11 @@
 /* config.h - configuration for edna(1) */
 
-#define PROMPT ":"
+#define PROMPT	":"
+#define ERROR	"?\n"
 
 const Command commands[] = {
 	{ "",	nop },
+	{ "",	gotol },
 	{ "a",	append },
 	{ "c",	change },
 	{ "d",	delete },
@@ -11,6 +13,4 @@ const Command commands[] = {
 	{ "i",	insert },
 	{ "p",	print },
 	{ "q",	quit },
-	{ "-",	back },
-	{ "+",	forward },
 };
