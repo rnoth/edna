@@ -1,25 +1,10 @@
 /* edna.h -- header information */
 
-#define MALLOC(X, Y) if (!(X = malloc (Y)))\
-			die ()
-#define CALLOC(X, Y, Z) if (!(X = calloc (Y, Z)))\
-			die ()
-#define REALLOC(X, Y) if (!(X = realloc (X, Y)))\
-			die ()
-/* man 3 printf says ``If an output error is encountered, a negative value is
- * returned.'', not necessarily -1
- */
-#define PRINTF(...) if (0 > printf (__VA_ARGS__))\
-			die ()
-#define FPRINTF(...) if (!fprintf (__VA_ARGS__))\
-			die ()
-#define MEMCPY(X, Y, Z) if (!memcpy(X, Y, Z))\
-			die ()
-#define GETLINE(X, Y, Z) if (-1 == getline(&X, &Y, Z))\
-			die () /* could be eof */
-
 #define LEN(X) (sizeof X / sizeof *X)
 
+#define INSERT -1
+#define CHANGE 0
+#define APPEND 1
 #define LINESIZE 80
 
 typedef struct Line Line;
@@ -30,6 +15,7 @@ struct Line {
 	Line *prev;
 };
 
+/* deprecated */
 typedef struct Position Position;
 struct Position {
 	size_t lineno;
@@ -39,36 +25,38 @@ struct Position {
 typedef struct State State;
 struct State {
 	FILE *file;
-	Position *pos;
+	short dirty;
+	Line *curline;
+	size_t lineno;
 };
 
 typedef struct Arg Arg;
 struct Arg {
 	short rel;	/* is address relative? */
 	int addr;
+	char *mode;
 };
 
 typedef struct Command Command;
 struct Command {
 	char *name;
-	int (*func)(Position *, Arg *, char *);
+	int (*func)(State *, Arg *, char *);
+	char *mode;
 };
 
 /* defined in commands.c */
-extern int	append	(Position *, Arg *, char *arg);
-extern int	back	(Position *, Arg *, char *arg);
-extern int	change	(Position *, Arg *, char *arg);
-extern int	delete	(Position *, Arg *, char *arg);
-extern int	forward	(Position *, Arg *, char *arg);
-extern int	gotol	(Position *, Arg *, char *arg);
-extern int	help	(Position *, Arg *, char *arg);
-extern int	insert	(Position *, Arg *, char *arg);
-extern int	nop	(Position *, Arg *, char *arg);
-extern int	print	(Position *, Arg *, char *arg);
-extern int	quit	(Position *, Arg *, char *arg);
+extern int	delete		(State *, Arg *, char *arg);
+extern int	gotol		(State *, Arg *, char *arg);
+extern int	help		(State *, Arg *, char *arg);
+extern int	insert		(State *, Arg *, char *arg);
+extern int	nop		(State *, Arg *, char *arg);
+extern int	print		(State *, Arg *, char *arg);
+extern int	quit		(State *, Arg *, char *arg);
+extern int	write		(State *, Arg *, char *);
 
 /* defined in file.c */
 extern void	readfile	(State *, char *);
+extern void	writefile	(State *);
 
 /* defined in input.c */
 extern void	readline	(char **, size_t *, char *, ...);
