@@ -1,4 +1,4 @@
-/* commands.c -- user itnerface to edna */
+/* commands.c -- user interface to edna */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,28 +20,20 @@ append (Position *pos, Arg *arg, char *error)
 {
 	char *buf;
 	size_t bufsiz;
-	Line *l;
-	pos->lineno += arg->addr;
+
+	if (!gotol(pos, arg, error))
+		return 1;
 	++pos->lineno;
-	PRINTF ("%ld\t", pos->lineno + arg->addr);
-	bufsiz = readline (&buf);
-	l = walk (pos->line, arg->addr, error);
-	if(!(pos->line = putline (l, buf, bufsiz, 1))) {
+	
+	buf = malloc (sizeof *buf * LINESIZE);
+	bufsiz = LINESIZE;
+	readline (&buf, &bufsiz, "%ld\t", pos->lineno);
+
+	if(!(pos->line = putline (pos->line, buf, bufsiz, 1))) {
 		strcpy (error, "append failed");
 		return 1; /* error */
 	}
-	return 0;
-}
 
-int
-back (Position *pos, Arg *arg, char *error)
-{
-	if (!pos->line->prev) {
-		strcpy (error, "begining of file");
-		return 1;
-	}
-	pos->line = pos->line->prev;
-	--pos->lineno;
 	return 0;
 }
 
@@ -50,17 +42,22 @@ change (Position *pos, Arg *arg, char *error)
 {
 	char *buf;
 	size_t bufsiz;
-	Line *l;
+
+	if (!gotol(pos, arg, error))
+		return 1;
+
 	if (pos->lineno == 0)
 		++pos->lineno;
-	pos->lineno += arg->addr;
-	PRINTF ("%ld\t", pos->lineno);
-	bufsiz = readline (&buf);
-	l = walk (pos->line, arg->addr, error);
-	if(!(pos->line = putline (l, buf, bufsiz, 0))) {
+
+	buf = malloc (sizeof *buf * LINESIZE);
+	bufsiz = LINESIZE;
+	readline (&buf, &bufsiz, "%ld\t", pos->lineno + arg->addr);
+
+	if(!(pos->line = putline (pos->line, buf, bufsiz, 0))) {
 		strcpy (error, "changeline failed");
 		return 1; /* error */
 	}
+
 	return 0;
 }
 
@@ -87,14 +84,20 @@ delete (Position *pos, Arg *arg, char *error)
 }
 
 int
-forward (Position *pos, Arg *arg, char *error)
+gotol (Position *pos, Arg *arg, char *error)
 {
-	if (!pos->line->next) {
-		strcpy (error, "end of file");
+	Line *l;
+
+	if (!arg->addr)
+		++arg->addr;
+	if (!arg->rel)
+		arg->addr -= pos->lineno;
+
+	l = walk (pos->line, arg->addr, error);
+	if (!l)
 		return 1;
-	}
-	pos->line = pos->line->next;
-	++pos->lineno;
+	pos->lineno += arg->addr;
+	pos->line = l;
 	return 0;
 }
 
@@ -110,17 +113,22 @@ insert (Position *pos, Arg *arg, char *error)
 {
 	char *buf;
 	size_t bufsiz;
-	Line *l;
+
+	if (!gotol(pos, arg, error))
+		return 1;
+
 	if (pos->lineno == 0)
 		++pos->lineno;
-	pos->lineno += arg->addr;
-	PRINTF ("%ld\t", pos->lineno);
-	bufsiz = readline (&buf);
-	l = walk (pos->line, arg->addr, error);
-	if(!(pos->line = putline (l, buf, bufsiz, -1))) {
+
+	buf = malloc (sizeof *buf * LINESIZE);
+	bufsiz = LINESIZE;
+	readline (&buf, &bufsiz, "%ld\t", pos->lineno);
+
+	if(!(pos->line = putline (pos->line, buf, bufsiz, -1))) {
 		strcpy (error, "insertion failed");
 		return 1; /* error */
 	}
+
 	return 0;
 }
 
@@ -134,16 +142,16 @@ nop (Position *pos, Arg *arg, char *error)
 int
 print (Position *pos, Arg *arg, char *error)
 {
-	Line *l;
-	l = walk (pos->line, arg->addr, error);
-	if (!l)
-		return 1;
-	if (!l->str) {
+	if (arg->addr)
+		if (gotol (pos, arg, error))
+			return 1;
+
+	if (!pos->line->str) {
 		strcpy (error, "empty buffer");
 		return 1;
 	}
-	pos->lineno += arg->addr;
-	PRINTF ("%ld\t%s", pos->lineno, l->str);
+
+	PRINTF ("%ld\t%s", pos->lineno, pos->line->str);
 	return 0;
 }
 
