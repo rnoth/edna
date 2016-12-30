@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern void	warn		();
-extern void	chomp		(char * buf, size_t biufsiz);
+extern void	warn	();
+inline void	die	();
+extern void	chomp	(char * buf, size_t biufsiz);
 
 void
 chomp(char *buf, size_t bufsiz)
@@ -13,9 +14,9 @@ chomp(char *buf, size_t bufsiz)
 }
 
 void
-die ()
+die (char *s)
 {
-	perror("edna");
+	perror(s);
 	exit(1);
 }
 	
