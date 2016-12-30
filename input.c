@@ -14,7 +14,7 @@ readline (char **buf_ptr, size_t *bufsiz_ptr, char *prompt, ...)
 	va_list v;
 	va_start(v, prompt);
 	if (0 > vprintf (prompt, v))
-		die();
+		die("vprintf");
 	getline (buf_ptr, bufsiz_ptr, stdin);
 	return;
 }
@@ -42,27 +42,28 @@ parseline (char *buf, char *name, Arg *arg)
 				arg->rel = 0;
 				goto num;
 			}
-			goto cmd;
+			if (isalpha(ch)) {
+				goto cmd;
+			}
 			break;
 		num:
-			j = 0;
 			if (arg->rel) {
-				tmp[j] = ch;
+				tmp[j] = ch; /* + or - */
 				++j;
-				if (!isdigit(buf[i + 1]))
+				if (!isdigit(buf[i + 1])) {
 					tmp[j++] = '1';
+				}	/* default to 1 on bare + and - */
 			}
 			for (; isdigit(ch = buf[i]); ++i, ++j)
 				tmp[j] = ch;
-			tmp[j] = 0;
+			tmp[j] = 0; /* terminate */
 			arg->addr = strtol (tmp, NULL, 10);
 			--i; /* push back last read char */
 			break;
 		cmd:
-			for (j = 0; (ch = buf[i]) != '\n'; ++i, ++j) {
+			for (j = 0; isalnum(ch = buf[i]); ++i, ++j)
 				name[j] = ch;
-			}
-			name[j] = 0;
+			name[j] = 0; /* terminate */
 			--i; /* push back last read char */
 			break;
 		}
