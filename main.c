@@ -11,12 +11,15 @@
 #include "config.h"
 
 int
-main (/*int argc, char** argv*/)
+main (int argc, char** argv)
 {
 	char *buf, *error, *name;
 	size_t bufsiz;
 	Position *pos;
+	State *st;
 	Arg *arg;
+
+	/* init stuff */
 
 	MALLOC (buf, LINESIZE * sizeof *buf);
 	bufsiz = LINESIZE * sizeof *buf;
@@ -26,78 +29,36 @@ main (/*int argc, char** argv*/)
 	CALLOC (name, LINESIZE, sizeof *name);
 
 	MALLOC (pos, sizeof *pos);
+	CALLOC (st, 1, sizeof *st);
 	MALLOC (arg, sizeof *arg);
 
 	pos->line = makeline ();
 	pos->lineno = 0;
+	st->pos = pos;
 
-	for(;;) {
+	/* parse argv */
+	if (argc > 1)
+		readfile (st, argv[1]);
+
+	for (;;) {
 		size_t cmd;
-		char ch;
 
 		cmd = 0;
 		arg->addr = 0;
-		PRINTF (PROMPT);
-		GETLINE (buf, bufsiz, stdin);
+		arg->rel = 1;
+		name[0] = 0;
 
-		for (size_t i = 0; (ch = buf[i]) ;++i) {
-			char relative = 0, tmp[64];
-			int j = 0;
-			switch (buf[i]) {
-			case ' ':
-			case '\t':
-			case '\n':
-				break;
-			case '+':
-				relative = 1;
-				goto num;
-				break;
-			case '-':
-				relative = 1;
-				++i;
-				goto num;
-				break;
-			default:
-				if (ch >= '0' && ch <= '9')
-					goto num;
-				goto cmd;
-				break;
-			num:
-				j = 0;
-				if (relative) {
-					tmp[0] = '-';
-					++j;
-				}
-				for (; ch = buf[i], ch >= '0' && ch <= '9'; ++i, ++j)
-					tmp[j] = ch;
-				tmp[j] = 0;
-				arg->addr =  strtol (tmp, NULL, 10)
-					   - (!relative ? pos->lineno : 0);
-				/* addr is an offset, because 'Line's have no
-				 * intrinsic addresses. Thus, if the user gave
-				 * us an absolute address, we have to convert
-				 * it to a relative address to use it.
-				 */
-				--i; /* push back last read char */
-				break;
-			cmd:
-				for (j = 0; (ch = buf[i]) != '\n'; ++i, ++j) {
-					name[j] = ch;
-				}
-				name[j] = 0;
-				--i; /* push back last read char */
-				break;
-			}
-		}
+		readline (&buf, &bufsiz, PROMPT);
+		parseline (buf, name, arg);
 
 		for (size_t j = 1; j < LEN(commands); ++j)
-			if (!strcmp (commands[j].handle, name)) {
+			if (!strcmp (name, commands[j].name)) {
 				cmd = j;
 				break;
 			}
 
 		if ((*commands[cmd].func) (pos, arg, error))
-			FPRINTF(stderr, "?\n");
+			FPRINTF(stderr, ERROR);
 
 		if (!strcmp (error, "quit"))
 			break;
@@ -107,8 +68,12 @@ main (/*int argc, char** argv*/)
 	}
 
 	PRINTF ("quitting\n");
+
 	for (; pos->line->prev; pos->line = pos->line->prev)
 		; /* nop */
+
+	if (st->file)
+		fclose (st->file);	
 	freelines (pos->line, NULL);
 	free (buf);
 	free (error);
