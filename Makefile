@@ -2,7 +2,7 @@ CC ?= cc
 CFLAGS ?= -g -Wall -Wextra -pedantic
 LDFLAGS ?= -lc
 
-SRC = command.c line.c main.c util.c
+SRC = command.c file.c input.c line.c main.c util.c
 OBJ = ${SRC:.c=.o}
 DEPS = edna.h
 
