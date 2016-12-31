@@ -3,6 +3,7 @@
 /* settings */
 #define PROMPT ":"
 #define ERROR "?\n"
+#define FILENAME "/tmp/edna.hup"
 
 /* advanced examples */
 //#define PROMPT "%ld:", st->lineno	/* have line numbers in prompt */
