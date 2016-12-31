@@ -1,86 +1,144 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 
 #include "edna.h"
 
 extern void	readline	(char **, size_t *, char *, ...);
-extern void	parseline	(char *, char *, Arg *);
+extern void	parseline	(char *, size_t, Arg *);
+
+static struct reply*	lexline		(char *, size_t);
+
+struct reply {
+	char *str;
+	size_t len;
+	size_t seg;
+};
 
 void
 readline (char **buf_ptr, size_t *bufsiz_ptr, char *prompt, ...)
 {
-	va_list v;
-	va_start(v, prompt);
-	if (0 > vprintf (prompt, v))
-		die("vprintf");
+	va_list va;
+	va_start (va, prompt);
+	if (0 > vprintf (prompt, va))
+		die ("vprintf");
 	getline (buf_ptr, bufsiz_ptr, stdin);
+	va_end (va);
 	return;
 }
 
-void
-parseline (char *buf, char *name, Arg *arg)
+struct reply *
+lexline (char *buf, size_t bufsiz)
 {
-	char ch, delim;
-	for (size_t i = 0; (ch = buf[i]) ;++i) {
-		char tmp[64];
-		int j = 0;
-		switch (buf[i]) {
-		case '+':
-		case '-':
-			arg->rel = 1;
-			++i;
-			goto num;
-			break;
-		default:
-			if (isdigit(ch) && !arg->addr) {
-				arg->rel = 0;
-				goto num;
-			}
-			if (isalpha(ch) && !name[0]) {
-				goto cmd;
-			}
-			goto str;
-			break;
-		num:
-			if (arg->rel) {
-				tmp[j] = ch; /* + or - */
-				++j;
-				if (!isdigit(buf[i + 1])) {
-					tmp[j++] = '1';
-				}	/* default to 1 on bare + and - */
-			}
-			for (; isdigit(ch = buf[i]); ++i, ++j)
-				tmp[j] = ch;
-			tmp[j] = 0; /* terminate */
-			arg->addr = strtol (tmp, NULL, 10);
-			--i;
-			break;
-		cmd:
-			for (j = 0; isalpha(ch = buf[i]); ++i, ++j)
-				name[j] = ch;
-			name[j] = 0; /* terminate */
-			if (isdigit(buf[i]))
-				goto arg;
-			--i;
-			break;
-		arg:
-			for (j = 0; !isblank (ch = buf[i]); ++i, ++j)
-				arg->str[j] = buf[i];
-			arg->str[j] = 0;
-			break;
-		str:
-			delim = buf[i];
-			++i;
-			for (j = 0; (ch = buf[i]) && ch != delim; ++i, ++j)
-				arg->str[j] = ch;
-			arg->str[j] = 0;
-			chomp (arg->str, j); /* only used here because only str
-					      * will read to the end of the buf
-					      */
-			--i;
-		}
+	/* `bufsiz + 4' is enough for even pathological inputs,
+	 * - one null byte delimits first line address
+	 * - one null byte delimits name
+	 * - two null bytes terminate the string. 
+	 * futhermore,
+	 * - every delimiter character is collapsed into a null byte
+	 * - multiple delimiters collapse into one
+	 * - `buf' - `name' - `addr's will alway be longer than
+	 *   `buf' - `name' - `addr's - `delim's
+	 * thus, bufsiz + 4 will always be enough
+	 */
+	char ch, delim, s[bufsiz + 4];
+	size_t i, j, k;
+	struct reply *reply;
+
+	chomp (buf, bufsiz);
+	i = j = k = 0;
+	for (; isspace (ch = buf[i]); ++i)
+		;
+	/* line address */
+	for (; isdigit (ch = buf[i]) || strchr ("+-,", ch); ++i, ++j)
+		s[j] = ch;
+	s[j] = 0;
+	++j;
+	++k;
+	/* command name */
+	for (; isalpha (ch = buf[i]); ++i, ++j)
+		s[j] = ch;
+	s[j] = 0;
+	++j;
+	++k;
+	/* secondary line address */
+	for (; isdigit (ch = buf[i]) || (ch && strchr ("+-,", ch)); ++i, ++j)
+		s[j] = ch;
+	s[j] = 0;
+	++j;
+	++k;
+	/* delimiter */
+	delim = buf[i];
+	++i;
+	/* arbitrary argument vector */
+	for (; (buf[i]);) {
+		for (; (ch = buf[i]) && ch != delim; ++i, ++j)
+			s[j] = ch;
+		s[j] = 0;
+		++j;
+		++k;
+		for (; (ch = buf[i]) == delim; ++i)
+			;
+	}
+	s[j] = 0;
+	/* finish */
+	if (!(reply = malloc (sizeof *reply)))
+		die ("malloc");
+	if (!(reply->str = malloc (j * sizeof *reply->str)))
+		die ("malloc");
+
+	if (!(memcpy (reply->str, s, j)))
+		die ("memcpy");
+	reply->len = j;
+	reply->seg = k;
+	return reply;
+}
+
+void
+parseline (char *buf, size_t bufsiz, Arg *arg)
+{
+	size_t k;
+	struct reply *reply;
+	reply = lexline (buf, bufsiz);
+	if (!reply || !reply->str)
+		die ("malloc(?)");	/* will probably never happen */
+	k = reply->seg;
+	/* line address */
+	if (reply->str[0] && strchr ("+-", reply->str[0]) )
+		arg->rel = 0; /* FIXME: doesn't parse complex use of +/-
+			       * e.g. 1+2, .-4, +++, etc.
+			       */
+	if (strchr (reply->str, ',')) {
+		; /* TODO */
+	}
+	if (strchr (reply->str, '.')) {
+		; /* TODO */
+	}
+	if (reply->str[0])
+		arg->addr = strtol (reply->str, &reply->str, 10);
+	//if (reply->str[0])
+		//arg->addr2 = strtol (reply->str, NULL, 10);
+	reply->str += strlen (reply->str) + 1;
+	--k;
+	/* command name */
+	strcpy (arg->name, reply->str);
+	reply->str += strlen (reply->str) + 1;
+	--k;
+	/* secondary line address */
+	//strcpy (arg->addr2, reply->str);
+	reply->str += strlen (reply->str) + 1;
+	--k;
+	if (k)
+		if (!(arg->vec = malloc (k * sizeof *arg->vec)))
+			die ("malloc");
+	for (size_t len, j = 0; j < k; ++j) {
+		len = strlen (reply->str) + 1;
+		if (!(arg->vec[j] = malloc (len * sizeof *arg->vec[j])))
+			die ("malloc");
+		strcpy (arg->vec[j], reply->str);
+		reply->str += len;
 	}
 	return;
 }
