@@ -28,7 +28,7 @@ main (int argc, char** argv)
 
 	if (!(st = calloc (1, sizeof *st)))
 		die ("calloc");
-	if (!(st->filename = malloc(1, sizeof *st->filename)))
+	if (!(st->filename = malloc(sizeof *st->filename)))
 		die ("malloc");
 	strcpy (st->filename, FILENAME);
 
