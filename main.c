@@ -31,8 +31,12 @@ main (int argc, char** argv)
 
 	if (!(st = calloc (1, sizeof *st)))
 		die ("calloc");
+	if (!(st->filename = calloc(1, sizeof *st->filename)))
+		die ("calloc");
 
 	if (!(arg = calloc (1, sizeof *arg)))
+		die ("calloc");
+	if (!(arg->str = calloc (1, sizeof *arg)))
 		die ("calloc");
 
 	st->curline = makeline ();
@@ -40,8 +44,10 @@ main (int argc, char** argv)
 	/* end init */
 
 	/* parse argv */
-	if (argc > 1)
-		readfile (st, argv[1]);
+	if (argc > 1) {
+		strcpy (st->filename, argv[1]);
+		readfile (st);
+	}
 
 	/* main execution */
 	for (;;) {
@@ -50,6 +56,7 @@ main (int argc, char** argv)
 		cmd = 0;
 		arg->addr = 0;
 		arg->rel = 1;
+		arg->str[0] = 0;
 		name[0] = 0;
 
 		readline (&buf, &bufsiz, PROMPT);
@@ -98,8 +105,11 @@ main (int argc, char** argv)
 	freelines (st->curline, NULL);
 	free (buf);
 	free (error);
-	free (st);
 	free (name);
+	free (st->filename);
+	free (st);
+	free (arg->str);
+	free (arg);
 
 	return 0;
 }
