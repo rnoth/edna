@@ -140,6 +140,10 @@ parseline (char *buf, size_t bufsiz, Arg *arg)
 		strcpy (arg->vec[j], reply->str);
 		reply->str += len;
 	}
+
+	free (reply->str);
+	free (reply);
+
 	return;
 }
 
