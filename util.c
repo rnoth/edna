@@ -8,9 +8,12 @@ extern void	chomp	(char * buf, size_t biufsiz);
 void
 chomp(char *buf, size_t bufsiz)
 {
+	char *p = buf;
 	for (size_t i = 0; buf[i] && i < bufsiz; ++i)
 		if (buf[i] == '\n')
-			buf[i] = 0;	/* also breaks the loop */
+			p = buf + i;
+	*p = 0;
+	return;
 }
 
 void
