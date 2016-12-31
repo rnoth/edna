@@ -122,6 +122,7 @@ insert (State *st, Arg *arg, char *error)
 		++st->lineno;
 		option = APPEND;
 	}
+	--st->lineno;
 
 	free (buf);
 	return 0;
