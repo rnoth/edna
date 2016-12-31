@@ -51,7 +51,17 @@ filename (State *st, Arg *arg, char *error)
 			strcpy (error, "could not close current file");
 			return 1;
 		}
-	strcpy (st->filename, arg->str);
+	/* FIXME: no sanity checking on arg->vec or arg->cnt */
+	if (!arg->vec) {
+		if (0 > printf ("%s\n", st->filename))
+			die ("printf");
+		return 0;
+	}
+	if (!arg->vec[0]) {
+		strcpy (error, "parsing error. this is not your fault");
+		return 1;
+	}
+	strcpy (st->filename, arg->vec[0]);
 	return 0;
 }
 
@@ -178,7 +188,7 @@ int
 write (State *st, Arg *arg, char *error)
 {
 	if (!st->file && !st->filename[0]) {
-		if (!arg->str[0]) {
+		if (!arg->vec) {
 			strcpy (error, "no open file and no default filename");
 			return 1;
 		}
