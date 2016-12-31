@@ -6,9 +6,8 @@
 
 #include "edna.h"
 
-extern int	back		(State *, Arg *, char *);
 extern int	delete		(State *, Arg *, char *);
-extern int	forward		(State *, Arg *, char *);
+extern int	filename	(State *, Arg *, char *);
 extern int	gotol		(State *, Arg *, char *);
 extern int	insert		(State *, Arg *, char *);
 extern int	print		(State *, Arg *, char *);
@@ -40,6 +39,19 @@ delete (State *st, Arg *arg, char *error)
 	(void) freelines(st->curline, st->curline->next);
 
 	st->curline = tmp;
+	return 0;
+}
+
+int
+filename (State *st, Arg *arg, char *error)
+{
+	if (st->file)
+		if (fclose (st->file) == EOF) {
+			warn ("fclose");
+			strcpy (error, "could not close current file");
+			return 1;
+		}
+	strcpy (st->filename, arg->str);
 	return 0;
 }
 
@@ -100,12 +112,15 @@ insert (State *st, Arg *arg, char *error)
 
 	buf = malloc (sizeof *buf * LINESIZE);
 	bufsiz = LINESIZE;
-	readline (&buf, &bufsiz, "%ld\t", st->lineno);
-
-	if(!(st->curline = putline (st->curline, buf, bufsiz, option))) {
-		free (buf);
-		strcpy (error, "insertion failed");
-		return 1; /* error */
+	for (;readline (&buf, &bufsiz, "%ld\t", st->lineno),
+	      strcmp (buf, ".\n");) {
+		if(!(st->curline = putline (st->curline, buf, bufsiz, option))) {
+			free (buf);
+			strcpy (error, "insertion failed");
+			return 1; /* error */
+		}
+		++st->lineno;
+		option = APPEND;
 	}
 
 	free (buf);
@@ -161,6 +176,14 @@ end:
 int
 write (State *st, Arg *arg, char *error)
 {
+	if (!st->file && !st->filename[0]) {
+		if (!arg->str[0]) {
+			strcpy (error, "no open file and no default filename");
+			return 1;
+		}
+		if(filename (st, arg, error))
+			return 1;
+	}
 	arg->addr = -st->lineno + 1; /* go to start of buffer */
 	gotol (st, arg, error);
 	writefile (st);
