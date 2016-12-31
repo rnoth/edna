@@ -12,7 +12,7 @@
 int
 main (int argc, char** argv)
 {
-	char *buf, *error, *name;
+	char *buf, *error;
 	size_t bufsiz;
 	State *st;
 	Arg *arg;
@@ -26,17 +26,15 @@ main (int argc, char** argv)
 		die ("malloc");
 	strcpy (error, "everything is ok");
 
-	if (!(name = calloc (LINESIZE, sizeof *name)))
-		die ("calloc");
-
 	if (!(st = calloc (1, sizeof *st)))
 		die ("calloc");
-	if (!(st->filename = calloc(1, sizeof *st->filename)))
-		die ("calloc");
+	if (!(st->filename = malloc(1, sizeof *st->filename)))
+		die ("malloc");
+	strcpy (st->filename, FILENAME);
 
 	if (!(arg = calloc (1, sizeof *arg)))
 		die ("calloc");
-	if (!(arg->str = calloc (1, sizeof *arg)))
+	if (!(arg->name = calloc (LINESIZE, sizeof *arg->name)))
 		die ("calloc");
 
 	st->curline = makeline ();
@@ -54,16 +52,17 @@ main (int argc, char** argv)
 		size_t cmd;
 
 		cmd = 0;
-		arg->addr = 0;
-		arg->rel = 1;
-		arg->str[0] = 0;
-		name[0] = 0;
+		arg->addr = st->lineno;
+		arg->rel = 0;
+		arg->cnt = 0;
+		arg->vec = NULL;
+		arg->mode = NULL;
 
 		readline (&buf, &bufsiz, PROMPT);
-		parseline (buf, name, arg);
+		parseline (buf, bufsiz, arg);
 
 		/* fix arg->addr, bexause parseline can't handle absolute
-		 * addresses (st->lineno isn't visible outside main()
+		 * addresses (st->lineno isn't visible outside main() )
 		 */
 		if (!arg->rel) {
 			arg->addr -= st->lineno;
@@ -71,7 +70,7 @@ main (int argc, char** argv)
 		}
 
 		for (size_t j = 1; j < LEN(commands); ++j)
-			if (!strcmp (name, commands[j].name)) {
+			if (!strcmp (arg->name, commands[j].name)) {
 				cmd = j;
 				break;
 			}
@@ -91,9 +90,12 @@ main (int argc, char** argv)
 
 		if (!st->curline)
 			st->curline = makeline ();
-		if (arg->mode) {
+		if (arg->mode)
 			free (arg->mode);
-			arg->mode = NULL;
+		if (arg->cnt) {
+			for (;arg->cnt;--arg->cnt)
+				free (arg->vec[arg->cnt]);
+			free (arg->vec);
 		}
 	}
 
@@ -105,11 +107,17 @@ main (int argc, char** argv)
 	freelines (st->curline, NULL);
 	free (buf);
 	free (error);
-	free (name);
 	free (st->filename);
 	free (st);
-	free (arg->str);
 	free (arg);
+	free (arg->name);
+	if (arg->mode)
+		free (arg->mode);
+	if (arg->cnt) {
+		for (;arg->cnt;--arg->cnt)
+			free (arg->vec[arg->cnt]);
+		free (arg->vec);
+	}
 
 	return 0;
 }
