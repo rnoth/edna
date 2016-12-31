@@ -39,6 +39,16 @@ struct Command {
 	char *mode;
 };
 
+struct Mark {
+	char c;
+	Line *l;
+};
+
+struct Macro {
+	Command cmd;
+	Arg arg;
+};
+
 /* defined in commands.c */
 extern int	delete		(State *, Arg *, char *);
 extern int	filename	(State *, Arg *, char *);
@@ -59,11 +69,13 @@ extern void	readline	(char **, size_t *, char *, ...);
 extern void	parseline	(char *, char *, Arg *);
 
 /* defined in line.c */
-extern Line*	freelines	(Line *, Line *);
-extern Line*	linklines	(Line *, Line*);
 extern Line*	makeline	();
 extern Line*	putline		(Line *, char *, size_t, int option);
 extern Line*	walk		(Line *, int, char *);
+
+/* defined in region.c */
+extern void	freelines	(Line *, Line *);
+extern void	linklines	(Line *, Line*);
 
 /* defined in util.c */
 extern void	chomp		(char *, size_t);
