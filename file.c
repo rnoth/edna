@@ -3,16 +3,16 @@
 
 #include "edna.h"
 
-extern void readfile	(State *, char *);
+extern void readfile	(State *);
 extern void writefile	(State *);
 
 void
-readfile (State *st, char *filename)
+readfile (State *st)
 {
 	char *buf;
 	size_t bufsiz;
 
-	st->file = fopen(filename, "r+");
+	st->file = fopen (st->filename, "r+");
 	if (!st->file)
 		die("fopen");
 
@@ -32,6 +32,12 @@ readfile (State *st, char *filename)
 void
 writefile (State *st)
 {
+	if (!st->file) {
+		if (!st->filename[0])
+			return;
+		if (!(st->file = fopen (st->filename, "w+")))
+			warn ("fopen");
+	}
 	rewind (st->file);
 	do {
 		fputs (st->curline->str, st->file);
