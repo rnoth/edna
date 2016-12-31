@@ -15,16 +15,10 @@ struct Line {
 	Line *prev;
 };
 
-/* deprecated */
-typedef struct Position Position;
-struct Position {
-	size_t lineno;
-	Line *line;
-};
-
 typedef struct State State;
 struct State {
 	FILE *file;
+	char *filename;
 	short dirty;
 	Line *curline;
 	size_t lineno;
@@ -35,6 +29,7 @@ struct Arg {
 	short rel;	/* is address relative? */
 	int addr;
 	char *mode;
+	char *str;
 };
 
 typedef struct Command Command;
@@ -45,17 +40,18 @@ struct Command {
 };
 
 /* defined in commands.c */
-extern int	delete		(State *, Arg *, char *arg);
-extern int	gotol		(State *, Arg *, char *arg);
-extern int	help		(State *, Arg *, char *arg);
-extern int	insert		(State *, Arg *, char *arg);
-extern int	nop		(State *, Arg *, char *arg);
-extern int	print		(State *, Arg *, char *arg);
-extern int	quit		(State *, Arg *, char *arg);
+extern int	delete		(State *, Arg *, char *);
+extern int	filename	(State *, Arg *, char *);
+extern int	gotol		(State *, Arg *, char *);
+extern int	help		(State *, Arg *, char *);
+extern int	insert		(State *, Arg *, char *);
+extern int	nop		(State *, Arg *, char *);
+extern int	print		(State *, Arg *, char *);
+extern int	quit		(State *, Arg *, char *);
 extern int	write		(State *, Arg *, char *);
 
 /* defined in file.c */
-extern void	readfile	(State *, char *);
+extern void	readfile	(State *);
 extern void	writefile	(State *);
 
 /* defined in input.c */
@@ -71,5 +67,5 @@ extern Line*	walk		(Line *, int, char *);
 
 /* defined in util.c */
 extern void	chomp		(char *, size_t);
-extern void	die		();
-extern void	warn		();
+extern void	die		(char *);
+extern void	warn		(char *);
