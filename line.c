@@ -7,61 +7,22 @@
 #include "edna.h"
 
 extern Line*	changeline	(Line *, char *, size_t);
-extern Line*	freelines	(Line *, Line *);
-extern Line*	linklines	(Line *, Line*);
 extern Line*	makeline	();
 extern Line*	walk		(Line *, int, char *error);
 
 Line *
-changeline (Line *targ, char *buf, size_t bufsiz)
+changeline (Line *l, char *buf, size_t bufsiz)
 {
-	if (!targ->str)
-		if (!(targ->str = malloc (sizeof *targ->str * bufsiz)))
+	if (!l->str)
+		if (!(l->str = malloc (sizeof *l->str * bufsiz)))
 			die("malloc");
-	if (!targ->str) /* malloc failed, let's bail */
-		return NULL;
-	if (targ->len && targ->len < bufsiz)
-		if (!(targ->str = realloc (targ->str, sizeof *targ->str * bufsiz)))
+	if (l->len && l->len < bufsiz)
+		if (!(l->str = realloc (l->str, sizeof *l->str * bufsiz)))
 			die("realloc");
-	if (!targ->str)	/* realloc failed, get out of here */
-		return NULL;
-	if (!memcpy (targ->str, buf, bufsiz + 1)) /* + 1 for the terminating 0 byte */
+	if (!memcpy (l->str, buf, bufsiz + 1)) /* + 1 for the terminating 0 byte */
 		die("memcpy");
-	targ->len = bufsiz;
-	return targ;
-}
-
-Line *
-freelines (Line *start, Line *stop)
-{
-	Line *cur, *next, *prev, *tmp;
-
-	prev = start->prev;
-	cur = start;
-	next = cur->next;
-	do {
-		tmp = (next ? next->next : NULL);
-		free (cur->str);
-		free (cur);
-		cur = next;
-		next = tmp;
-	} while (cur && cur != stop);
-
-	/* line around freed region */
-	linklines (prev, stop);
-
-	return stop;
-}
-
-Line *
-linklines(Line *left, Line *right)
-{
-	if (left)
-		left->next = right;
-	if (right)
-		right->prev = left;
-
-	return right;
+	l->len = bufsiz;
+	return l;
 }
 
 Line*
