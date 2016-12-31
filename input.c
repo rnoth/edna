@@ -42,9 +42,10 @@ parseline (char *buf, char *name, Arg *arg)
 				arg->rel = 0;
 				goto num;
 			}
-			if (isalpha(ch)) {
+			if (isalpha(ch) && !name[0]) {
 				goto cmd;
 			}
+			goto str;
 			break;
 		num:
 			if (arg->rel) {
@@ -66,6 +67,11 @@ parseline (char *buf, char *name, Arg *arg)
 			name[j] = 0; /* terminate */
 			--i; /* push back last read char */
 			break;
+		str:
+			for (j = 0; (ch = buf[i]); ++i, ++j)
+				arg->str[j] = ch;
+			chomp (arg->str, j);
+			--i; /* push back last read char */
 		}
 	}
 	return;
