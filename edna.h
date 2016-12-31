@@ -28,8 +28,10 @@ typedef struct Arg Arg;
 struct Arg {
 	short rel;	/* is address relative? */
 	int addr;
+	char *name;
 	char *mode;
-	char *str;
+	size_t cnt;
+	char **vec;
 };
 
 typedef struct Command Command;
@@ -66,7 +68,7 @@ extern void	writefile	(State *);
 
 /* defined in input.c */
 extern void	readline	(char **, size_t *, char *, ...);
-extern void	parseline	(char *, char *, Arg *);
+extern void	parseline	(char *, size_t, Arg *);
 
 /* defined in line.c */
 extern Line*	makeline	();
