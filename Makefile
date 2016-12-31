@@ -1,4 +1,5 @@
 CC ?= cc
+#LD ?= ld
 CFLAGS ?= -g -Wall -Wextra -pedantic
 LDFLAGS ?= -lc
 
@@ -7,7 +8,7 @@ OBJ = ${SRC:.c=.o}
 DEPS = edna.h
 
 edna: $(OBJ)
-	@echo CC $(LDFLAGS) -o edna *.o
+	@echo LD $(LDFLAGS) -o edna *.o
 	@$(CC) $(LDFLAGS) -o edna *.o
 
 %.o: %.c $(DEPS)
