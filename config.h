@@ -1,5 +1,4 @@
 /* config.h - configuration for edna(1) */
-
 /* settings */
 #define PROMPT ":"
 #define ERROR "?\n"

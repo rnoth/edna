@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "edna.h"
+#include "cmd.h"
 
 extern int	delete		(State *, Arg *, char *);
 extern int	filename	(State *, Arg *, char *);
@@ -173,6 +174,7 @@ quit (State *st, Arg *arg, char *error)
 		return 1;
 	}
 
+end:
 	strcpy (error, "quit");
 	return 0;
 }	
@@ -180,7 +182,7 @@ quit (State *st, Arg *arg, char *error)
 int
 write (State *st, Arg *arg, char *error)
 {
-	if (arg->cnt && arg->vec[0]) {
+	if (arg->cnt && arg->vec[0])
 		strcpy (st->filename, arg->vec[0]);
 
 	arg->addr = -st->lineno + 1; /* go to start of buffer */

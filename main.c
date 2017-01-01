@@ -7,6 +7,7 @@
 #include <regex.h>
 
 #include "edna.h"
+#include "cmd.h"
 #include "config.h"
 
 int
