@@ -1,3 +1,4 @@
+/* util.c -- various functions */
 #include <stdio.h>
 #include <stdlib.h>
 

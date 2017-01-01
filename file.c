@@ -1,3 +1,4 @@
+/* file.c -- file manipulation functions */
 #include <stdio.h>
 #include <stdlib.h>
 
