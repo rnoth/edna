@@ -45,23 +45,18 @@ delete (State *st, Arg *arg, char *error)
 int
 filename (State *st, Arg *arg, char *error)
 {
-	if (st->file)
-		if (fclose (st->file) == EOF) {
-			warn ("fclose");
-			strcpy (error, "could not close current file");
-			return 1;
-		}
-	/* FIXME: no sanity checking on arg->vec or arg->cnt */
-	if (!arg->vec) {
-		if (0 > printf ("%s\n", st->filename))
-			die ("printf");
-		return 0;
-	}
-	if (!arg->vec[0]) {
+	if (!arg->cnt && (0 > printf ("%s\n", st->filename))) {
+		die ("printf");
+	} else if (!arg->vec[0]) {
 		strcpy (error, "parsing error. this is not your fault");
 		return 1;
+	} else if (st->file && fclose (st->file) == EOF) {
+		warn ("fclose");
+		strcpy (error, "could not close current file");
+		return 1;
+	} else {
+		strcpy (st->filename, arg->vec[0]);
 	}
-	strcpy (st->filename, arg->vec[0]);
 	return 0;
 }
 
@@ -96,7 +91,7 @@ insert (State *st, Arg *arg, char *error)
 	size_t bufsiz;
 	int option;
 
-	option = INSERT; /* -1 is putline's insert mode */
+	option = INSERT;
 
 	if (arg->mode) {
 		if (!strcmp (arg->mode, "insert")) {
@@ -148,9 +143,8 @@ nop (State *st, Arg *arg, char *error)
 int
 print (State *st, Arg *arg, char *error)
 {
-	if (arg->addr)
-		if (gotol (st, arg, error))
-			return 1;
+	if (arg->addr && gotol (st, arg, error))
+		return 1;
 
 	if (!st->curline->str) {
 		strcpy (error, "empty buffer");
@@ -179,7 +173,6 @@ quit (State *st, Arg *arg, char *error)
 		return 1;
 	}
 
-end:
 	strcpy (error, "quit");
 	return 0;
 }	
@@ -187,14 +180,9 @@ end:
 int
 write (State *st, Arg *arg, char *error)
 {
-	if (!st->file && !st->filename[0]) {
-		if (!arg->vec) {
-			strcpy (error, "no open file and no default filename");
-			return 1;
-		}
-		if(filename (st, arg, error))
-			return 1;
-	}
+	if (arg->cnt && arg->vec[0]) {
+		strcpy (st->filename, arg->vec[0]);
+
 	arg->addr = -st->lineno + 1; /* go to start of buffer */
 	gotol (st, arg, error);
 	writefile (st);
