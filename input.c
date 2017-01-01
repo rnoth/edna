@@ -1,3 +1,4 @@
+/* input.c -- functions for getting and processing input */
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -99,46 +100,49 @@ lexline (char *buf, size_t bufsiz)
 void
 parseline (char *buf, size_t bufsiz, Arg *arg)
 {
+	char *str;
 	size_t k;
 	struct reply *reply;
 	reply = lexline (buf, bufsiz);
 	if (!reply || !reply->str)
 		die ("malloc(?)");	/* will probably never happen */
 	k = reply->seg;
+	str = reply->str;
 	/* line address */
-	if (reply->str[0] && strchr ("+-", reply->str[0]) )
+	if (str[0] && strchr ("+-", str[0]) )
 		arg->rel = 0; /* FIXME: doesn't parse complex use of +/-
 			       * e.g. 1+2, .-4, +++, etc.
 			       */
-	if (strchr (reply->str, ',')) {
+	if (strchr (str, ',')) {
 		; /* TODO */
 	}
-	if (strchr (reply->str, '.')) {
+	if (strchr (str, '.')) {
 		; /* TODO */
 	}
-	if (reply->str[0])
-		arg->addr = strtol (reply->str, &reply->str, 10);
+	if (str[0])
+		arg->addr = strtol (str, &str, 10);
 	//if (reply->str[0])
 		//arg->addr2 = strtol (reply->str, NULL, 10);
-	reply->str += strlen (reply->str) + 1;
+	str += strlen (str) + 1;
 	--k;
 	/* command name */
-	strcpy (arg->name, reply->str);
-	reply->str += strlen (reply->str) + 1;
+	strcpy (arg->name, str);
+	str += strlen (str) + 1;
 	--k;
 	/* secondary line address */
-	//strcpy (arg->addr2, reply->str);
-	reply->str += strlen (reply->str) + 1;
+	//strcpy (arg->addr2, str);
+	str += strlen (str) + 1;
 	--k;
+	arg->cnt = k;
 	if (k)
 		if (!(arg->vec = malloc (k * sizeof *arg->vec)))
 			die ("malloc");
 	for (size_t len, j = 0; j < k; ++j) {
-		len = strlen (reply->str) + 1;
+		len = strlen (str) + 1;
 		if (!(arg->vec[j] = malloc (len * sizeof *arg->vec[j])))
 			die ("malloc");
-		strcpy (arg->vec[j], reply->str);
-		reply->str += len;
+		strcpy (arg->vec[j], str);
+		str += len;
 	}
 
 	free (reply->str);
