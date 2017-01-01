@@ -1,4 +1,4 @@
-/* edna.c -- ed-like text editor */
+/* edna -- ed-like text editor */
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -93,7 +93,7 @@ main (int argc, char** argv)
 		if (arg->mode)
 			free (arg->mode);
 		if (arg->cnt) {
-			for (;arg->cnt;--arg->cnt)
+			for (;arg->cnt--;)
 				free (arg->vec[arg->cnt]);
 			free (arg->vec);
 		}
