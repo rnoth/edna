@@ -7,9 +7,13 @@
 
 #include "edna.h"
 
-extern Line*	changeline	(Line *, char *, size_t);
+extern Line*	getnext		(Line *);
+extern Line*	getprev		(Line *);
 extern Line*	makeline	();
+extern Line*	putline		(Line *, char *, size_t, int);
 extern Line*	walk		(Line *, int, char *error);
+
+static Line*	changeline	(Line *, char *, size_t);
 
 Line *
 changeline (Line *l, char *buf, size_t bufsiz)
@@ -24,6 +28,18 @@ changeline (Line *l, char *buf, size_t bufsiz)
 		die("memcpy");
 	l->len = bufsiz;
 	return l;
+}
+
+Line *
+getnext (Line * l)
+{
+	return l->next;
+}
+
+Line *
+getprev (Line *l)
+{
+	return l->prev;
 }
 
 Line*
@@ -71,18 +87,17 @@ Line *
 walk (Line *cur, int offset, char *error)
 {
 	Line *l = cur;
-	if (0 < offset) {
-		while ((l = l->next))
-			if (!--offset)
-				return l;
-		strcpy (error, "end of file");
-		return NULL;
-	}
 	if (0 > offset) {
 		while ((l = l->prev))
 			if (!++offset)
 				return l;
 		strcpy (error, "start of file");
+		return NULL;
+	} else if (0 < offset) {
+		while ((l = l->next))
+			if (!--offset)
+				return l;
+		strcpy (error, "end of file");
 		return NULL;
 	}
 	return cur;		

@@ -60,6 +60,8 @@ extern void	readline	(char **, size_t *, char *, ...);
 extern void	parseline	(char *, size_t, Arg *);
 
 /* defined in line.c */
+extern Line*	getnext		(Line *);
+extern Line*	getprev		(Line *);
 extern Line*	makeline	();
 extern Line*	putline		(Line *, char *, size_t, int option);
 extern Line*	walk		(Line *, int, char *);
