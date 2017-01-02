@@ -16,17 +16,17 @@ extern Line*	walk		(Line *, int, char *error);
 static Line*	changeline	(Line *, char *, size_t);
 
 Line *
-changeline (Line *l, char *buf, size_t bufsiz)
+changeline (Line *l, char *line, size_t len)
 {
 	if (!l->str)
-		if (!(l->str = malloc (sizeof *l->str * bufsiz)))
+		if (!(l->str = malloc (sizeof *l->str * len)))
 			die("malloc");
-	if (l->len && l->len < bufsiz)
-		if (!(l->str = realloc (l->str, sizeof *l->str * bufsiz)))
+	if (l->len && l->len < len)
+		if (!(l->str = realloc (l->str, sizeof *l->str * len)))
 			die("realloc");
-	if (!memcpy (l->str, buf, bufsiz + 1)) /* + 1 for the terminating 0 byte */
+	if (!memcpy (l->str, line, len + 1)) /* + 1 for the terminating 0 byte */
 		die("memcpy");
-	l->len = bufsiz;
+	l->len = len;
 	return l;
 }
 
@@ -52,16 +52,18 @@ makeline ()
 }
 
 Line*
-putline (Line *cur, char* buf, size_t bufsiz, int option)
+putline (Line *cur, char *line, size_t len, int option)
 {
 	Line *new;
 
 	/* only call makeline() when buffer isn't already empty */
 	new = cur->str ? makeline() : cur;
-	if (!changeline (new, buf, bufsiz)) {
+
+	if (!changeline (new, line, len)) {
 		free (new);
 		return NULL;
 	}
+
 	switch (option) {
 	case 1:	/* append */
 		linklines (new, cur->next);

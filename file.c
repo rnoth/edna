@@ -4,45 +4,49 @@
 
 #include "edna.h"
 
-extern void readfile	(State *);
-extern void writefile	(State *);
+extern void readbuf	(Buffer *);
+extern void writebuf	(Buffer *);
 
 void
-readfile (State *st)
+readbuf (Buffer *buf)
 {
-	char *buf;
-	size_t bufsiz;
+	char *s;
+	size_t i;
 
-	st->file = fopen (st->filename, "r+");
-	if (!st->file)
+	buf->file = fopen (buf->filename, "r+");
+	if (!buf->file)
 		die("fopen");
 
-	buf = malloc (sizeof *buf * LINESIZE);
-	bufsiz = LINESIZE;
-	while (!feof (st->file)) {
-		if (-1 == getline (&buf, &bufsiz, st->file))
-			continue;
-		st->curline = putline (st->curline, buf, bufsiz, 1);
-		++st->lineno;
-	}
-	free (buf);
+	if (!(s = malloc (sizeof *s * LINESIZE)))
+		die ("malloc");
+	i = LINESIZE;
 
+	while (!feof (buf->file)) {
+		if (-1 == getline (&s, &i, buf->file))
+			continue; /* usually means eof, go check */
+		buf->curline = putline (buf->curline, s, i, 1);
+		++buf->lineno;
+	}
+
+	free (s);
 	return;
 }
 
 void
-writefile (State *st)
+writebuf (Buffer *buf)
 {
-	if (!st->file) {
-		if (!st->filename[0])
+	if (!buf->file) {
+	/* FIXME: nested ifs tend to imply bad design. Can this be rework? */
+		if (!buf->filename[0])
 			return;
-		if (!(st->file = fopen (st->filename, "w+")))
+		if (!(buf->file = fopen (buf->filename, "w+")))
 			warn ("fopen");
-	}
-	rewind (st->file);
+	} else if (!buf->curline->str)
+		return;
+	rewind (buf->file);
 	do {
-		fputs (st->curline->str, st->file);
-		st->curline = st->curline->next;
-	} while (st->curline);
+		fputs (buf->curline->str, buf->file);
+		buf->curline = buf->curline->next;
+	} while (buf->curline);
 	return;
 }

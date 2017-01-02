@@ -8,6 +8,14 @@
 #define LINESIZE 80
 
 typedef struct Line Line;
+typedef struct Command Command;
+typedef struct Arg Arg;
+typedef struct Mark Mark;
+typedef struct Buffer Buffer;
+typedef struct Register Register;
+typedef struct Macro Macro;
+typedef struct State State;
+
 struct Line {
 	size_t len;
 	char *str;
@@ -15,45 +23,58 @@ struct Line {
 	Line *prev;
 };
 
-typedef struct State State;
-struct State {
-	FILE *file;
-	char *filename;
-	short dirty;
-	Line *curline;
-	size_t lineno;
-};
-
-typedef struct Arg Arg;
-struct Arg {
-	short rel;	/* is address relative? */
-	int addr;
-	char *name;
-	char *mode;
-	size_t cnt;
-	char **vec;
-};
-
-typedef struct Command Command;
 struct Command {
 	char *name;
-	int (*func)(State *, Arg *, char *);
+	int (*func)(State *, Buffer *, Arg *, char *);
 	char *mode;
 };
 
 struct Mark {
-	char c;
+	char *name;
 	Line *l;
+	size_t lineno;
+};
+
+struct Buffer {
+	short dirty;
+	FILE *file;
+	char *filename;
+	Line *curline;
+	size_t lineno;
+	Mark *marks;
+};
+
+struct Register {
+	char *name;
+	char *str;
+};
+
+struct Arg {
+	short rel;	/* is address relative? */
+	int addr;
+	size_t range;
+	char *name;
+	char *mode;
+	size_t cnt; /* argc equivalent */
+	char **vec; /* argv equivalent */
 };
 
 struct Macro {
+	char *name; /* macro name, not command name */
 	Command cmd;
 	Arg arg;
 };
 
+struct State {
+	Buffer **buffers;
+	Buffer *curbuf;
+	Macro *macros;
+	Register *regs;
+};
+
 /* defined in file.c */
-extern void	readfile	(State *);
-extern void	writefile	(State *);
+extern void	readbuf		(Buffer *);
+extern void	writebuf	(Buffer *);
 
 /* defined in input.c */
 extern void	readline	(char **, size_t *, char *, ...);

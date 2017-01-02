@@ -4,15 +4,15 @@
 
 extern void	warn	(char *);
 inline void	die	(char *);
-extern void	chomp	(char * buf, size_t biufsiz);
+extern void	chomp	(char *, size_t);
 
 void
-chomp(char *buf, size_t bufsiz)
+chomp(char *line, size_t linelen)
 {
-	char *p = buf;
-	for (size_t i = 0; buf[i] && i < bufsiz; ++i)
-		if (buf[i] == '\n')
-			p = buf + i;
+	char *p = line;
+	for (size_t i = 0; line[i] && i < linelen; ++i)
+		if (line[i] == '\n')
+			p = line + i;
 	*p = 0;
 	return;
 }
