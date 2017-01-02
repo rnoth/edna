@@ -2,3 +2,4 @@ edna
 *.o
 *~
 cscope.out
+core
