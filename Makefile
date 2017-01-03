@@ -1,9 +1,9 @@
 CC ?= cc
 #LD ?= ld
-CFLAGS ?= -g -Wall -Wextra -pedantic
+CFLAGS ?= -g -Wall -Wextra -Werror -pedantic
 LDFLAGS ?= -lc
 
-SRC = commands.c file.c input.c line.c main.c region.c util.c
+SRC = buffer.c commands.c file.c init.c input.c line.c main.c region.c util.c
 OBJ = ${SRC:.c=.o}
 DEPS = edna.h
 
@@ -14,6 +14,8 @@ edna: $(OBJ)
 %.o: %.c $(DEPS)
 	@echo CC $(CFLAGS) -o $@ -c $<
 	@$(CC) $(CFLAGS) -o $@ -c $<
+
+init.o: config.h
 
 commands.o: cmd.h
 commands.o: CFLAGS += -Wno-unused-parameter

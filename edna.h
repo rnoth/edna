@@ -1,4 +1,5 @@
 /* edna.h -- header information */
+#include <stdio.h>
 
 #define LEN(X) (sizeof X / sizeof *X)
 
@@ -68,13 +69,23 @@ struct Macro {
 struct State {
 	Buffer **buffers;
 	Buffer *curbuf;
+	size_t buflen;
 	Macro *macros;
 	Register *regs;
 };
 
+/* defined in buffer.c */
+extern int	addbuf		(State *, Buffer *);
+extern Buffer*	makebuf		(char *);
+
 /* defined in file.c */
 extern void	readbuf		(Buffer *);
 extern void	writebuf	(Buffer *);
+
+/* defined in init.c */
+extern State*	makestate	(void);
+extern Arg*	makearg		(void);
+extern void	cleanup		(State *, Arg *);
 
 /* defined in input.c */
 extern void	readline	(char **, size_t *, char *, ...);

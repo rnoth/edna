@@ -14,8 +14,10 @@ readbuf (Buffer *buf)
 	size_t i;
 
 	buf->file = fopen (buf->filename, "r+");
-	if (!buf->file)
-		die("fopen");
+	if (!buf->file) {
+		warn ("fopen");
+		return;
+	}
 
 	if (!(s = malloc (sizeof *s * LINESIZE)))
 		die ("malloc");
