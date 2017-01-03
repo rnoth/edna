@@ -33,3 +33,22 @@ switchbuf (State *st, Buffer *buf, Arg *arg, char *error)
 	strcpy (error, "unknown option");
 	return 1;
 }
+
+int
+openbuf (State *st, Buffer *buf, Arg *arg, char *error)
+{
+	size_t i = 0;
+	if (!arg->cnt) {
+		strcpy (error, "no filename provided");
+		return 1;
+	}
+
+	do {
+		st->curbuf = makebuf (arg->vec[i]);
+		readbuf (st->curbuf);
+		addbuf (st, st->curbuf);
+	} while (++i < arg->cnt);
+	st->bufno = st->buflen - 1;
+
+	return 0;
+}
