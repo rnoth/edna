@@ -3,11 +3,11 @@ CC ?= cc
 CFLAGS ?= -g -Wall -Wextra -Werror -pedantic
 LDFLAGS ?= -lc
 
-SRC = buffer.c commands.c file.c init.c input.c line.c main.c region.c util.c
+SRC != find . -name '*.c'
 OBJ = ${SRC:.c=.o}
 DEPS = edna.h
 
-edna: $(OBJ)
+edna: ${OBJ}
 	@echo LD $(LDFLAGS) -o edna *.o
 	@$(CC) $(LDFLAGS) -o edna *.o
 
@@ -15,12 +15,12 @@ edna: $(OBJ)
 	@echo CC $(CFLAGS) -o $@ -c $<
 	@$(CC) $(CFLAGS) -o $@ -c $<
 
+cmd_%.o: cmd.h
+cmd_%.o: CFLAGS += -Wno-unused-parameter
+
 init.o: config.h
 
-commands.o: cmd.h
-commands.o: CFLAGS += -Wno-unused-parameter
-
-main.o: cmd.h config.h
+main.o: config.h
 
 clean:
 	rm -f edna log *.o 
