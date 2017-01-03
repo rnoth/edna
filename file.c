@@ -14,8 +14,6 @@ readbuf (Buffer *buf)
 	size_t i;
 
 	buf->file = fopen (buf->filename, "r+");
-	if (!buf->file)
-		buf->file = fopen (buf->filename, "w+");
 	if (!buf->file ) {
 		warn ("fopen");
 		return;
