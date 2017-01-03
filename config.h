@@ -1,4 +1,6 @@
 /* config.h - configuration for edna(1) */
+#include "cmd.h"
+
 /* settings */
 #define PROMPT ":"
 #define ERROR "?\n"
@@ -18,7 +20,9 @@ static const Command commands[] = {
 	{ "f",		filename,	NULL, },
 	{ "h",		help,		NULL },
 	{ "i",		insert,		NULL },
+	{ "next",	switchbuf,	"next" },
 	{ "p",		print,		NULL },
+	{ "prev",	switchbuf,	"prev" },
 	{ "q",		quit,		NULL },
 	{ "w",		write,		NULL },
 	{ "wq",		quit,		"write" },

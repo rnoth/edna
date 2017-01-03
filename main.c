@@ -28,30 +28,22 @@ main (int argc, char** argv)
 		die ("malloc");
 	strcpy (error, "everything is ok");
 
-	if (!(st = calloc (1, sizeof *st)))
-		die ("calloc");
-	if (!(st->buffers = malloc (sizeof *st->buffers)))
-		die ("malloc");
-	if (!(st->curbuf = malloc (sizeof *st->curbuf)))
-		die ("malloc");
-	st->buffers[0] = st->curbuf;
-	if (!(st->curbuf->filename = malloc(LINESIZE * sizeof *st->curbuf->filename)))
-		die ("malloc");
-	strcpy (st->curbuf->filename, FILENAME);
-
-	if (!(arg = calloc (1, sizeof *arg)))
-		die ("calloc");
-	if (!(arg->name = calloc (LINESIZE, sizeof *arg->name)))
-		die ("calloc");
-
-	st->curbuf->curline = makeline ();
-	st->curbuf->lineno = 0;
+	st = makestate();
+	arg = makearg();
 	/* end init */
 
 	/* parse argv */
 	if (argc > 1) {
-		strcpy (st->curbuf->filename, argv[1]);
+		do {
+			st->curbuf = makebuf (*(++argv));
+			readbuf (st->curbuf);
+			addbuf (st, st->curbuf);
+			++st->bufno;
+		} while (--argc > 1);
+	} else {
+		st->curbuf = makebuf (FILENAME);
 		readbuf (st->curbuf);
+		addbuf (st, st->curbuf);
 	}
 
 	/* main execution */
@@ -106,31 +98,9 @@ main (int argc, char** argv)
 		}
 	}
 
-	/* TODO: this is getting ridiculous. put in in it's own function */
-	for (;st->curbuf->curline->prev;)
-		st->curbuf->curline = st->curbuf->curline->prev;
-
-	/* FIXME: doesn't free all buffers if there's more */
-	if (st->curbuf->file)
-		fclose (st->curbuf->file);	
-	freelines (st->curbuf->curline, NULL);
-	free (st->curbuf->filename);
-	free (st->curbuf);
-	free (st->buffers);
-	free (st);
-
-	free (line);
 	free (error);
-
-	free (arg);
-	free (arg->name);
-	if (arg->mode)
-		free (arg->mode);
-	if (arg->cnt) {
-		for (;arg->cnt;--arg->cnt)
-			free (arg->vec[arg->cnt]);
-		free (arg->vec);
-	}
+	free (line);
+	cleanup (st, arg);
 
 	return 0;
 }

@@ -68,8 +68,9 @@ struct Macro {
 
 struct State {
 	Buffer **buffers;
-	Buffer *curbuf;
 	size_t buflen;
+	Buffer *curbuf;
+	size_t bufno;
 	Macro *macros;
 	Register *regs;
 };
@@ -77,6 +78,8 @@ struct State {
 /* defined in buffer.c */
 extern int	addbuf		(State *, Buffer *);
 extern Buffer*	makebuf		(char *);
+extern void	freebuf		(Buffer *);
+extern int	rmbuf		(State *, Buffer *);
 
 /* defined in file.c */
 extern void	readbuf		(Buffer *);

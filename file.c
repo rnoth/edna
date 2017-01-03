@@ -14,7 +14,9 @@ readbuf (Buffer *buf)
 	size_t i;
 
 	buf->file = fopen (buf->filename, "r+");
-	if (!buf->file) {
+	if (!buf->file)
+		buf->file = fopen (buf->filename, "w+");
+	if (!buf->file ) {
 		warn ("fopen");
 		return;
 	}
@@ -37,14 +39,12 @@ readbuf (Buffer *buf)
 void
 writebuf (Buffer *buf)
 {
-	if (!buf->file) {
-	/* FIXME: nested ifs tend to imply bad design. Can this be rework? */
-		if (!buf->filename[0])
-			return;
-		if (!(buf->file = fopen (buf->filename, "w+")))
-			warn ("fopen");
-	} else if (!buf->curline->str)
+	if (!buf->filename[0])
 		return;
+	if (!buf->curline->str)
+		return;
+	if (!(buf->file = freopen (buf->filename, "w+", buf->file)))
+		warn ("fopen");
 	rewind (buf->file);
 	do {
 		fputs (buf->curline->str, buf->file);

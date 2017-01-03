@@ -109,17 +109,18 @@ parseline (char *line, size_t linelen, Arg *arg)
 	k = reply->seg;
 	str = reply->str;
 	/* line address */
-	if (str[0] && strchr ("+-", str[0]) )
-		arg->rel = 0; /* FIXME: doesn't parse complex use of +/-
-			       * e.g. 1+2, .-4, +++, etc.
-			       */
+	if (str[0] && strchr ("+-", str[0]) ) {
+		arg->rel = 1; /* FIXME: does not handle complex uses of +/- */
+		if (!str[1])
+			arg->addr = str[0] == '+' ? 1 : -1;
+	}
 	if (strchr (str, ',')) {
 		; /* TODO */
 	}
 	if (strchr (str, '.')) {
 		; /* TODO */
 	}
-	if (str[0])
+	if (isdigit(str[0]) || isdigit(str[1])) /* FIXME: so ugly */
 		arg->addr = strtol (str, &str, 10);
 	//if (reply->str[0])
 		//arg->addr2 = strtol (reply->str, NULL, 10);
