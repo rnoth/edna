@@ -18,6 +18,7 @@ main (int argc, char** argv)
 	size_t len;
 	State *st;
 	Arg *arg;
+	Command *cmd;
 
 	/* init stuff */
 	if (!(line = malloc (LINESIZE * sizeof *line)))
@@ -30,6 +31,8 @@ main (int argc, char** argv)
 
 	st = makestate();
 	arg = makearg();
+
+	qsort (commands, LEN (commands), sizeof *commands, &cmdcmp);
 	/* end init */
 
 	/* parse argv */
@@ -48,9 +51,8 @@ main (int argc, char** argv)
 
 	/* main execution */
 	for (;;) {
-		size_t cmd;
 
-		cmd = 0;
+		cmd = NULL;
 		arg->addr = st->curbuf->lineno;
 		arg->rel = 0;
 		arg->cnt = 0;
@@ -68,19 +70,27 @@ main (int argc, char** argv)
 			arg->rel = 1;
 		}
 
-		for (size_t j = 1; j < LEN(commands); ++j)
+		/*for (size_t j = 1; j < LEN(commands); ++j)
 			if (!strcmp (arg->name, commands[j].name)) {
 				cmd = j;
 				break;
-			}
+			}*/
+		cmd = bsearch (arg->name, commands, LEN (commands), sizeof *commands, &cmdchck);
 
-		if (commands[cmd].mode) {
-			if (!(arg->mode = malloc (sizeof *arg->mode)))
-				die("malloc");
-			strcpy (arg->mode, commands[cmd].mode);
+		if (!cmd) {
+			strcpy (error, "unknown command");
+			if (0 > fprintf(stderr, ERROR))
+				die("fprintf");
+			continue;
 		}
 
-		if ((*commands[cmd].func) (st, st->curbuf, arg, error))
+		if (cmd->mode) {
+			if (!(arg->mode = malloc (sizeof *arg->mode)))
+				die("malloc");
+			strcpy (arg->mode, cmd->mode);
+		}
+
+		if ((*cmd->func) (st, st->curbuf, arg, error))
 			if (0 > fprintf(stderr, ERROR))
 				die("fprintf");
 
