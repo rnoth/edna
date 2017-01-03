@@ -107,5 +107,7 @@ extern void	linklines	(Line *, Line*);
 
 /* defined in util.c */
 extern void	chomp		(char *, size_t);
+extern int	cmdcmp		(const void *, const void *);
+extern int	cmdchck		(const void *, const void *);
 extern void	die		(char *);
 extern void	warn		(char *);
