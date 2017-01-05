@@ -10,6 +10,7 @@ extern int	nop		(State *, Buffer *, Arg *, char *);
 extern int	openbuf		(State *, Buffer *, Arg *, char *);
 extern int	print		(State *, Buffer *, Arg *, char *);
 extern int	quit		(State *, Buffer *, Arg *, char *);
+extern int	sub		(State *, Buffer *, Arg *, char *);
 extern int	switchbuf	(State *, Buffer *, Arg *, char *);
 extern int	write		(State *, Buffer *, Arg *, char *);
 

@@ -27,6 +27,7 @@ static Command commands[] = {
 	{ "p",		print,		NULL },
 	{ "prev",	switchbuf,	"prev" },
 	{ "q",		quit,		NULL },
+	{ "s",		sub,		NULL },
 	{ "w",		write,		NULL },
 	{ "wq",		quit,		"write" },
 	{ "Q", 		quit,		"force" },
