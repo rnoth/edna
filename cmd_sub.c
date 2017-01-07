@@ -9,7 +9,7 @@ int
 sub (State *st, Buffer *buf, Arg *arg, char *error)
 {
 	regex_t *re;
-	regmatch_t *mat;
+	regmatch_t *m;
 	char *tail;
 	size_t i, j;
 
