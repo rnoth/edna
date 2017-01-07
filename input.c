@@ -80,20 +80,22 @@ lexline (char *line, size_t linelen)
 		s[j] = 0;
 		++j;
 		++k;
-		for (; (ch = line[i]) == delim; ++i)
-			;
+		//for (; (ch = line[i]) == delim; ++i)
+			//;
+		// motivation: some commands like sub like to alter their
+		// behavior if a certain input field is empty.
+		// note that this potentitally invalids the long argument above
+		// justifying linelen + 4 as a reasonable buffersize
 	}
 	s[j] = 0;
 	/* finish */
-	if (!(reply = malloc (sizeof *reply)))
-		die ("malloc");
-	if (!(reply->str = malloc (j * sizeof *reply->str)))
-		die ("malloc");
+	if (!(reply = malloc (sizeof *reply))) die ("malloc");
+	if (!(reply->str = malloc (j * sizeof *reply->str))) die ("malloc");
 
-	if (!(memcpy (reply->str, s, j)))
-		die ("memcpy");
+	if (!(memcpy (reply->str, s, j))) die ("memcpy");
 	reply->len = j;
 	reply->seg = k;
+
 	return reply;
 }
 
@@ -103,11 +105,13 @@ parseline (char *line, size_t linelen, Arg *arg)
 	char *str;
 	size_t k;
 	struct reply *reply;
+
 	reply = lexline (line, linelen);
-	if (!reply || !reply->str)
-		die ("malloc(?)");	/* will probably never happen */
+	if (!reply || !reply->str) die ("malloc(?)");	/* will probably never happen */
+
 	k = reply->seg;
 	str = reply->str;
+
 	/* line address */
 	if (str[0] && strchr ("+-", str[0]) ) {
 		arg->rel = 1; /* FIXME: does not handle complex uses of +/- */
@@ -126,10 +130,12 @@ parseline (char *line, size_t linelen, Arg *arg)
 		//arg->addr2 = strtol (reply->str, NULL, 10);
 	str += strlen (str) + 1;
 	--k;
+
 	/* command name */
 	strcpy (arg->name, str);
 	str += strlen (str) + 1;
 	--k;
+
 	/* secondary line address */
 	//strcpy (arg->addr2, str);
 	str += strlen (str) + 1;
