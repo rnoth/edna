@@ -1,4 +1,7 @@
 /* edna.h -- header information */
+#ifndef _EDNA_
+#define _EDNA_
+
 #include <stdio.h>
 
 #define LEN(X) (sizeof X / sizeof *X)
@@ -118,3 +121,4 @@ extern int	cmdcmp		(const void *, const void *);
 extern int	cmdchck		(const void *, const void *);
 extern void	die		(char *);
 extern void	warn		(char *);
+#endif
