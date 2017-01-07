@@ -1,47 +1,62 @@
 edna is a work in progress text editor inspired by the UNIX standard, ed.
 
-(note: this document is correct as of commit c4b785c ("good-bye macros. you will
- be missed.") if this is not the lastest commit, edna may have diverged from
+(note: this document is correct as of commit 75306f4 ("more consistent memory
+ management") if this is not the lastest commit, edna may have diverged from
  what is described here)
 
-at the moment edna is quite barebones -- the supported commands are:
-	- `a' to append a single line, advancing the cursor one line
-	- `i' to insert a single line
-	- `c' to change the current line
+at the moment edna is quite featureful, but not yet at odds with ed(1) itself.
+edna has all of ed's line insertion commands
+
+	- `a' will advance a one line and enter insert mode
+	- `i' will enter insert mode
+	- `c' will change the current line and leave you in insert mode
+(note that edna uses a single period on a line by itself to exit insert mode)
+
+among those commands are also:
 	- `d' to unlink and free and single line
 	- `h' to explain the last error
 	- `p' to print the current line
+	- `s' to preform a basic regexp search/replace on the current line
+
+there is also support for multiple buffers:
+	- `o' opens a delimitted list of files in new buffers
+	- `next' focuses the next buffer, failing on the last
+	- `prev' focuses the previous buffer, failing on the first
+
+finally:
+	- `f' to print/change the default filename
+	- `w' to write the contents of the file back out
+	- `e' to re-open the current file
 	- `q' to free the buffer and exit successfully
 		- `q' has two variations -- `wq' and `Q', as in ed.
 
 furthermore, edna has support for basic line-addressing. `1p' prints the first
 line, `-2a' appends from two lines back, +d deletes the next line, etc.
 
-if edna is given a file as it's first argument, it is read into the buffer, and
-written back out on `w' and `wq' commands
+if edna is given a list of files as it's arguments, they are read into the
+buffer, and written back out on `w' and `wq' commands
 
 edna has a ``config.h'' header file, which allows configuring three options, at
 the moment:
 	- the `PROMPT' macro is expanded and printed before a command is read
 	  from stdin. it defaults to ':', but it is fed into printf(3),
 	  allowing great flexibility. the ``"%ld:" st->lineno'' prompt is quite
-	  useful, for instance
+	  handy, for instance
 	- the `ERROR' macro is expanded and printed when a command fails in
 	  some way. following ed(1), edna defaults to the inscrutable "?\n",
 	  but you may find ``"%s\n" error'' more helpful. don't forget the
 	  newline!
-	- the `commands' array is searched sequentially everytime a command is
-	  read from stdin. it has a three fields: `name', a string handle to
+	- the `commands' array is bsearch(3)'d when a command is read from
+	  stdin. it has a three fields: `name', a string handle to
 	  identify the command both to the user and edna, `func' a pointer to
 	  function to be executed, and `mode', a string which allows extra
 	  context to be given to the function.
 
 hacking guide:
 	- the text document is represented as a doubly linked list, with
-	  functions acting as manipulations on this object
-	- commands are representing as an array, indexed by an O(n) sequential
-	  search. the first element is special, a command which always fails
-	  and sets `error' to ``unknown command''
+	  text functions manipulating this object
+	- commands are representing as an array, qsort(3)'d and indexed by
+	  bsearch(3)
 
 known issues:
 	- most functions don't sanity check their arguments, meaning any errors
@@ -52,5 +67,10 @@ known issues:
 planned features:
 	- explicit UTF-8 support
 	- regex support
-	- commands take arguments
+	- registers
+	- line marks
+	- macros
+	- more standard ed commands (`m',`t',`x', etc.)
+	- undo trees
+	- command chaining
 	- plugin support
