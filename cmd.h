@@ -1,4 +1,6 @@
 /* commands.h -- command-specific header file */
+#ifndef _edna_cmds_
+#define _edna_cmds_
 /* TODO: organization */
 extern int	delete		(State *, Buffer *, Arg *, char *);
 extern int	edit		(State *, Buffer *, Arg *, char *);
@@ -13,4 +15,4 @@ extern int	quit		(State *, Buffer *, Arg *, char *);
 extern int	sub		(State *, Buffer *, Arg *, char *);
 extern int	switchbuf	(State *, Buffer *, Arg *, char *);
 extern int	write		(State *, Buffer *, Arg *, char *);
-
+#endif

@@ -1,8 +1,9 @@
 /* edna.h -- header information */
-#ifndef _EDNA_
-#define _EDNA_
+#ifndef _edna_
+#define _edna_
 
 #include <stdio.h>
+#include <regex.h>
 
 #define LEN(X) (sizeof X / sizeof *X)
 
@@ -96,9 +97,10 @@ extern void	readbuf		(Buffer *);
 extern void	writebuf	(Buffer *);
 
 /* defined in init.c */
-extern State*	makestate	(void);
+extern void	freearg		(Arg *);
+extern void	freestate	(State *);
 extern Arg*	makearg		(void);
-extern void	cleanup		(State *, Arg *);
+extern State*	makestate	(void);
 
 /* defined in input.c */
 extern void	readline	(char **, size_t *, char *, ...);
