@@ -18,6 +18,9 @@ edna: ${OBJ}
 cmd_%.o: cmd.h
 cmd_%.o: CFLAGS += -Wno-unused-parameter
 
+address.o: addr.h
+addr_%.o: addr.h
+
 init.o: config.h
 
 main.o: config.h
