@@ -21,12 +21,10 @@ main (int argc, char** argv)
 	Command *cmd;
 
 	/* init stuff */
-	if (!(line = malloc (LINESIZE * sizeof *line)))
-		die ("malloc");
+	if (!(line = malloc (LINESIZE * sizeof *line))) die ("malloc");
 	len = LINESIZE;
 
-	if (!(error = malloc (LINESIZE * sizeof *error)))
-		die ("malloc");
+	if (!(error = malloc (LINESIZE * sizeof *error))) die ("malloc");
 	strcpy (error, "everything is ok");
 
 	st = makestate();
@@ -70,29 +68,23 @@ main (int argc, char** argv)
 			arg->rel = 1;
 		}
 
-		/*for (size_t j = 1; j < LEN(commands); ++j)
-			if (!strcmp (arg->name, commands[j].name)) {
-				cmd = j;
-				break;
-			}*/
-		cmd = bsearch (arg->name, commands, LEN (commands), sizeof *commands, &cmdchck);
+		cmd = bsearch (arg->name, commands, LEN (commands),
+				sizeof *commands, &cmdchck);
 
 		if (!cmd) {
 			strcpy (error, "unknown command");
-			if (0 > fprintf(stderr, ERROR))
-				die("fprintf");
+			if (printf(ERROR) < 0) die("printf");
 			continue;
 		}
 
 		if (cmd->mode) {
-			if (!(arg->mode = malloc (sizeof *arg->mode)))
-				die("malloc");
+			arg->mode = malloc (sizeof *arg->mode);
+			if (!arg->mode) die("malloc");
 			strcpy (arg->mode, cmd->mode);
 		}
 
 		if ((*cmd->func) (st, st->curbuf, arg, error))
-			if (0 > fprintf(stderr, ERROR))
-				die("fprintf");
+			if (printf(ERROR) < 0) die("printf");
 
 		if (!strcmp (error, "quit"))
 			break;
@@ -110,7 +102,8 @@ main (int argc, char** argv)
 
 	free (error);
 	free (line);
-	cleanup (st, arg);
+	freestate (st);
+	freearg (arg);
 
 	return 0;
 }

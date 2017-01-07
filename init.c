@@ -3,9 +3,24 @@
 
 #include "edna.h"
 
-extern State*	makestate	(void);
+extern void	freearg		(Arg *);
+extern void	freestate	(State *);
 extern Arg*	makearg		(void);
-extern void	cleanup		(State *, Arg *);
+extern State*	makestate	(void);
+
+void
+freestate (State *st)
+{
+	for (; --st->buflen;)
+		freebuf (st->buffers[st->buflen]);
+}
+
+void
+freearg (Arg *arg)
+{
+	free (arg->name);
+	free (arg);
+}
 
 State *
 makestate (void)
@@ -27,11 +42,3 @@ makearg (void)
 	return arg;
 }
 
-void
-cleanup (State *st, Arg *arg)
-{
-	for (; --st->buflen;)
-		freebuf (st->buffers[st->buflen]);
-	free (arg->name);
-	free (arg);
-}
