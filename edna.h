@@ -11,17 +11,29 @@
 typedef struct Line Line;
 typedef struct Command Command;
 typedef struct Arg Arg;
+typedef struct Record Record;
 typedef struct Mark Mark;
 typedef struct Buffer Buffer;
 typedef struct Register Register;
 typedef struct Macro Macro;
 typedef struct State State;
 
-struct Line {
-	size_t len;
-	char *str;
-	Line *next;
-	Line *prev;
+struct Arg {
+	unsigned char rel;	/* is address relative? */
+	int addr;
+	char *name;
+	char *mode;
+	size_t cnt;	/* argc equivalent */
+	char **vec;	/* argv equivalent */
+};
+
+struct Buffer {
+	unsigned char dirty;
+	FILE *file;
+	char *filename;
+	Line *curline;
+	size_t lineno;
+	Mark *marks;
 };
 
 struct Command {
@@ -30,40 +42,35 @@ struct Command {
 	char *mode;
 };
 
+struct Line {
+	size_t len;
+	char *str;
+	Line *next;
+	Line *prev;
+};
+
+struct Macro {
+	char *name;	/* macro name, not command name */
+	Command cmd;
+	Arg arg;
+};
+
 struct Mark {
 	char *name;
 	Line *l;
 	size_t lineno;
 };
 
-struct Buffer {
-	short dirty;
-	FILE *file;
-	char *filename;
-	Line *curline;
-	size_t lineno;
-	Mark *marks;
+struct Record {
+	unsigned char ok;
+	char *error;
+	Arg *arg;
+	void *diff;
 };
 
 struct Register {
 	char *name;
 	char *str;
-};
-
-struct Arg {
-	short rel;	/* is address relative? */
-	int addr;
-	size_t range;
-	char *name;
-	char *mode;
-	size_t cnt; /* argc equivalent */
-	char **vec; /* argv equivalent */
-};
-
-struct Macro {
-	char *name; /* macro name, not command name */
-	Command cmd;
-	Arg arg;
 };
 
 struct State {
