@@ -2,7 +2,7 @@
 #include "cmd.h"
 
 /* settings */
-#define PROMPT ":"
+#define PROMPT "\r\033[K:"
 #define ERROR "?\n"
 #define FILENAME "/tmp/edna.hup"
 

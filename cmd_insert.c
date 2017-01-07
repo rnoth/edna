@@ -1,18 +1,30 @@
 /* cmd_insert.c -- line insertion commands */
 #include <stdlib.h>
 #include <string.h>
+#include <setjmp.h>
+#include <signal.h>
 
 #include "edna.h"
 #include "cmd.h"
 
 extern int	insert		(State *, Buffer *, Arg *, char *);
 
+static void escape (int);
+static sigjmp_buf jmp;
+
+void
+escape (int sig)
+{
+	siglongjmp (jmp, 1);
+}
+
 int
 insert (State *st, Buffer *buf, Arg *arg, char *error)
 {
 	char *line;
-	size_t linelen;
 	int option;
+	size_t linelen;
+	struct sigaction act, oldact;
 
 	option = INSERT;
 
@@ -39,6 +51,12 @@ insert (State *st, Buffer *buf, Arg *arg, char *error)
 
 	line = malloc (sizeof *line * LINESIZE);
 	linelen = LINESIZE;
+
+	if (sigsetjmp (jmp, 1))
+		goto end;
+	act.sa_handler = escape;
+	sigaction (SIGINT, &act, &oldact);
+	
 	for (;readline (&line, &linelen, "%ld\t", buf->lineno), strcmp (line, ".\n");) {
 		if(!(buf->curline = putline (buf->curline, line, linelen, option))) {
 			free (line);
@@ -48,8 +66,10 @@ insert (State *st, Buffer *buf, Arg *arg, char *error)
 		++buf->lineno;
 		option = APPEND;
 	}
-	--buf->lineno;
 
+end:
+	sigaction (SIGINT, &oldact, NULL);
+	--buf->lineno;
 	free (line);
 	return 0;
 }
