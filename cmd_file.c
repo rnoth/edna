@@ -75,7 +75,7 @@ quit (State *st, Buffer *buf, Arg *arg, char *error)
 
 end:
 	strcpy (error, "quit");
-	return 0;
+	return 1;
 }	
 
 int

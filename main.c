@@ -13,9 +13,8 @@
 int
 main (int argc, char** argv)
 {
-	/* FIXME: line isn't a Line, len isn't descriptive */
 	char *line, *error;
-	size_t len;
+	size_t len;	/* size of s */
 	State *st;
 	Arg *arg;
 	Command *cmd;
@@ -25,7 +24,7 @@ main (int argc, char** argv)
 	len = LINESIZE;
 
 	if (!(error = malloc (LINESIZE * sizeof *error))) die ("malloc");
-	strcpy (error, "everything is ok");
+	error[0] = 0;
 
 	st = makestate();
 	arg = makearg();
@@ -74,8 +73,7 @@ main (int argc, char** argv)
 
 		if (!cmd) {
 			strcpy (error, "unknown command");
-			if (printf(ERROR) < 0) die("printf");
-			continue;
+			goto finally;
 		}
 
 		if (cmd->mode) {
@@ -85,10 +83,14 @@ main (int argc, char** argv)
 		}
 
 		if ((*cmd->func) (st, st->curbuf, arg, error))
-			if (printf(ERROR) < 0) die("printf");
+			goto finally;
 
-		if (!strcmp (error, "quit"))
-			break;
+		if (0) {
+		finally:
+			if (!strcmp (error, "quit"))
+				break;
+			if (printf (ERROR) < 0) die ("printf");
+		}
 
 		if (!st->curbuf->curline)
 			st->curbuf->curline = makeline ();
@@ -99,6 +101,7 @@ main (int argc, char** argv)
 				free (arg->vec[arg->cnt]);
 			free (arg->vec);
 		}
+
 	}
 
 	free (error);

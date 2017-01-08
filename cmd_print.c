@@ -11,8 +11,8 @@ extern int	help	(State *, Buffer *, Arg *, char *);
 int
 help (State *st, Buffer *buf, Arg *arg, char *error)
 {
-	if (0 > printf ("%s\n", error))
-		die("printf");
+	if (error[0])
+		if (printf ("%s\n", error) < 0) die("printf");
 	return 0;
 }
 
