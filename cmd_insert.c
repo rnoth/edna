@@ -57,7 +57,11 @@ insert (State *st, Buffer *buf, Arg *arg, char *error)
 	act.sa_handler = escape;
 	sigaction (SIGINT, &act, &oldact);
 	
-	for (;readline (&line, &linelen, "%ld\t", buf->lineno), strcmp (line, ".\n");) {
+	for (;;) {
+		if (printf ("%ld|", buf->lineno) < 0) die ("printf");
+		readline (&line, &linelen, stdin, error);
+		if (!strcmp (line, ".\n"))
+			break;
 		if(!(buf->curline = putline (buf->curline, line, linelen, option))) {
 			free (line);
 			strcpy (error, "insertion failed");

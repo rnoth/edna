@@ -37,13 +37,13 @@ main (int argc, char** argv)
 	if (argc > 1) {
 		do {
 			st->curbuf = makebuf (*(++argv));
-			readbuf (st->curbuf);
+			readbuf (st->curbuf, error);
 			addbuf (st, st->curbuf);
 			++st->bufno;
 		} while (--argc > 1);
 	} else {
 		st->curbuf = makebuf (FILENAME);
-		readbuf (st->curbuf);
+		readbuf (st->curbuf, error);
 		addbuf (st, st->curbuf);
 	}
 
@@ -57,7 +57,8 @@ main (int argc, char** argv)
 		arg->vec = NULL;
 		arg->mode = NULL;
 
-		readline (&line, &len, PROMPT);
+		if (printf (PROMPT) < 0) die ("printf");
+		readline (&line, &len, stdin, error);
 		parseline (line, len, arg);
 
 		/* fix arg->addr, bexause parseline can't handle absolute
