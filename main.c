@@ -17,7 +17,6 @@ main (int argc, char** argv)
 	size_t len;	/* size of s */
 	State *st;
 	Arg *arg;
-	Command *cmd;
 
 	/* init stuff */
 	if (!(line = malloc (LINESIZE * sizeof *line))) die ("malloc");
@@ -29,7 +28,7 @@ main (int argc, char** argv)
 	st = makestate();
 	arg = makearg();
 
-	qsort (commands, LEN (commands), sizeof *commands, &cmdcmp);
+	initst (st);
 	/* end init */
 
 	/* parse argv */
@@ -45,45 +44,16 @@ main (int argc, char** argv)
 		readbuf (st->curbuf, error);
 		addbuf (st, st->curbuf);
 	}
+	arg->addr = st->curbuf->lineno;
 	/* end parse */
 
 	/* main execution */
 	for (;;) {
 
-		cmd = NULL;
-		arg->addr = st->curbuf->lineno;
-		arg->rel = 0;
-		arg->cnt = 0;
-		arg->vec = NULL;
-		arg->mode = NULL;
-
 		if (printf (PROMPT) < 0) die ("printf");
 		readline (&line, &len, stdin, error);
 		parseline (line, len, arg);
-
-		/* fix arg->addr, bexause parseline can't handle absolute
-		 * addresses (st->lineno isn't visible outside main() )
-		 */
-		if (!arg->rel) {
-			arg->addr -= st->curbuf->lineno;
-			arg->rel = 1;
-		}
-
-		cmd = bsearch (arg->name, commands, LEN (commands),
-				sizeof *commands, &cmdchck);
-
-		if (!cmd) {
-			strcpy (error, "unknown command");
-			goto finally;
-		}
-
-		if (cmd->mode) {
-			arg->mode = malloc (sizeof *arg->mode);
-			if (!arg->mode) die("malloc");
-			strcpy (arg->mode, cmd->mode);
-		}
-
-		if ((*cmd->func) (st, st->curbuf, arg, error))
+		if (!evalcmd (st, arg, error))
 			goto finally;
 
 		if (0) {
@@ -91,16 +61,6 @@ main (int argc, char** argv)
 			if (!strcmp (error, "quit"))
 				break;
 			if (printf (ERROR) < 0) die ("printf");
-		}
-
-		if (!st->curbuf->curline)
-			st->curbuf->curline = makeline ();
-		if (arg->mode)
-			free (arg->mode);
-		if (arg->cnt) {
-			for (;arg->cnt--;)
-				free (arg->vec[arg->cnt]);
-			free (arg->vec);
 		}
 
 	}

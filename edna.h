@@ -78,10 +78,14 @@ struct Register {
 };
 
 struct State {
+	Command *commands;
+	size_t cmdlen;
+
 	Buffer **buffers;
 	size_t buflen;
 	Buffer *curbuf;
 	size_t bufno;
+
 	Macro *macros;
 	Register *regs;
 };
@@ -92,6 +96,9 @@ extern Buffer*	makebuf		(char *);
 extern void	freebuf		(Buffer *);
 extern int	rmbuf		(State *, Buffer *);
 
+/* defined in command.c */
+extern int	evalcmd		(State *, Arg *, char *);
+
 /* defined in file.c */
 extern void	readbuf		(Buffer *, char *);
 extern void	writebuf	(Buffer *);
@@ -99,6 +106,7 @@ extern void	writebuf	(Buffer *);
 /* defined in init.c */
 extern void	freearg		(Arg *);
 extern void	freestate	(State *);
+extern void	initst		(State *);
 extern Arg*	makearg		(void);
 extern State*	makestate	(void);
 

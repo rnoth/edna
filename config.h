@@ -10,7 +10,7 @@
 //#define PROMPT "%ld:", st->lineno	/* have line numbers in prompt */
 //#define ERROR "%s\n", error		/* like ed's 'H', without the '?' */
 
-static Command commands[] = {
+static const Command commands[] = {
       /*  name,		func,		mode */
 	{ "",		nop,		NULL },
 	{ "",		gotol,		NULL },
