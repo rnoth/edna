@@ -2,12 +2,13 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <string.h>
 #include <ctype.h>
 
 #include "edna.h"
 
-extern void	readline	(char **, size_t *, char *, ...);
+extern size_t	readline	(char **, size_t *, FILE *, char *);
 extern void	parseline	(char *, size_t, Arg *);
 
 static struct reply*	lexline		(char *, size_t);
@@ -18,16 +19,32 @@ struct reply {
 	size_t seg;
 };
 
-void
-readline (char **line_ptr, size_t *len_ptr, char *prompt, ...)
+size_t
+readline (char **line, size_t *len, FILE *f, char *error)
 {
-	va_list va;
-	va_start (va, prompt);
-	if (0 > vprintf (prompt, va))
-		die ("vprintf");
-	getline (line_ptr, len_ptr, stdin);
-	va_end (va);
-	return;
+#	define CHUNK 20
+	char *tmp;
+	size_t off = 0;
+	for (;;) {
+		if (!memset (*line + *len - 1, '\n', 1)) die ("memset");
+		if (!fgets (*line + off, *len - off, f)) {
+			if (feof (f))
+				break;
+			strcpy (error, "fgets: ");
+			strncpy (error + strlen (error), strerror (errno), LINESIZE);
+			return 0;
+		}
+		if ((*line)[*len - 1] == '\n') /* got all of line */
+			break;
+		if (!(tmp = realloc (*line, *len + CHUNK))) {
+			strcpy (error, "error allocating buffer");
+			return 0; /* error */
+		}
+		*line = tmp;
+		off = *len - 1;
+		*len += CHUNK;
+	}
+	return *len;
 }
 
 struct reply *

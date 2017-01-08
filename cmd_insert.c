@@ -39,7 +39,11 @@ insert (State *st, Buffer *buf, Arg *arg, char *error)
 
 	line = malloc (sizeof *line * LINESIZE);
 	linelen = LINESIZE;
-	for (;readline (&line, &linelen, "%ld\t", buf->lineno), strcmp (line, ".\n");) {
+	for (;;) {
+		if (printf ("%ld|", buf->lineno) < 0) die ("printf");
+		readline (&line, &linelen, stdin, error);
+		if (!strcmp (line, ".\n"))
+			break;
 		if(!(buf->curline = putline (buf->curline, line, linelen, option))) {
 			free (line);
 			strcpy (error, "insertion failed");

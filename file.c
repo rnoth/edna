@@ -4,11 +4,11 @@
 
 #include "edna.h"
 
-extern void readbuf	(Buffer *);
+extern void readbuf	(Buffer *, char *);
 extern void writebuf	(Buffer *);
 
 void
-readbuf (Buffer *buf)
+readbuf (Buffer *buf, char *error)
 {
 	char *s;
 	size_t i;
@@ -24,7 +24,7 @@ readbuf (Buffer *buf)
 	i = LINESIZE;
 
 	while (!feof (buf->file)) {
-		if (-1 == getline (&s, &i, buf->file))
+		if (!readline (&s, &i, buf->file, error)) 
 			continue; /* usually means eof, go check */
 		buf->curline = putline (buf->curline, s, i, 1);
 		++buf->lineno;

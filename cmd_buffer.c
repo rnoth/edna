@@ -45,7 +45,7 @@ openbuf (State *st, Buffer *buf, Arg *arg, char *error)
 
 	do {
 		st->curbuf = makebuf (arg->vec[i]);
-		readbuf (st->curbuf);
+		readbuf (st->curbuf, error);
 		addbuf (st, st->curbuf);
 	} while (++i < arg->cnt);
 	st->bufno = st->buflen - 1;

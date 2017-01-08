@@ -92,7 +92,7 @@ extern void	freebuf		(Buffer *);
 extern int	rmbuf		(State *, Buffer *);
 
 /* defined in file.c */
-extern void	readbuf		(Buffer *);
+extern void	readbuf		(Buffer *, char *);
 extern void	writebuf	(Buffer *);
 
 /* defined in init.c */
@@ -101,7 +101,7 @@ extern Arg*	makearg		(void);
 extern void	cleanup		(State *, Arg *);
 
 /* defined in input.c */
-extern void	readline	(char **, size_t *, char *, ...);
+extern size_t	readline	(char **, size_t *, FILE *, char *);
 extern void	parseline	(char *, size_t, Arg *);
 
 /* defined in line.c */

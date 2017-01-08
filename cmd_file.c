@@ -35,7 +35,7 @@ end:
 	if (arg->cnt)
 		strcpy (buf->filename, arg->vec[0]);
 
-	readbuf (buf);
+	readbuf (buf, error);
 	return 0;
 }
 
