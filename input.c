@@ -8,8 +8,8 @@
 
 #include "edna.h"
 
-extern size_t	readline	(char **, size_t *, FILE *, char *);
 extern void	parseline	(char *, size_t, Arg *);
+extern size_t	readline	(char **, size_t *, FILE *, char *);
 
 static struct reply*	lexline		(char *, size_t);
 
@@ -18,34 +18,6 @@ struct reply {
 	size_t len;
 	size_t seg;
 };
-
-size_t
-readline (char **line, size_t *len, FILE *f, char *error)
-{
-#	define CHUNK 20
-	char *tmp;
-	size_t off = 0;
-	for (;;) {
-		if (!memset (*line + *len - 1, '\n', 1)) die ("memset");
-		if (!fgets (*line + off, *len - off, f)) {
-			if (feof (f))
-				break;
-			strcpy (error, "fgets: ");
-			strncpy (error + strlen (error), strerror (errno), LINESIZE);
-			return 0;
-		}
-		if ((*line)[*len - 1] == '\n') /* got all of line */
-			break;
-		if (!(tmp = realloc (*line, *len + CHUNK))) {
-			strcpy (error, "error allocating buffer");
-			return 0; /* error */
-		}
-		*line = tmp;
-		off = *len - 1;
-		*len += CHUNK;
-	}
-	return *len;
-}
 
 struct reply *
 lexline (char *line, size_t linelen)
@@ -173,5 +145,33 @@ parseline (char *line, size_t linelen, Arg *arg)
 	free (reply);
 
 	return;
+}
+
+size_t
+readline (char **line, size_t *len, FILE *f, char *error)
+{
+#	define CHUNK 20
+	char *tmp;
+	size_t off = 0;
+	for (;;) {
+		if (!memset (*line + *len - 1, '\n', 1)) die ("memset");
+		if (!fgets (*line + off, *len - off, f)) {
+			if (feof (f))
+				break;
+			strcpy (error, "fgets: ");
+			strncpy (error + strlen (error), strerror (errno), LINESIZE);
+			return 0; /* error */
+		}
+		if ((*line)[*len - 1] == '\n') /* got all of line */
+			break;
+		if (!(tmp = realloc (*line, *len + CHUNK))) {
+			strcpy (error, "error allocating buffer");
+			return 0; /* error */
+		}
+		*line = tmp;
+		off = *len - 1;
+		*len += CHUNK;
+	}
+	return *len;
 }
 

@@ -1,14 +1,14 @@
 /* edna -- ed-like text editor */
-#include <stdio.h>
+#include <regex.h>
+#include <signal.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <signal.h>
-#include <regex.h>
 
 #include "edna.h"
-#include "cmd.h"
 #include "config.h"
+#include "cmd.h"
 
 int
 main (int argc, char** argv)
@@ -45,6 +45,7 @@ main (int argc, char** argv)
 		readbuf (st->curbuf, error);
 		addbuf (st, st->curbuf);
 	}
+	/* end parse */
 
 	/* main execution */
 	for (;;) {
@@ -103,6 +104,7 @@ main (int argc, char** argv)
 		}
 
 	}
+	/* end main */
 
 	free (error);
 	free (line);
