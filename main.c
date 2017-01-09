@@ -51,18 +51,20 @@ main (int argc, char** argv)
 	for (;;) {
 
 		if (printf (PROMPT) < 0) die ("printf");
-		readline (&line, &len, stdin, error);
-		parseline (line, len, arg);
+		if (!readline (&line, &len, stdin, error))
+			goto finally;
+		if (!parseline (line, len, arg))
+			goto finally;
 		if (!evalcmd (st, arg, error))
 			goto finally;
+		continue;
 
-		if (0) {
 		finally:
+			if (feof (stdin) && !st->curbuf->dirty)
+				break;
 			if (!strcmp (error, "quit"))
 				break;
 			if (printf (ERROR) < 0) die ("printf");
-		}
-
 	}
 	/* end main */
 

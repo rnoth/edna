@@ -7,10 +7,16 @@
 
 #define LEN(X) (sizeof X / sizeof *X)
 
-#define INSERT -1
-#define CHANGE 0
-#define APPEND 1
-#define LINESIZE 80
+#define LINESIZE (80)
+
+#define FAIL (0)
+#define SUCC (1)
+
+enum {
+	INSERT = -1, /* this needs to be fixed */
+	CHANGE,
+	APPEND,
+};
 
 typedef struct Line Line;
 typedef struct Command Command;
@@ -111,8 +117,8 @@ extern Arg*	makearg		(void);
 extern State*	makestate	(void);
 
 /* defined in input.c */
-extern size_t	readline	(char **, size_t *, FILE *, char *);
-extern void	parseline	(char *, size_t, Arg *);
+extern int	readline	(char **, size_t *, FILE *, char *);
+extern int	parseline	(char *, size_t, Arg *);
 
 /* defined in line.c */
 extern Line*	getnext		(Line *);

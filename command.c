@@ -4,9 +4,6 @@
 
 #include "edna.h"
 
-#define FAIL (0)
-#define SUCC (1)
-
 extern int	evalcmd	(State *st, Arg *arg, char *error);
 static void	cleanup	(State *st, Arg *arg);
 

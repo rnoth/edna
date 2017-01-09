@@ -8,8 +8,8 @@
 
 #include "edna.h"
 
-extern void	parseline	(char *, size_t, Arg *);
-extern size_t	readline	(char **, size_t *, FILE *, char *);
+extern int	parseline	(char *, size_t, Arg *);
+extern int	readline	(char **, size_t *, FILE *, char *);
 
 static struct reply*	lexline		(char *, size_t);
 
@@ -88,7 +88,7 @@ lexline (char *line, size_t linelen)
 	return reply;
 }
 
-void
+int
 parseline (char *line, size_t linelen, Arg *arg)
 {
 	char *str;
@@ -144,10 +144,10 @@ parseline (char *line, size_t linelen, Arg *arg)
 	free (reply->str);
 	free (reply);
 
-	return;
+	return SUCC;
 }
 
-size_t
+int
 readline (char **line, size_t *len, FILE *f, char *error)
 {
 #	define CHUNK 20
@@ -156,22 +156,22 @@ readline (char **line, size_t *len, FILE *f, char *error)
 	for (;;) {
 		if (!memset (*line + *len - 1, '\n', 1)) die ("memset");
 		if (!fgets (*line + off, *len - off, f)) {
-			if (feof (f))
-				break;
-			strcpy (error, "fgets: ");
-			strncpy (error + strlen (error), strerror (errno), LINESIZE);
-			return 0; /* error */
+			if (!feof (f)) { /* only report non-eof errors */
+				strcpy (error, "fgets: ");
+				strncpy (error + strlen (error), strerror (errno), LINESIZE);
+			}
+			return FAIL;
 		}
 		if ((*line)[*len - 1] == '\n') /* got all of line */
 			break;
 		if (!(tmp = realloc (*line, *len + CHUNK))) {
 			strcpy (error, "error allocating buffer");
-			return 0; /* error */
+			return FAIL; /* error */
 		}
 		*line = tmp;
 		off = *len - 1;
 		*len += CHUNK;
 	}
-	return *len;
+	return SUCC;
 }
 
