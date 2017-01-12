@@ -1,77 +1,68 @@
 /* edna -- ed-like text editor */
-#include <regex.h>
-#include <signal.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "edna.h"
-#include "config.h"
-#include "cmd.h"
 
 int
 main (int argc, char** argv)
 {
-	char *line, *error;
-	size_t len;	/* size of s */
+	String s, err;
 	State *st;
+	Buffer *buf;
 	Arg *arg;
 
 	/* init stuff */
-	if (!(line = malloc (LINESIZE * sizeof *line))) die ("malloc");
-	len = LINESIZE;
+	st  = makestate ();
+	buf = makebuf (NULL);
+	arg = makearg ();
+	s   = makestring (LINESIZE);
+	err = makestring (LINESIZE);
 
-	if (!(error = malloc (LINESIZE * sizeof *error))) die ("malloc");
-	error[0] = 0;
-
-	st = makestate();
-	arg = makearg();
-
-	initst (st);
+	init (st);
 	/* end init */
 
-	/* parse argv */
-	if (argc > 1) {
-		do {
-			st->curbuf = makebuf (*(++argv));
-			readbuf (st->curbuf, error);
-			addbuf (st, st->curbuf);
-			++st->bufno;
-		} while (--argc > 1);
-	} else {
-		st->curbuf = makebuf (FILENAME);
-		readbuf (st->curbuf, error);
-		addbuf (st, st->curbuf);
+	{
+		Buffer *tmp;
+		/* open tmpfile */
+		tmp = makebuf ("/tmp/edna.hup"); /* FIXME */
+		readbuf (tmp, err.v);
+		addbuf (st, tmp);
+		/* end open */
+	
+		/* parse argv */
+		if (argc > 1)
+			do {
+				tmp = makebuf (*(++argv));
+				readbuf (tmp, err.v);
+				addbuf (st, tmp);
+			} while (--argc > 1);
+		/* end parse */
 	}
-	arg->addr = st->curbuf->lineno;
-	/* end parse */
+
+	arg->addr = buf->lineno;
+	checkoutbuf (buf, st, st->buffers.c - 1);
 
 	/* main execution */
 	for (;;) {
 
-		if (printf (PROMPT) < 0) die ("printf");
-		if (!readline (&line, &len, stdin, error))
+		if (!(*buf->mode->prompt) (st, buf, arg))
 			goto finally;
-		if (!parseline (line, len, arg))
+		if (!readline (&s, stdin, err.v))
 			goto finally;
-		if (!evalcmd (st, arg, error))
+		if (!(*buf->mode->parse) (s.v, s.c, arg))
+			goto finally;
+		if (!(*buf->mode->eval) (st, buf, arg, err.v))
 			goto finally;
 		continue;
 
-		finally:
-			if (feof (stdin) && !st->curbuf->dirty)
-				break;
-			if (!strcmp (error, "quit"))
-				break;
-			if (printf (ERROR) < 0) die ("printf");
+	finally:
+		if (!(*buf->mode->error) (st, buf, arg, err.v))
+			break;
 	}
 	/* end main */
 
-	free (error);
-	free (line);
-	freestate (st);
-	freearg (arg);
+	freestate	(st);
+	freearg		(arg);
+	freestring	(s);
+	freestring	(err);
 
 	return 0;
 }
