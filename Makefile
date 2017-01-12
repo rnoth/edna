@@ -5,11 +5,12 @@ LDFLAGS ?= -lc
 
 SRC != find . -name '*.c'
 OBJ = ${SRC:.c=.o}
-DEPS = edna.h
+DEPS = edna.h vector.h
+TARGET = edna
 
 edna: ${OBJ}
-	@echo LD $(LDFLAGS) -o edna *.o
-	@$(CC) $(LDFLAGS) -o edna *.o
+	@echo LD $(LDFLAGS) -o $(TARGET) *.o
+	@$(CC) $(LDFLAGS) -o $(TARGET) *.o
 
 %.o: %.c $(DEPS)
 	@echo CC $(CFLAGS) -o $@ -c $<
@@ -18,10 +19,16 @@ edna: ${OBJ}
 cmd_%.o: cmd.h
 cmd_%.o: CFLAGS += -Wno-unused-parameter
 
-address.o: addr.h
-addr_%.o: addr.h
+address.o: addr.h set.h
+addr_%.o: CFLAGS += -Wno-unused-parameter
+addr_%.o: addr.h set.h
+
+set.o: set.h
 
 init.o: config.h
+init.o: CFLAGS += -Wno-unused-parameter
+
+insert.o: CFLAGS += -Wno-unused-parameter
 
 main.o: config.h
 
