@@ -1,16 +1,16 @@
 CC ?= cc
 #LD ?= ld
-CFLAGS ?= -g -Wall -Wextra -Werror -pedantic
+CFLAGS ?= -g -Wall -Wextra -Werror -pedantic -pedantic-errors
 LDFLAGS ?= -lc
 
-SRC != find . -name '*.c'
-OBJ = ${SRC:.c=.o}
-DEPS = edna.h vector.h
-TARGET = edna
+SRC    != find .  -maxdepth 1 -name '*.c'
+OBJ	= ${SRC:.c=.o}
+DEPS	= edna.h vector.h string.h
+TARGET	= edna
 
-edna: ${OBJ}
-	@echo LD $(LDFLAGS) -o $(TARGET) *.o
-	@$(CC) $(LDFLAGS) -o $(TARGET) *.o
+edna: $(OBJ)
+	@echo LD $(LDFLAGS) -o $(TARGET) $(OBJ)
+	@$(CC) $(LDFLAGS) -o $(TARGET) $(OBJ)
 
 %.o: %.c $(DEPS)
 	@echo CC $(CFLAGS) -o $@ -c $<
