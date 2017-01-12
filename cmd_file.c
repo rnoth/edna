@@ -86,7 +86,8 @@ write (State *st, Buffer *buf, Arg *arg, char *error)
 
 	arg->addr = -buf->lineno + 1; /* go to start of buffer */
 	gotol (st, buf, arg, error);
-	writebuf (buf);
+	if (!writebuf (buf, error))
+		return 1;
 	buf->dirty = 0;
 	return 0;
 }
