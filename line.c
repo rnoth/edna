@@ -7,10 +7,8 @@
 
 #include "edna.h"
 
-extern Line*	getnext		(Line *);
-extern Line*	getprev		(Line *);
 extern Line*	makeline	();
-extern Line*	putline		(Line *, char *, size_t, int);
+extern Line*	putline		(Line *, char *, size_t);
 extern Line*	walk		(Line *, int, char *error);
 
 static Line*	changeline	(Line *, char *, size_t);
@@ -30,18 +28,6 @@ changeline (Line *l, char *line, size_t len)
 	return l;
 }
 
-Line *
-getnext (Line * l)
-{
-	return l->next;
-}
-
-Line *
-getprev (Line *l)
-{
-	return l->prev;
-}
-
 Line*
 makeline ()
 {
@@ -52,7 +38,7 @@ makeline ()
 }
 
 Line*
-putline (Line *cur, char *line, size_t len, int option)
+putline (Line *cur, char *line, size_t len)
 {
 	Line *new;
 
@@ -64,23 +50,9 @@ putline (Line *cur, char *line, size_t len, int option)
 		return NULL;
 	}
 
-	switch (option) {
-	case 1:	/* append */
+	if (new != cur)	{	/* don't make a infinite loop */
 		linklines (new, cur->next);
-		if (new != cur)	/* don't make a infinite loop */
-			linklines (cur, new);
-		break;
-	case 0:	/* change */
-		linklines (cur->prev, new);
-		linklines (new, cur->next);
-		if (new != cur) /* no use-after-free, please */
-			freelines (cur, cur->next);
-		break;
-	case -1: /* insert */
-		linklines (cur->prev, new);
-		if (new != cur)
-			linklines (new, cur);
-		break;
+		linklines (cur, new);
 	}
 	return new;
 }
