@@ -3,19 +3,20 @@
 #include <string.h>
 
 #include "edna.h"
+#include "vector.h"
 #include "config.h"
 
 extern void	freearg		(Arg *);
 extern void	freestate	(State *);
-extern void	initst		(State *);
+extern void	init		(State *);
 extern Arg*	makearg		(void);
 extern State*	makestate	(void);
 
 void
 freestate (State *st)
 {
-	for (; --st->buflen;)
-		freebuf (st->buffers[st->buflen]);
+	FREE_VECTOR (st->cmds);
+	FREE_VECTOR (st->modes);
 }
 
 void
@@ -26,34 +27,22 @@ freearg (Arg *arg)
 }
 
 void
-initst (State *st)
+init (State *st)
 {
-	size_t i;
-	Command *c;
-	if (!(st->commands = calloc (1, sizeof commands)))
-		die ("calloc");
-	st->cmdlen = LEN (commands);
+	/* st->commands */
+	MAKE_VECTOR (Command, st->cmds, sizeof commands);
+	if (!memcpy (st->cmds.v, commands, sizeof commands)) die ("memcpy");
+	st->cmds.c = LEN (commands);
+	qsort (st->cmds.v, st->cmds.c, sizeof *commands, &cmdcmp);
+	/* end st->commands */
 
-	for (i = 0, c = st->commands; i < st->cmdlen; ++i, ++c) {
-		size_t tmp;
-		/* copy names */
-		tmp = strlen (commands[i].name) + 1;
-		c->name = malloc (tmp * sizeof *c->name);
-		if (!c->name)
-			die ("malloc");
-		strcpy (c->name, commands[i].name);
-		/* copy funcs */
-		c->func = commands[i].func;
-		/* copy modes */
-		if (commands[i].mode) {
-			tmp = strlen (commands[i].mode) + 1;
-			c->mode = malloc (tmp * sizeof *c->name);
-			if (!c->mode)
-				die ("malloc");
-			strcpy (c->mode, commands[i].mode);
-		}
-	}
-	qsort (st->commands, st->cmdlen, sizeof *commands, &cmdcmp);
+	/* st->modes */
+	MAKE_VECTOR (Mode, st->modes, sizeof modes);
+	if (!memcpy (st->modes.v, modes, sizeof modes)) die ("memcpy");
+	st->modes.c = LEN (modes);
+	/* end st->modes */
+
+	return;
 }
 
 State *
