@@ -3,34 +3,44 @@
 #include <string.h>
 
 #include "edna.h"
+#include "vector.h"
 
 extern int	addbuf		(State *, Buffer *);
+extern int	checkoutbuf	(Buffer *, State *, size_t);
 extern void	freebuf		(Buffer *);
 extern Buffer*	makebuf		(char *);
-extern int	rmbuf		(State *, Buffer *);
+extern int	rmbuf		(State *, size_t);
+extern int	returnbuf	(Buffer *, State *);
 
 int
 addbuf (State *st, Buffer *buf)
 {
-	Buffer **tmp;
-	++st->buflen;
-	tmp = realloc (st->buffers, st->buflen * sizeof *st->buffers);
-	if (!tmp) {
-		warn ("realloc");
-		--st->buflen;
-		return -1;
-	}
-	st->buffers = tmp;
-	st->buffers[st->buflen - 1] = buf;
-	return 0;
+	/* TODO: no error handling */
+	VEC_APPEND (Buffer*, st->buffers, buf);
+	return SUCC;
+}
+
+int
+checkoutbuf (Buffer *dest, State *st, size_t which)
+{
+	Buffer *src;
+
+	if (which >= st->buffers.c)
+		return FAIL;
+
+	src = st->buffers.v[which];
+	if (!memcpy (dest, src, sizeof *dest)) die ("memcpy");
+	VEC_REMOVE (Buffer*, st->buffers, which);
+
+	dest->mode = st->modes.v;
+
+	return SUCC;
 }
 
 void
 freebuf (Buffer *buf)
 {
-	for (; buf->curline->prev;)
-		buf->curline = buf->curline->prev;
-	freelines (buf->curline, NULL);
+	freelines (buf->top, NULL);
 	if (buf->file)
 		fclose (buf->file);
 	free (buf->filename);
@@ -44,9 +54,9 @@ makebuf (char *filename)
 	
 	if (!(buf = calloc (1, sizeof *buf)))
 		die ("calloc");
-	if (!(buf->filename = malloc (LINESIZE * sizeof *buf->filename)))
-		die ("malloc");
-	buf->curline = makeline();
+	if (!(buf->filename = calloc (LINESIZE, sizeof *buf->filename)))
+		die ("calloc");
+	buf->curline = buf->top = buf->bot = makeline();
 
 	if (filename) {
 		strcpy (buf->filename, filename);
@@ -56,21 +66,15 @@ makebuf (char *filename)
 }
 
 int
-rmbuf (State *st, Buffer *buf)
+returnbuf (Buffer *src, State *st)
 {
-	size_t i;
-	for (i = 0; ++i < st->buflen && st->buffers[i] != buf;)
-		;
-	if (i == st->buflen)
-		return -1;
-	if (i == st->bufno) {
-		st->curbuf = st->buffers[i - 1];
-		st->bufno = i - 1;
-	}
-	if (i < st->bufno)
-		--st->bufno;
-	if (!(memmove (st->buffers[i], st->buffers[i+1], st->buflen - i)))
-		die ("memmove");
-	--st->buflen;
-	return 0;
+	VEC_INSERT (Buffer*, st->buffers, 0, src);
+	return SUCC;
+}
+
+int
+rmbuf (State *st, size_t which)
+{
+	VEC_REMOVE (Buffer*, st->buffers, which);
+	return SUCC;
 }
