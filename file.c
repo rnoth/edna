@@ -1,52 +1,59 @@
 /* file.c -- file manipulation functions */
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "edna.h"
 
-extern void readbuf	(Buffer *, char *);
-extern void writebuf	(Buffer *);
+extern int readbuf	(Buffer *, char *);
+extern int writebuf	(Buffer *, char *);
 
-void
+int
 readbuf (Buffer *buf, char *error)
 {
-	char *s;
-	size_t i;
+	String s;
 
 	buf->file = fopen (buf->filename, "r+");
 	if (!buf->file ) {
 		warn ("fopen");
-		return;
+		return FAIL;
 	}
 
-	if (!(s = malloc (sizeof *s * LINESIZE)))
-		die ("malloc");
-	i = LINESIZE;
+	s = makestring (LINESIZE);
 
+	/* TODO: no actual error handling */
 	while (!feof (buf->file)) {
-		if (!readline (&s, &i, buf->file, error)) 
+		if (!readline (&s, buf->file, error)) 
 			continue; /* usually means eof, go check */
-		buf->curline = putline (buf->curline, s, i, 1);
+		buf->curline = putline (buf->curline, s.v, s.c);
 		++buf->lineno;
 	}
+	clearerr (buf->file);
 
-	free (s);
-	return;
+	freestring (s);
+	return SUCC;
 }
 
-void
-writebuf (Buffer *buf)
+int
+writebuf (Buffer *buf, char *error)
 {
-	if (!buf->filename[0])
-		return;
-	if (!buf->curline->str)
-		return;
-	if (!(buf->file = freopen (buf->filename, "w+", buf->file)))
-		warn ("fopen");
-	rewind (buf->file);
+	if (!buf->filename[0]) {
+		strcpy (error, "invalid filename");
+		return FAIL;
+	}
+	if (!buf->curline->str) {
+		strcpy (error, "empty buffer");
+		return FAIL;
+	}
+	if (!(buf->file = freopen (buf->filename, "w+", buf->file))) {
+		strcpy (error, "fopen: ");	
+		strcpy (error + strlen (error), strerror (errno));
+		return FAIL;
+	}
 	do {
 		fputs (buf->curline->str, buf->file);
 		buf->curline = buf->curline->next;
 	} while (buf->curline);
-	return;
+	return SUCC;
 }
