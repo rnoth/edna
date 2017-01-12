@@ -67,10 +67,6 @@
 	}
 
 
-#define FREE_VECTOR(INST) {				\
-		free (INST.v); 				\
-	}
-
 #define VEC_INSERT(TYPE, INST, LOC, ITEM) {		\
 		_tagged_vector (vec, TYPE, *inst);	\
 		size_t	loc;				\
@@ -109,5 +105,9 @@
 		}					\
 	}
 			
+#define FREE_VECTOR(INST) {				\
+		free (INST.v); 				\
+	}
+
 
 #endif
