@@ -24,7 +24,7 @@ readbuf (Buffer *buf, char *error)
 
 	/* TODO: no actual error handling */
 	while (!feof (buf->file)) {
-		if (!readline (&s, buf->file, error)) 
+		if (!readline (&s, buf->file, error))
 			continue; /* usually means eof, go check */
 		buf->curline = putline (buf->curline, s.v, s.c);
 		++buf->lineno;
@@ -47,7 +47,7 @@ writebuf (Buffer *buf, char *error)
 		return FAIL;
 	}
 	if (!(buf->file = freopen (buf->filename, "w+", buf->file))) {
-		strcpy (error, "fopen: ");	
+		strcpy (error, "fopen: ");
 		strcpy (error + strlen (error), strerror (errno));
 		return FAIL;
 	}
