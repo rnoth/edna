@@ -25,7 +25,10 @@ addr_%.o: addr.h set.h
 
 set.o: set.h
 
-init.o: config.h
+buffer.o: vector.h
+cmd_buffer.o: vector.h
+
+init.o: config.h vector.h
 init.o: CFLAGS += -Wno-unused-parameter
 
 insert.o: CFLAGS += -Wno-unused-parameter
