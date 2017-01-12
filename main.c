@@ -26,7 +26,7 @@ main (int argc, char** argv)
 		readbuf (tmp, err.v);
 		addbuf (st, tmp);
 		/* end open */
-	
+
 		/* parse argv */
 		if (argc > 1)
 			do {
