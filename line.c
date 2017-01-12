@@ -17,10 +17,10 @@ Line *
 changeline (Line *l, char *line, size_t len)
 {
 	if (!l->str)
-		if (!(l->str = malloc (sizeof *l->str * len)))
+		if (!(l->str = malloc (sizeof *l->str * len + 1)))
 			die("malloc");
 	if (l->len && l->len < len)
-		if (!(l->str = realloc (l->str, sizeof *l->str * len)))
+		if (!(l->str = realloc (l->str, sizeof *l->str * len + 1)))
 			die("realloc");
 	if (!memcpy (l->str, line, len + 1)) /* + 1 for the terminating 0 byte */
 		die("memcpy");
