@@ -5,6 +5,7 @@
 #include "cmd.h"
 
 extern int	switchbuf	(State *, Buffer *, Arg *, char *);
+extern int	openbuf		(State *, Buffer *, Arg *, char *);
 
 int
 switchbuf (State *st, Buffer *buf, Arg *arg, char *error)
@@ -13,20 +14,15 @@ switchbuf (State *st, Buffer *buf, Arg *arg, char *error)
 		strcpy (error, "no option specified");
 		return 1;
 	} else if (!strcmp (arg->mode, "next")) {
-		if (st->buffers[st->buflen - 1] == buf) {
-			strcpy (error, "at last buffer");
-			return 1;
-		}
-		st->curbuf = st->buffers[st->bufno + 1];
-		++st->bufno;
+		/* TODO: this code shouldn't run
+		 * into errors, but it should handle
+		 * them in any case */
+		returnbuf (buf, st);
+		checkoutbuf (buf, st, 1);
 		return 0;
 	} else if (!strcmp (arg->mode, "prev")) {
-		if (st->buffers[0] == buf) {
-			strcpy (error, "at first buffer");
-			return 1;
-		}
-		st->curbuf = st->buffers[st->bufno - 1];
-		--st->bufno;
+		returnbuf (buf, st);
+		checkoutbuf (buf, st, st->buffers.c - 1);
 		return 0;
 	}
 
@@ -37,18 +33,22 @@ switchbuf (State *st, Buffer *buf, Arg *arg, char *error)
 int
 openbuf (State *st, Buffer *buf, Arg *arg, char *error)
 {
+	Buffer *tmp;
 	size_t i = 0;
+
 	if (!arg->cnt) {
 		strcpy (error, "no filename provided");
 		return 1;
 	}
 
 	do {
-		st->curbuf = makebuf (arg->vec[i]);
-		readbuf (st->curbuf, error);
-		addbuf (st, st->curbuf);
+		tmp = makebuf (arg->vec[i]);
+		readbuf (tmp, error);
+		addbuf (st, tmp);
 	} while (++i < arg->cnt);
-	st->bufno = st->buflen - 1;
+
+	returnbuf (buf, st);
+	checkoutbuf (buf, st, st->buffers.c - 1);
 
 	return 0;
 }
