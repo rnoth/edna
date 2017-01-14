@@ -24,7 +24,7 @@ cleanup (Buffer *buf, Arg *arg)
 	if (!buf->curline)
 		buf->curline = makeline ();
 	arg->addr = buf->lineno;
-	arg->rel = 0;
+	arg->rel = 1;
 	arg->cnt = 0;
 	arg->vec = NULL;
 	arg->mode = NULL;
