@@ -85,7 +85,7 @@ struct Mark {
 struct Mode {
 	char*	name;
 	int	(*prompt)  (State *, Buffer *, Arg *);
-	int	(*parse)   (char *, size_t, Arg *);
+	int	(*parse)   (String, Arg *);
 	int	(*eval)    (State *, Buffer *, Arg *, char *);
 	int	(*error)   (State *, Buffer *, Arg *, char *);
 };
@@ -135,14 +135,15 @@ extern void	freestate	(State *);
 extern void	init		(State *);
 extern Arg*	makearg		(void);
 extern State*	makestate	(void);
+extern int	parse_argv	(State *, String, int, char **);
 
 /* input.c */
 extern int	readline	(String *, FILE *, char *);
-extern int	parseline	(char *, size_t, Arg *);
+extern int	parseline	(String, Arg *);
 
 /* insert.c */
 extern int	inserror	(State *, Buffer *, Arg *, char *);
-extern int	insparse	(char *, size_t, Arg *);
+extern int	insparse	(String, Arg *);
 extern int	insline		(State *, Buffer *, Arg *, char *);
 extern void	inshandle	(int);
 
@@ -159,6 +160,6 @@ extern void	freelines	(Line *, Line *);
 extern void	linklines	(Line *, Line*);
 
 /* util.c */
-extern void	chomp		(char *, size_t);
+extern void	chomp		(String);
 
 #endif
