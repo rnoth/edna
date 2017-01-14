@@ -49,19 +49,20 @@ insline (State *st, Buffer *buf, Arg *arg, char *error)
 }
 
 int
-insparse (char *line, size_t len, Arg *arg)
+insparse (String line, Arg *arg)
 {
-	if (!strcmp (line, ".\n"))
+	if (!strcmp (line.v, ".\n"))
 		return FAIL;
 
 	if (!(arg->vec = malloc (sizeof *arg->vec))) die ("malloc");
-	if (!(arg->vec[0] = calloc (strlen (line) + 1, sizeof **arg->vec)))
+	if (!(arg->vec[0] = calloc (strlen (line.v) + 1, sizeof **arg->vec)))
 		die ("calloc");
 	if (!(arg->vec[1] = calloc (LINESIZE, sizeof **arg->vec)))
 		die ("calloc");
-	sprintf (arg->vec[1], "%ld", len);
 
-	strcpy (arg->vec[0], line);
+	strcpy (arg->vec[0], line.v);
+	sprintf (arg->vec[1], "%ld", line.c);
+
 	return SUCC;
 }
  
