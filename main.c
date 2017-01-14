@@ -47,7 +47,7 @@ main (int argc, char** argv)
 			goto finally;
 		if (!readline (&s, stdin, err.v))
 			goto finally;
-		if (!(*buf->mode->parse) (s.v, s.c, arg))
+		if (!(*buf->mode->parse) (s, arg))
 			goto finally;
 		if (!(*buf->mode->eval) (st, buf, arg, err.v))
 			goto finally;
