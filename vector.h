@@ -37,17 +37,19 @@
 	}
 
 #define _resize_vec(inst, size) {			\
+		size_t diff;				\
 		void *tmp;				\
 							\
-		tmp = inst->v;				\
-		inst->v = realloc (inst->v,		\
-				   size);		\
-		if (!inst->v) {				\
+		diff = size - inst->m;			\
+		tmp = realloc (inst->v, size);		\
+		if (!tmp) {				\
 			warn ("realloc");		\
 			inst->v = tmp;			\
 		} else {				\
-			memset (inst->v + inst->m - 1,	\
-			0, size - inst->m);		\
+			inst->v = tmp;			\
+			if (diff > 0)			\
+				bzero (inst->v+inst->m,	\
+					diff);		\
 			inst->m = size;			\
 		}					\
 	}
