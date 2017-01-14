@@ -3,17 +3,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "edna.h"
+#include "str.h"
 
-extern void	chomp	(char *, size_t);
+extern void	chomp	(String);
 
 void
-chomp (char *line, size_t linelen)
+chomp (String s)
 {
-	char *p = line;
-	for (size_t i = 0; line[i] && i < linelen; ++i)
-		if (line[i] == '\n')
-			p = line + i;
+	size_t i;
+	char *p = s.v;
+	for (i = 0; s.v[i] && i < s.c; ++i)
+		if (s.v[i] == '\n')
+			p = s.v + i;
 	*p = 0;
 	return;
 }
