@@ -1,6 +1,6 @@
 CC ?= cc
 #LD ?= ld
-CFLAGS ?= -g3 -Wall -Wextra -Werror -pedantic -pedantic-errors
+CFLAGS ?= -g3 -O0 -W -Wall -Wextra -Werror -Wpedantic -pedantic-errors
 LDFLAGS ?= -lc
 
 SRC    != find .  -maxdepth 1 -name '*.c'
