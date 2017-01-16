@@ -64,9 +64,8 @@
 							\
 		memmove (inst->v + loc + 1,		\
 			 inst->v + loc,			\
-			 inst->z * inst->m - loc);	\
-		memcpy (inst->v + loc, &item,		\
-					sizeof item);	\
+			 inst->z * (inst->c - loc));	\
+		*(inst->v + loc) = item;		\
 		inst->c += 1;				\
 	}
 
