@@ -16,12 +16,12 @@
 	} INST
 
 #define _tagged_vector(TAG, TYPE, INST)			\
-	struct TAG {					\
+	typedef struct TAG {					\
 		TYPE *v;				\
 		size_t c;				\
 		size_t m;				\
 		size_t z;				\
-	} INST
+	} INST TAG
 
 #define MAKE_VECTOR(TYPE, INST, SIZE) {			\
 		_tagged_vector (vec, TYPE,		\
