@@ -48,7 +48,7 @@ tests/%_test: tests/%_test.c
 	@echo Test successful: $@
 
 clean:
-	rm -f edna log core *.o vgcore.* tests/*_test
+	rm -f edna log core *.o vgcore.* tests/*_test deps.mk
 
 lint:
 	mkdir -p /tmp/report

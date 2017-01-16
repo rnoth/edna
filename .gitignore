@@ -1,9 +1,0 @@
-edna
-*.o
-*~
-cscope.out
-core
-a.out
-vgcore.*
-*.so
-*.gch
