@@ -2,3 +2,7 @@ Known issues
 - sending a EOF on stdin (^D) cause an infinite loop, endlessly printing :? 
 - gotol (and addressing in general) is broken
 - file writing logic is bugged. something to do with buf->top
+- the `f' ignores its arguments
+- every functions returns 0 on failure and 1 on success, except for commands,
+  which do the opposite
+- there are still some subtle memory related bugs in vector.h
