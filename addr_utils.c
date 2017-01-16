@@ -4,6 +4,7 @@
 #include "addr.h"
 #include "set.h"
 
+/*
 Set
 defaultarg (char *s, Buffer *buf, enum direc d, char *error)
 {
@@ -17,7 +18,7 @@ defaultarg (char *s, Buffer *buf, enum direc d, char *error)
 	} else if (d == RIGHT) {
 		return (*evals[NUM_SYMBOL]) ("1", buf, error);
 	}
-	return NULL; /* not reached */
+	return NULL; / * not reached * /
 }
 
 Operator
@@ -40,6 +41,7 @@ getbinop (char *s)
 		return NULL;
 	}
 }
+*/
 
 Line **
 resolveset (Set A, size_t len, Buffer *buf, char *error)
