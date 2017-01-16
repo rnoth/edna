@@ -57,6 +57,16 @@
 		}					\
 	}
 
+#define RESIZE_VEC(TYPE, INST, SIZE) {			\
+		_tagged_vector (vec, TYPE, inst);	\
+		size_t size;				\
+							\
+		inst = INST;				\
+		size = SIZE;				\
+							\
+		_resize_vec (inst, size);		\
+	}
+
 #define _vec_insert(type, inst, loc, item) {		\
 		if (inst->c >= inst->m) {		\
 			_resize_vec (inst, inst->c + 1);\
