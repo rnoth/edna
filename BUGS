@@ -1,0 +1,4 @@
+Known issues
+- sending a EOF on stdin (^D) cause an infinite loop, endlessly printing :? 
+- gotol (and addressing in general) is broken
+- file writing logic is bugged. something to do with buf->top
