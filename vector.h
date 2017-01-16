@@ -12,6 +12,7 @@
 		TYPE *v;  /* vector (data) */		\
 		size_t c; /* count (length) */		\
 		size_t m; /* memory allocated */	\
+		size_t z; /* size of unit */		\
 	} INST
 
 #define _tagged_vector(TAG, TYPE, INST)			\
@@ -19,6 +20,7 @@
 		TYPE *v;				\
 		size_t c;				\
 		size_t m;				\
+		size_t z;				\
 	} INST
 
 #define MAKE_VECTOR(TYPE, INST, SIZE) {			\
@@ -34,6 +36,7 @@
 		if (!inst->v) die ("calloc");		\
 		inst->c = 0;				\
 		inst->m = size; 			\
+		inst->z = sizeof (TYPE);		\
 	}
 
 #define _resize_vec(inst, size) {			\
@@ -59,12 +62,11 @@
 			_resize_vec (inst, inst->c + 1);\
 		}					\
 							\
-		if (!memmove (inst->v + loc + 1,	\
-			inst->v + loc, inst->m - loc))	\
-			die ("memmove");		\
-		if (!memcpy (inst->v + loc,		\
-				&item, sizeof item))	\
-			die ("memcpy");			\
+		memmove (inst->v + loc + 1,		\
+			 inst->v + loc,			\
+			 inst->z * inst->m - loc);	\
+		memcpy (inst->v + loc, &item,		\
+					sizeof item);	\
 		inst->c += 1;				\
 	}
 
@@ -97,12 +99,12 @@
 							\
 		inst	= (struct vec *) &(INST);	\
 		loc	= LOC;				\
-		seg 	=(inst->c - loc)		\
-			  * sizeof *inst->v;		\
+		seg 	= (inst->c - loc)		\
+			   * sizeof *inst->v;		\
 							\
 		if (loc <= inst->c) {			\
 			memmove (inst->v + loc,		\
-			  inst->v + loc + 1, seg);	\
+			      inst->v + loc + 1, seg);	\
 			--inst->c;			\
 		}					\
 	}
