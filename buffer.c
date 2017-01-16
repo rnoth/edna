@@ -29,7 +29,7 @@ checkoutbuf (Buffer *dest, State *st, size_t which)
 		return FAIL;
 
 	src = st->buffers.v[which];
-	if (!memcpy (dest, src, sizeof *dest)) die ("memcpy");
+	memcpy (dest, src, sizeof *dest);
 	VEC_REMOVE (Buffer*, st->buffers, which);
 
 	dest->mode = st->modes.v;
