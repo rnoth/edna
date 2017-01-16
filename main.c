@@ -16,29 +16,12 @@ main (int argc, char** argv)
 	s   = makestring (LINESIZE);
 	err = makestring (LINESIZE);
 
-	init (st);
+	init  (st);
+	parse_argv (st, err, argc, argv);
 	/* end init */
 
-	{
-		Buffer *tmp;
-		/* open tmpfile */
-		tmp = makebuf ("/tmp/edna.hup"); /* FIXME */
-		readbuf (tmp, err.v);
-		addbuf (st, tmp);
-		/* end open */
-
-		/* parse argv */
-		if (argc > 1)
-			do {
-				tmp = makebuf (*(++argv));
-				readbuf (tmp, err.v);
-				addbuf (st, tmp);
-			} while (--argc > 1);
-		/* end parse */
-	}
-
 	arg->addr = buf->lineno;
-	checkoutbuf (buf, st, st->buffers.c - 1);
+	checkoutbuf (buf, st, MIN (0, st->buffers.c - 1));
 
 	/* main execution */
 	for (;;) {
