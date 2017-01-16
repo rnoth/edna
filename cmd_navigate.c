@@ -16,9 +16,9 @@ gotol (State *st, Buffer *buf, Arg *arg, char *error)
 
 	l = walk (buf->curline, arg->addr, error);
 	if (!l)
-		return 1;
+		return FAIL;
 	buf->lineno += arg->addr;
 	buf->curline = l;
-	return 0;
+	return SUCC;
 }
 

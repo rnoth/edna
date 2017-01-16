@@ -18,7 +18,7 @@ subst (State *st, Buffer *buf, Arg *arg, char *error)
 	if (regcomp (re, arg->vec[0], REG_NEWLINE)) {
 		strcpy (error, "error compiling regex");
 		free (re);
-		return 1;
+		return FAIL;
 	}
 
 	if (!(m = malloc (sizeof *m))) die ("malloc");
@@ -50,5 +50,5 @@ subst (State *st, Buffer *buf, Arg *arg, char *error)
 finally:
 	regfree (re);
 	free (m);
-	return 1;
+	return SUCC;
 }

@@ -13,12 +13,12 @@ delete (State *st, Buffer *buf, Arg *arg, char *error)
 
 	if (!buf->curline->str) {
 		strcpy (error, "empty buffer");
-		return 1;
+		return FAIL;
 	}
 
 	if (arg->addr)
-		if (gotol (st, buf, arg, error))
-			return 1;
+		if (gotol (st, buf, arg, error) == FAIL)
+			return FAIL;
 
 	buf->dirty = 1;
 
@@ -31,6 +31,6 @@ delete (State *st, Buffer *buf, Arg *arg, char *error)
 	freelines(buf->curline, buf->curline->next);
 
 	buf->curline = tmp;
-	return 0;
+	return SUCC;
 }
 

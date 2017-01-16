@@ -17,13 +17,13 @@ edit (State *st, Buffer *buf, Arg *arg, char *error)
 		goto end;
 	if (buf->dirty) {
 		strcpy (error, "buffer has unsved changes");
-		return 1;
+		return FAIL;
 	}
 
 end:
 	if (EOF == fclose (buf->file)) {
 		warn ("fclose");
-		return 1;
+		return FAIL;
 	}
 
 	for (; buf->curline->next; buf->curline = buf->curline->next)
@@ -36,7 +36,7 @@ end:
 		strcpy (buf->filename, arg->vec[0]);
 
 	readbuf (buf, error);
-	return 0;
+	return SUCC;
 }
 
 int
@@ -45,15 +45,16 @@ filename (State *st, Buffer *buf, Arg *arg, char *error)
 	if (!arg->cnt) {
 		if (0 > printf ("%s\n", buf->filename))
 			die ("printf");
-		return 0;
+		return SUCC;
 	}
+
 	if (buf->file && fclose (buf->file) == EOF) {
 		warn ("fclose");
 		strcpy (error, "could not close current file");
-		return 1;
+		return FAIL;
 	} else
 		strcpy (buf->filename, arg->vec[0]);
-	return 0;
+	return SUCC;
 }
 
 int
@@ -63,19 +64,20 @@ quit (State *st, Buffer *buf, Arg *arg, char *error)
 		if (!strcmp (arg->mode, "force"))
 			goto end;
 		if (!strcmp (arg->mode, "write"))
-			write (st, buf, arg, error);
+			if (write (st, buf, arg, error) == FAIL)
+				return FAIL;
 		strcpy (error, "unknown option");
-		return 1;
+		return FAIL;
 	}
 
 	if (buf->dirty) {
 		strcpy (error, "buffer has unsaved changes");
-		return 1;
+		return FAIL;
 	}
 
 end:
 	strcpy (error, "quit");
-	return 1;
+	return FAIL;
 }	
 
 int
@@ -87,7 +89,7 @@ write (State *st, Buffer *buf, Arg *arg, char *error)
 	arg->addr = -buf->lineno + 1; /* go to start of buffer */
 	gotol (st, buf, arg, error);
 	if (!writebuf (buf, error))
-		return 1;
+		return FAIL;
 	buf->dirty = 0;
-	return 0;
+	return SUCC;
 }

@@ -12,22 +12,22 @@ switchbuf (State *st, Buffer *buf, Arg *arg, char *error)
 {
 	if (!arg->mode) {
 		strcpy (error, "no option specified");
-		return 1;
+		return FAIL;
 	} else if (!strcmp (arg->mode, "next")) {
 		/* TODO: this code shouldn't run
 		 * into errors, but it should handle
 		 * them in any case */
 		returnbuf (buf, st);
 		checkoutbuf (buf, st, 1);
-		return 0;
+		return SUCC;
 	} else if (!strcmp (arg->mode, "prev")) {
 		returnbuf (buf, st);
 		checkoutbuf (buf, st, st->buffers.c - 1);
-		return 0;
+		return SUCC;
 	}
 
 	strcpy (error, "unknown option");
-	return 1;
+	return FAIL;
 }
 
 int
@@ -38,9 +38,10 @@ openbuf (State *st, Buffer *buf, Arg *arg, char *error)
 
 	if (!arg->cnt) {
 		strcpy (error, "no filename provided");
-		return 1;
+		return FAIL;
 	}
 
+	/* TODO: error handling */
 	do {
 		tmp = makebuf (arg->vec[i]);
 		readbuf (tmp, error);
@@ -50,5 +51,5 @@ openbuf (State *st, Buffer *buf, Arg *arg, char *error)
 	returnbuf (buf, st);
 	checkoutbuf (buf, st, st->buffers.c - 1);
 
-	return 0;
+	return SUCC;
 }

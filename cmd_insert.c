@@ -12,8 +12,8 @@ insert (State *st, Buffer *buf, Arg *arg, char *error)
 {
 	Line *new;
 
-	if (arg->addr && gotol(st, buf, arg, error))
-		return 1;
+	if (arg->addr && (gotol(st, buf, arg, error) == FAIL))
+		return FAIL;
 	arg->addr = 0;
 
 	if (arg->mode) {
@@ -27,15 +27,15 @@ insert (State *st, Buffer *buf, Arg *arg, char *error)
 			++buf->lineno;
 			buf->curline = buf->curline->next;
 		} else if (!strcmp (arg->mode, "change")) {
-			if (!delete (st, buf, arg, error))
-				return 1;
+			if (delete (st, buf, arg, error) == FAIL)
+				return FAIL;
 		} else {
 			strcpy (error, "unknown option");
-			return 1;
+			return SUCC;
 		}
 	}
 
 	setmode (st, buf, "insert");
-	return 0;
+	return SUCC;
 }
 

@@ -71,7 +71,7 @@ evalcmd (State *st, Buffer *buf, Arg *arg, char *error)
 		strcpy (arg->mode, cmd->mode);
 	}
 
-	if ((*cmd->func) (st, buf, arg, error)) {
+	if ((*cmd->func) (st, buf, arg, error) == FAIL) {
 		ret = FAIL;
 		goto finally;
 	}
