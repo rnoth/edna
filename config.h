@@ -50,6 +50,7 @@ int
 cmdprompt (State *st, Buffer *buf, Arg *arg)
 {
 	if (printf (PROMPT) < 0) die ("printf");
+	if (fflush (stdout) == EOF) warn ("fflush");
 	return SUCC;
 }
 
@@ -57,6 +58,7 @@ int
 insprompt (State *st, Buffer *buf, Arg *arg)
 {
 	if (printf (INS_PROMPT) < 0) die ("printf");
+	if (fflush (stdout) == EOF) warn ("fflush");
 	return SUCC;
 }
 
@@ -66,5 +68,6 @@ cmderror (State *st, Buffer *buf, Arg *arg, char *error)
 	if (!strcmp (error, "quit"))
 		return FAIL;
 	if (printf (ERROR) < 0) die ("printf");
+	if (fflush (stdout) == EOF) warn ("fflush");
 	return SUCC;
 }
