@@ -132,7 +132,7 @@ extern int	writebuf	(Buffer *, char *);
 /* init.c */
 extern void	freearg		(Arg *);
 extern void	freestate	(State *);
-extern void	init		(State *);
+extern void	initst		(State *);
 extern Arg*	makearg		(void);
 extern State*	makestate	(void);
 extern int	parse_argv	(State *, String, int, char **);

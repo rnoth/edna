@@ -8,7 +8,7 @@
 
 extern void	freearg		(Arg *);
 extern void	freestate	(State *);
-extern void	init		(State *);
+extern void	initst		(State *);
 extern Arg*	makearg		(void);
 extern State*	makestate	(void);
 extern int	parse_argv	(State *, String, int, char **);
@@ -28,7 +28,7 @@ freearg (Arg *arg)
 }
 
 void
-init (State *st)
+initst (State *st)
 {
 	/* st->buffers */
 	MAKE_VECTOR (Buffer*, st->buffers, 1);

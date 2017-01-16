@@ -16,7 +16,7 @@ main (int argc, char** argv)
 	s   = makestring (LINESIZE);
 	err = makestring (LINESIZE);
 
-	init  (st);
+	initst  (st);
 	parse_argv (st, err, argc, argv);
 	/* end init */
 
