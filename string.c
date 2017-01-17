@@ -4,6 +4,16 @@
 #include "util.h"
 #include "str.h"
 
+String *
+chartostr (char *src)
+{
+	String *ret;
+	if (!(ret = malloc (sizeof *ret))) die ("malloc");
+	*ret = makestring (strlen (src) + 1);
+	strcpy (ret->v, src);
+	return ret;
+}
+
 int
 copystring (String *dest, String *src)
 {
@@ -14,6 +24,7 @@ copystring (String *dest, String *src)
 		return 0;
 	bzero (dest->v, dest->m);
 	memcpy (dest->v, src->v, src->c);
+	dest->c = src->c;
 	return 1;
 }
 

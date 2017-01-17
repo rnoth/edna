@@ -11,6 +11,7 @@ struct String {
 };
 
 extern void	freestring	(String);
+extern String*	chartostr	(char *);
 extern int	copystring	(String *, String *);
 extern String	makestring	(size_t);
 extern int	resizestring	(String *, size_t);
