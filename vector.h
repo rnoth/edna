@@ -15,13 +15,21 @@
 		size_t z; /* size of unit */		\
 	} INST
 
+#define VECTOR_TAG(TYPE, TAG)				\
+	struct TAG {				\
+		TYPE	*v;				\
+		size_t	 c;				\
+		size_t	 m;				\
+		size_t	 z;				\
+	}
+
 #define _tagged_vector(TAG, TYPE, INST)			\
-	typedef struct TAG {					\
+	struct TAG {					\
 		TYPE *v;				\
 		size_t c;				\
 		size_t m;				\
 		size_t z;				\
-	} INST TAG
+	} INST
 
 #define MAKE_VECTOR(TYPE, INST, SIZE) {			\
 		_tagged_vector (vec, TYPE,		\
@@ -40,7 +48,7 @@
 	}
 
 #define _resize_vec(inst, size) {			\
-		size_t diff;				\
+		long diff;				\
 		void *tmp;				\
 							\
 		diff = size - inst->m;			\
@@ -58,10 +66,10 @@
 	}
 
 #define RESIZE_VEC(TYPE, INST, SIZE) {			\
-		_tagged_vector (vec, TYPE, inst);	\
+		_tagged_vector (vec, TYPE, *inst);	\
 		size_t size;				\
 							\
-		inst = INST;				\
+		inst = (struct vec *) &(INST);				\
 		size = SIZE;				\
 							\
 		_resize_vec (inst, size);		\
