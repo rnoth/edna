@@ -14,7 +14,7 @@ DEPS := edna.h vector.h str.h
 TARG := edna
 VERS := 0.2
 
-edna:
+edna: deps.mk $(OBJ)
 
 # includes
 -include deps.mk
@@ -42,7 +42,8 @@ deps.mk: $(SRC)
 
 tests/%_test: tests/%_test.c
 	@echo Compiling $<
-	@$(CC) $(DBFLAGS) -o $@ $<
+	@echo CC $(DBFLAGS) -o $@ $+
+	@$(CC) $(DBFLAGS) -o $@ $+
 	@echo Running $@
 	@$@
 	@echo Test successful: $@
