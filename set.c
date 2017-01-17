@@ -17,12 +17,13 @@ setaddmemb (Set A, size_t len, size_t memb)
 {
 	size_t i = sizeof *A * CHAR_BIT;
 	for (size_t j=0; j < len && memb > 0; ++j, memb -= i)
-		if (memb < i) {
-			A[j] &= 1 << memb;
+		if (memb <= i) {
+			A[j] |= BIT (memb - 1);
 			return A;
 		}
 	return NULL;
 }
+
 Set
 setcomplement (Set A, size_t len)
 {
