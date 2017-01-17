@@ -21,7 +21,7 @@ main (int argc, char** argv)
 	/* end init */
 
 	arg->addr = buf->lineno;
-	checkoutbuf (buf, st, MIN (0, st->buffers.c - 1));
+	checkoutbuf (buf, st, MAX (0, (signed long) st->buffers.c - 1));
 
 	/* main execution */
 	for (;;) {
