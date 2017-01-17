@@ -7,15 +7,17 @@
 #include <ctype.h>
 
 #include "edna.h"
+#include "addr.h"
 #include "str.h"
 
-extern		int	parseline	(String, Arg *);
+extern		int	parseline	(String, Buffer *, Arg *, char *);
 
 static struct reply*	lexline		(String);
 
 struct reply {
 	String str;
 	size_t seg;
+	struct tokaddr *tok;
 };
 
 struct reply *
@@ -28,12 +30,13 @@ lexline (String line)
 	 * futhermore,
 	 * - every delimiter character is collapsed into a null byte
 	 * thus, bufsiz + 4 will always be enough
-	 * [0]: unless it's long enough overflow
+	 * [0]: unless it's long enough to overflow
 	 */
 	char ch, delim; 
 	size_t seg;
 	String s;
 	struct reply *reply;
+	struct tokaddr *tok;
 
 	chomp (line);
 	s = makestring (line.c + 4);
@@ -44,10 +47,13 @@ lexline (String line)
 		;
 
 	/* line address */
+	tok = lexaddr (&line);
+	/*
 	for (; line.c && (ch = *line.v) && (isdigit (ch) || strchr ("+-", ch)); ++line.v, --line.c)
 		s.v[s.c++] = ch;
 	s.v[s.c++] = 0;
 	++seg;
+	*/
 
 	/* command name */
 	for (; line.c && isalpha (ch = *line.v); ++line.v, --line.c)
@@ -73,6 +79,7 @@ lexline (String line)
 	reply->str = makestring (s.c);
 	copystring (&reply->str, &s);
 	reply->seg = seg;
+	reply->tok = tok;
 
 	freestring (s);
 
@@ -80,7 +87,7 @@ lexline (String line)
 }
 
 int
-parseline (String line, Arg *arg)
+parseline (String line, Buffer *buf, Arg *arg, char *error)
 {
 	String str;
 	size_t i, seg, len;
@@ -92,17 +99,9 @@ parseline (String line, Arg *arg)
 	str = reply->str;
 
 	/* line address */
-	if (str.v[0] && strchr ("+-", str.v[0])) {
-		arg->rel = 1;	/* FIXME: does not handle complex uses of +/- */
-		if (!str.v[1])
-			arg->addr = str.v[0] == '+' ? 1 : -1;
-	}
-
-	if (isdigit(str.v[0]) || isdigit(str.v[1]))	/* FIXME: so ugly */
-		arg->addr = strtol (str.v, &str.v, 10);
-
-	str.v += strlen (str.v) + 1;
-	--seg;
+	arg->sel = evaladdr (reply->tok, buf, error);
+	if (!arg->sel.v)
+		return FAIL;
 
 	/* command name */
 	strcpy (arg->name, str.v);
