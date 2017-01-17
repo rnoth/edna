@@ -33,8 +33,7 @@ insline (State *st, Buffer *buf, Arg *arg, char *error)
 		new = makeline();
 		linklines (new, buf->top);
 		buf->curline = new;
-	} else
-		buf->curline = buf->curline->prev;
+	}
 
 	len = strtol (arg->vec[1], NULL, 10);
 	if (!(tmp = putline (buf->curline, arg->vec[0], len))) {
@@ -45,6 +44,7 @@ insline (State *st, Buffer *buf, Arg *arg, char *error)
 	buf->curline = tmp;
 
 	++buf->lineno;
+	++buf->len;
 	return SUCC;
 }
 
