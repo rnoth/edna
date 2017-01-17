@@ -151,6 +151,7 @@ extern int	insline		(State *, Buffer *, Arg *, char *);
 extern void	inshandle	(int);
 
 /* line.c */
+extern size_t	getlineno	(Line *);
 extern Line*	makeline	(void);
 extern Line*	putline		(Line *, char *, size_t);
 extern Line*	walk		(Line *, int, char *);
