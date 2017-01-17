@@ -9,16 +9,8 @@ extern int	gotol	(State *, Buffer *, Arg *, char *);
 int
 gotol (State *st, Buffer *buf, Arg *arg, char *error)
 {
-	Line *l;
-
-	if (!arg->addr)
-		++arg->addr;
-
-	l = walk (buf->curline, arg->addr, error);
-	if (!l)
-		return FAIL;
-	buf->lineno += arg->addr;
-	buf->curline = l;
+	buf->curline = (*arg->sel.v) + arg->sel.c - 1;
+	buf->lineno = getlineno (buf->curline);
 	return SUCC;
 }
 
