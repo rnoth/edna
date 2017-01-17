@@ -26,9 +26,12 @@ struct tokaddr {
 	size_t		height;
 };
 
-extern Line**	resolveset	(Set, size_t, Buffer *, char *);
+extern	struct tokaddr*	lexaddr (String *);
+extern 	Selection	evaladdr (struct tokaddr *, Buffer *, char *);
 
-extern Set	num	(String, Buffer *, char *);
-extern Set	symnum	(String, Buffer *, char *);
+extern 	Selection	resolveset	(Set, size_t, Buffer *, char *);
+
+extern 	Set		num	(String, Buffer *, char *);
+extern 	Set		symnum	(String, Buffer *, char *);
 
 #endif
