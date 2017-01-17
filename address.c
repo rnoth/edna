@@ -11,6 +11,7 @@
 const char *symbols[] = {
 	"1234567890",	/* NUM_LITERAL */
 	".$",		/* NUM_SYMBOL */
+	"",		/* IDENT_LEN */
 	NULL
 };
 
@@ -28,25 +29,27 @@ static const Rule ruleset[] = {
 	NO_GLOB | VALUE,
 };
 
-Line **
+Selection
 evaladdr (struct tokaddr *tok, Buffer *buf, char *error)
 {
 	String s;
 	size_t i, j, k;
 	enum ident *t;
+	Selection ret;
 	/*Operator oplist[tok->height];*/
 	Set sel, /*tmp,*/ values[tok->height];
 
 	s = tok->str;
 	t = tok->stack;
 
-	if (!memset (values, 0, tok->height)) die ("memset");
+	bzero (values, tok->height * sizeof *values);
+	bzero (&ret, sizeof ret);
 	i = j = k = 0;
 	for (; i < tok->height; ++i, s.v += strlen (s.v)) {
 		if (ruleset[t[i]] & VALUE) {
 			if (i != tok->height - 1 && ruleset[t[i+1]] & VALUE) {
 				strcpy (error, "invalid sequence of values");
-				return NULL; /* FIXME: resource leak */
+				goto finally;
 			}
 
 			/* this is ugly and should be fixed */
@@ -89,19 +92,21 @@ evaladdr (struct tokaddr *tok, Buffer *buf, char *error)
 			return NULL; / * FIXME: resource leak * /
 	*/
 
-	return resolveset (sel, buf->len, buf, error);
+	ret = resolveset (sel, buf->len, buf, error);
+finally:
+	return (ret);
 }
 
 struct tokaddr *
-lexaddr (String line)
+lexaddr (String *line)
 {
 	size_t i = 0, k = 0, t = 0;
-	enum ident tokstack[line.c];
+	enum ident tokstack[line->c];
 	struct tokaddr *tok;
 	char cur, prev, delim;
 	String tokline;
 
-	tokline = makestring (line.c * 2);
+	tokline = makestring (line->c * 2);
 	/*
 	 * justification: worst case string is '+++++...', where a delimiter is
 	 * required after every symbol, meaning the buffer must have length:
@@ -109,8 +114,8 @@ lexaddr (String line)
 	 */
 
 	prev = delim = 0;
-	cur = *line.v;
-	for (; cur && i < line.c; k < IDENT_LEN - 1 ? (++k) : (k = 0))
+	cur = *line->v++;
+	for (; cur && i < line->c; k < IDENT_LEN ? (++k) : (k = 0))
 		if (strchr (symbols[k], cur)) {
 			tokstack[t++] = k;
 			do {
@@ -138,25 +143,31 @@ lexaddr (String line)
 					tokline.v[tokline.c++] = cur;
 
 				prev = cur;
-				cur = line.v[++line.c];
+				cur = *line->v++;
 
 				if (!(cur && strchr (symbols[k], cur)))
 					break;
 				if (ruleset[k] & NO_GLOB)
 					break;
 			} while (cur);
+
 			tokline.v[tokline.c++] = 0;
 			delim = 0;
-		}
+			k = 0;
+		} else if (k == IDENT_LEN)
+			break;
+
 	tokline.v[tokline.c++] = 0;
-	tokstack[t++] = 0;
+	tokstack[t++] = IDENT_LEN;
+	--line->v;
 
 	if (!(tok = malloc (sizeof *tok))) die ("malloc");
 	if (!(tok->stack = malloc (t * sizeof *tok->stack))) die ("malloc");
 	tok->str = makestring (tokline.c);
 
 	copystring (&tok->str, &tokline);
-	memcpy (tok->stack, tokstack, t);
+	memset (tok->stack, IDENT_LEN, t);
+	memcpy (tok->stack, tokstack, t * sizeof *tok->stack);
 	tok->height = t;
 
 	return tok;
