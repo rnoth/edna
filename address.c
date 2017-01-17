@@ -42,8 +42,8 @@ evaladdr (struct tokaddr *tok, Buffer *buf, char *error)
 	s = tok->str;
 	t = tok->stack;
 
-	bzero (values, tok->height * sizeof *values);
-	bzero (&ret, sizeof ret);
+	memset (values, 0, tok->height * sizeof *values);
+	memset (&ret, 0, sizeof ret);
 	i = j = k = 0;
 	for (; i < tok->height; ++i, s.v += strlen (s.v)) {
 		if (ruleset[t[i]] & VALUE) {

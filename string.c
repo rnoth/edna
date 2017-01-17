@@ -23,7 +23,7 @@ copystring (String *dest, String *src)
 		return 0; /* error */
 	if (dest->m < src->c)
 		return 0;
-	bzero (dest->v, dest->m);
+	memset (dest->v, 0, dest->m);
 	memcpy (dest->v, src->v, src->c);
 	dest->c = src->c;
 	return 1;

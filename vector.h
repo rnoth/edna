@@ -59,8 +59,8 @@
 		} else {				\
 			inst->v = tmp;			\
 			if (diff > 0)			\
-				bzero (inst->v+inst->m,	\
-					diff);		\
+				memset (inst->v+inst->m,\
+					0, diff);		\
 			inst->m = size;			\
 		}					\
 	}
