@@ -49,7 +49,7 @@ insline (State *st, Buffer *buf, Arg *arg, char *error)
 }
 
 int
-insparse (String line, Arg *arg)
+insparse (String line, Buffer *buf, Arg *arg, char *error)
 {
 	if (!strcmp (line.v, ".\n"))
 		return FAIL;
@@ -65,4 +65,4 @@ insparse (String line, Arg *arg)
 
 	return SUCC;
 }
- 
+
