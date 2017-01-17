@@ -28,15 +28,18 @@ typedef struct Mode	Mode;
 typedef struct Record	Record;
 typedef struct Register	Register;
 typedef struct State	State;
+typedef VECTOR_TAG (Line*, Selection) Selection;
 
 struct Arg {
 	byte	rel;	/* is address relative? */
-	int	addr;
-	char*	name;
-	char*	mode;
+	int	addr;	/* deprecated */
 
-	size_t	cnt;	/* argc equivalent */
-	char**	vec;	/* argv equivalent */
+	Selection  sel;
+	char*	   name;
+	char*	   mode;
+
+	size_t	   cnt;	/* argc equivalent */
+	char**	   vec;	/* argv equivalent */
 };
 
 struct Buffer {
@@ -61,6 +64,7 @@ struct Command {
 	char*	name;
 	int	(*func)	(State *, Buffer *, Arg *, char *);
 	char*	mode;
+	char*	defaddr;
 };
 
 struct Line {
@@ -85,7 +89,7 @@ struct Mark {
 struct Mode {
 	char*	name;
 	int	(*prompt)  (State *, Buffer *, Arg *);
-	int	(*parse)   (String, Arg *);
+	int	(*parse)   (String, Buffer *, Arg *, char *);
 	int	(*eval)    (State *, Buffer *, Arg *, char *);
 	int	(*error)   (State *, Buffer *, Arg *, char *);
 };
@@ -139,11 +143,10 @@ extern int	parse_argv	(State *, String, int, char **);
 
 /* input.c */
 extern int	readline	(String *, FILE *, char *);
-extern int	parseline	(String, Arg *);
 
 /* insert.c */
 extern int	inserror	(State *, Buffer *, Arg *, char *);
-extern int	insparse	(String, Arg *);
+extern int	insparse	(String, Buffer *, Arg *, char *);
 extern int	insline		(State *, Buffer *, Arg *, char *);
 extern void	inshandle	(int);
 
@@ -154,6 +157,9 @@ extern Line*	walk		(Line *, int, char *);
 
 /* mode.c */
 extern int	setmode		(State *, Buffer *, char *);
+
+/* parse.c */
+extern int	parseline	(String, Buffer *, Arg *, char *);
 
 /* region.c */
 extern void	freelines	(Line *, Line *);
