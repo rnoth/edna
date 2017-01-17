@@ -73,7 +73,7 @@ walk (Line *cur, int offset, char *error)
 {
 	Line *li = cur;
 	if (0 > offset) {
-		for (; li; li = li->prev))
+		for (; li; li = li->prev)
 			if (!++offset)
 				return li;
 		strcpy (error, "start of file");
