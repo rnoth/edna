@@ -68,6 +68,10 @@ evalcmd (State *st, Buffer *buf, Arg *arg, char *error)
 	if (!*arg->sel.v) {
 		tok = lexaddr (chartostr(cmd->defaddr));
 		arg->sel = evaladdr (tok, buf, error);
+		if (!*arg->sel.v) {
+			ret = FAIL;
+			goto finally;
+		}
 	}
 
 	if ((*cmd->func) (st, buf, arg, error) == FAIL) {
