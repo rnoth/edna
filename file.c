@@ -39,6 +39,8 @@ readbuf (Buffer *buf, char *error)
 int
 writebuf (Buffer *buf, char *error)
 {
+	Line *tmp;
+
 	if (!buf->filename[0]) {
 		strcpy (error, "invalid filename");
 		return FAIL;
@@ -52,9 +54,9 @@ writebuf (Buffer *buf, char *error)
 		strcpy (error + strlen (error), strerror (errno));
 		return FAIL;
 	}
-	do {
-		fputs (buf->curline->str, buf->file);
-		buf->curline = buf->curline->next;
-	} while (buf->curline);
-	return SUCC;
+
+	for (tmp = buf->top; tmp; tmp = tmp->next)
+		fputs (tmp->str, buf->file);
+
+	return (SUCC);
 }
