@@ -28,6 +28,7 @@ readbuf (Buffer *buf, char *error)
 			continue; /* usually means eof, go check */
 		buf->curline = putline (buf->curline, s.v, s.c);
 		++buf->lineno;
+		++buf->len;
 	}
 	clearerr (buf->file);
 
