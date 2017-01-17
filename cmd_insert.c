@@ -12,9 +12,7 @@ insert (State *st, Buffer *buf, Arg *arg, char *error)
 {
 	Line *new;
 
-	if (arg->addr && (gotol(st, buf, arg, error) == FAIL))
-		return FAIL;
-	arg->addr = 0;
+	buf->curline = (*arg->sel.v) + arg->sel.c - 1;
 
 	if (arg->mode) {
 		if (!strcmp (arg->mode, "insert")) {
@@ -38,4 +36,3 @@ insert (State *st, Buffer *buf, Arg *arg, char *error)
 	setmode (st, buf, "insert");
 	return SUCC;
 }
-
