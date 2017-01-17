@@ -7,6 +7,7 @@
 
 #include "edna.h"
 
+extern size_t	getlineno	(Line *);
 extern Line*	makeline	();
 extern Line*	putline		(Line *, char *, size_t);
 extern Line*	walk		(Line *, int, char *error);
@@ -27,6 +28,17 @@ changeline (Line *l, char *line, size_t len)
 	return l;
 }
 
+size_t
+getlineno (Line *targ)
+{
+	size_t lineno;
+
+	lineno = 1;
+	while ((targ = targ->prev))
+		++lineno;
+
+	return (lineno);
+}
 Line*
 makeline ()
 {
@@ -59,19 +71,19 @@ putline (Line *cur, char *line, size_t len)
 Line *
 walk (Line *cur, int offset, char *error)
 {
-	Line *l = cur;
+	Line *li = cur;
 	if (0 > offset) {
-		while ((l = l->prev))
+		for (; li; li = li->prev))
 			if (!++offset)
-				return l;
+				return li;
 		strcpy (error, "start of file");
-		return NULL;
+		return (NULL);
 	} else if (0 < offset) {
-		while ((l = l->next))
+		for (; li; li = li->next)
 			if (!--offset)
-				return l;
+				return li;
 		strcpy (error, "end of file");
-		return NULL;
+		return (NULL);
 	}
-	return cur;		
+	return (cur); /* offset == 0 */
 }
