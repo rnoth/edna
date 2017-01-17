@@ -86,9 +86,7 @@ write (State *st, Buffer *buf, Arg *arg, char *error)
 	if (arg->cnt && arg->vec[0])
 		strcpy (buf->filename, arg->vec[0]);
 
-	arg->addr = -buf->lineno + 1; /* go to start of buffer */
-	gotol (st, buf, arg, error);
-	if (!writebuf (buf, error))
+	if (writebuf (buf, error) == FAIL)
 		return FAIL;
 	buf->dirty = 0;
 	return SUCC;
