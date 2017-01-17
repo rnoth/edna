@@ -1,4 +1,7 @@
 /* set.h -- set operations */
+#ifndef _set_
+#define _set_
+
 #include "edna.h"
 
 typedef unsigned long long  subset;
@@ -11,3 +14,4 @@ extern Set setdifference	(Set A, Set B, size_t len);
 extern Set setintersect		(Set A, Set B, size_t len);
 extern Set setunion		(Set A, Set B, size_t len);
 
+#endif
