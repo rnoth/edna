@@ -11,6 +11,7 @@ chartostr (char *src)
 	if (!(ret = malloc (sizeof *ret))) die ("malloc");
 	*ret = makestring (strlen (src) + 1);
 	strcpy (ret->v, src);
+	ret->c = strlen (src);
 	return ret;
 }
 
