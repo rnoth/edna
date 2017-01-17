@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "edna.h"
+#include "addr.h"
 
 static void	cleanup	(Buffer *, Arg *arg);
 extern int	evalcmd	(State *st, Buffer *, Arg *arg, char *error);
@@ -46,6 +47,7 @@ int
 evalcmd (State *st, Buffer *buf, Arg *arg, char *error)
 {
 	int ret = SUCC;
+	struct tokaddr *tok;
 	Command *cmd;
 
 	/* fix arg->addr, bexause parseline can't handle absolute
@@ -69,6 +71,11 @@ evalcmd (State *st, Buffer *buf, Arg *arg, char *error)
 		arg->mode = malloc (sizeof *arg->mode);
 		if (!arg->mode) die("malloc");
 		strcpy (arg->mode, cmd->mode);
+	}
+
+	if (!*arg->sel.v) {
+		tok = lexaddr (chartostr(cmd->defaddr));
+		arg->sel = evaladdr (tok, buf, error);
 	}
 
 	if ((*cmd->func) (st, buf, arg, error) == FAIL) {
