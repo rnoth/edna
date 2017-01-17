@@ -1,7 +1,7 @@
 # Makefile for edna v0.2
 CC ?= cc
 LD ?= ld
-DBFLAGS ?= -g3 -O0 -W -Wall -Wextra -pedantic -pedantic-errors -Werror
+DBFLAGS ?= -std=c99 -g3 -O0 -W -Wall -Wextra -pedantic -pedantic-errors -Werror
 CFLAGS  ?= -W -Wall -Wextra -pedantic -Werror -pedantic-errors
 LDFLAGS ?= -lc
 ARFLAGS ?= rcs
@@ -10,7 +10,7 @@ DEBUG   ?= yes
 SRC  != find .  -maxdepth 1 -name '*.c'
 TEST != find ./tests -name '*.c' | sed s/.c$$/.o/
 OBJ  := ${SRC:.c=.o}
-LIB  := string.a
+LIB  := str.a
 DEPS := edna.h vector.h str.h
 TARG := edna
 VERS := 0.2
