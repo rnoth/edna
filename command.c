@@ -50,14 +50,6 @@ evalcmd (State *st, Buffer *buf, Arg *arg, char *error)
 	struct tokaddr *tok;
 	Command *cmd;
 
-	/* fix arg->addr, bexause parseline can't handle absolute
-	 * addresses (st->lineno isn't visible inside input.c )
-	 */
-	if (!arg->rel) {
-		arg->addr -= buf->lineno;
-		arg->rel = 1;
-	}
-
 	cmd = bsearch (arg->name, st->cmds.v, st->cmds.c,
 			sizeof *st->cmds.v, &cmdchck);
 
