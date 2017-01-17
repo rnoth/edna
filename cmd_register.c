@@ -9,28 +9,26 @@ extern int	delete		(State *, Buffer *, Arg *, char *);
 int
 delete (State *st, Buffer *buf, Arg *arg, char *error)
 {
-	Line *tmp;
+	Line **targ, *tmp;
 
-	if (!buf->curline->str) {
-		strcpy (error, "empty buffer");
+	targ = arg->sel.v;
+	//tlen = arg->sel.c;
+
+	if (!(*targ)->str) {
+		strcpy (error, "empty selection");
 		return FAIL;
 	}
 
-	if (arg->addr)
-		if (gotol (st, buf, arg, error) == FAIL)
-			return FAIL;
-
 	buf->dirty = 1;
 
-	tmp = buf->curline->next ? buf->curline->next : buf->curline->prev;
+	tmp = (*targ)->next ? (*targ)->next : (*targ)->prev;
 	if (!tmp)
 		tmp = makeline ();
 
-	if (!buf->curline->next)
-		--buf->lineno;
-	freelines(buf->curline, buf->curline->next);
+	freelines(*targ, (*targ)->next);
 
 	buf->curline = tmp;
+	buf->lineno  = getlineno (tmp);
 	return SUCC;
 }
 
