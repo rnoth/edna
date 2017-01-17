@@ -58,7 +58,6 @@ resolveset (Set A, size_t len, Buffer *buf, char *error)
 	/* TODO: once default addresses are implemented, come back and turn
 	 * this into an error or something */
 	if (!A) { /* no line address */
-		VEC_APPEND (Line*, ret, buf->curline);
 		free (t);
 		return ret;
 	} /* TODO: remove special case */
@@ -81,7 +80,7 @@ resolveset (Set A, size_t len, Buffer *buf, char *error)
 
 		while (h && h --> 0) {	/* convert stack to stack of lines */
 			Line *tmp;
-			tmp = walk (buf->top, *--t - 1, error);
+			tmp = walk (buf->top, *--t, error);
 			if (!tmp) {
 				free (t - h);
 				return (ret);
