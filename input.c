@@ -72,7 +72,9 @@ readline (String *str, FILE *file, char *error)
 
 	finally:
 
-		if (!feof(file)) { /* actual error occurred */
+		if (feof(file)) /* eof? */
+			strcpy (error, "eof");
+		else { /* actual error occurred */
 			strncpy (error, strerror (errno), 20);
 			perror ("fread");
 		}
