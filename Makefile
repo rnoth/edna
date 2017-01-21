@@ -2,7 +2,7 @@
 CC ?= cc
 LD ?= ld
 CFLAGS  ?= -std=c99 -fPIC -W -Wall -Wextra -pedantic -Werror -pedantic-errors
-CPPFLAGS?= -D_POSIX_C_SOURCE
+CPPFLAGS?= -D_POSIX_C_SOURCE=199309L
 LDFLAGS ?= -lc
 SOFLAGS ?= -lc -fPIC -shared -Wl,-rpath=$(shell pwd)
 ARFLAGS ?= rcs
