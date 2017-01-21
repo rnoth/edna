@@ -13,13 +13,13 @@ main (int argc, char** argv)
 	st   = makestate ();
 	buf  = makebuf (NULL);
 	s    = makestring (LINESIZE);
-	*err = 0;
 
 	initst  (st);
 	parse_argv (st, err, argc, argv);
 	/* end init */
 
 	checkoutbuf (buf, st, 0);
+	*err = 0;
 
 	/* main execution */
 	for (;;) {
