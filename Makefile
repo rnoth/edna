@@ -2,6 +2,7 @@
 CC ?= cc
 LD ?= ld
 CFLAGS  ?= -std=c99 -fPIC -W -Wall -Wextra -pedantic -Werror -pedantic-errors
+CPPFLAGS?= -D_POSIX_C_SOURCE
 LDFLAGS ?= -lc
 SOFLAGS ?= -lc -fPIC -shared -Wl,-rpath=$(shell pwd)
 ARFLAGS ?= rcs
@@ -29,8 +30,8 @@ endif
 
 # recipes
 edna: deps.mk $(OBJ) $(LIB)
-	@echo LD $(LDFLAGS) -o $@ $(OBJ) $(LIB)
-	@$(CC)   $(LDFLAGS) -o $@ $(OBJ) $(LIB)
+	@echo LD -o $@
+	@$(CC) $(LDFLAGS) -o $@ $(OBJ) $(LIB)
 
 libedna.so: deps.mk $(OBJ) $(LIB)
 	@echo LD $(SOFLAGS) -o $@ $(filter-out main.o, $(OBJ)) $(LIB)
@@ -45,8 +46,8 @@ deps.mk: $(SRC)
 	@$(CC) -MM $(SRC) > deps.mk
 
 %.o: %.c
-	@echo CC $(CFLAGS) -c -o $@ $<
-	@$(CC)   $(CFLAGS) -c -o $@ $<
+	@echo CC $<
+	@$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 tests/%_test: CFLAGS += -Wl,-rpath=$(shell pwd)
 tests/%_test: tests/%_test.c %.o libedna.so
