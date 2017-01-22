@@ -72,14 +72,16 @@ readline (String *str, FILE *file, char *error)
 
 	finally:
 
-		if (feof(file))
-			break;
-		strncpy (error, strerror (errno), 20);
-		perror ("fread");
-		return (FAIL);
+		if (!feof(file)) { /* actual error occurred */
+			strncpy (error, strerror (errno), 20);
+			perror ("fread");
+		}
+		ret = FAIL;
+		break;
 	}
 
 	str->b = off;
+	str->v[off] = 0;
 
 	return (ret);
 }
