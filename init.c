@@ -3,28 +3,20 @@
 #include <string.h>
 
 #include "edna.h"
+#include "cmd.h"
 #include "vector.h"
 #include "config.h"
 
-extern void	freearg		(Arg *);
 extern void	freestate	(State *);
 extern void	initst		(State *);
-extern Arg*	makearg		(void);
 extern State*	makestate	(void);
-extern int	parse_argv	(State *, String, int, char **);
+extern int	parse_argv	(State *, char *, int, char **);
 
 void
 freestate (State *st)
 {
 	FREE_VECTOR (st->cmds);
 	FREE_VECTOR (st->modes);
-}
-
-void
-freearg (Arg *arg)
-{
-	free (arg->name);
-	free (arg);
 }
 
 void
@@ -54,25 +46,14 @@ makestate (void)
 	return st;
 }
 
-Arg *
-makearg (void)
-{
-	Arg *arg;
-	if (!(arg = calloc (1, sizeof *arg)))
-		die ("calloc");
-	if (!(arg->name = malloc (LINESIZE * sizeof *arg->name)))
-		die ("malloc");
-	return arg;
-}
-
 int
-parse_argv (State *st, String err, int argc, char **argv)
+parse_argv (State *st, char *err, int argc, char **argv)
 {
 	Buffer *tmp;
 
 	/* open tmpfile */
 	tmp = makebuf ("/tmp/edna.hup"); /* FIXME */
-	readbuf (tmp, err.v);
+	readbuf (tmp, err);
 	addbuf (st, tmp);
 	/* end open */
 
@@ -80,7 +61,7 @@ parse_argv (State *st, String err, int argc, char **argv)
 	if (argc > 1)
 		do {
 			tmp = makebuf (*(++argv));
-			readbuf (tmp, err.v);
+			readbuf (tmp, err);
 			addbuf (st, tmp);
 		} while (--argc > 1);
 	/* end parse */
