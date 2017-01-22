@@ -6,28 +6,26 @@
 
 #include "edna.h"
 
+
+extern int inserror (State *st, Buffer *buf, char *error);
+extern int insline (State *st, Buffer *buf, String *str, char *error);
+
 int
-inserror (State *st, Buffer *buf, Arg *arg, char *error)
+inserror (State *st, Buffer *buf, char *error)
 {
-	if (feof (buf->file)) {
+	if (feof (buf->file))
 		clearerr (buf->file);
-	}
 	setmode (st, buf, "command");
 	return SUCC;
 }
 
-void
-inshandle (int signo)
-{
-	if (signo == SIGINT)
-		return; /* TODO: longjmp */
-}
-
 int
-insline (State *st, Buffer *buf, Arg *arg, char *error)
+insline (State *st, Buffer *buf, String *str, char *error)
 {
-	size_t len;
 	Line *tmp, *new;
+
+	if (!strcmp (str->v, ".\n"))
+		return FAIL;
 
 	if (buf->curline == buf->top) {
 		new = makeline();
@@ -35,8 +33,7 @@ insline (State *st, Buffer *buf, Arg *arg, char *error)
 		buf->curline = new;
 	}
 
-	len = strtol (arg->vec[1], NULL, 10);
-	if (!(tmp = putline (buf->curline, arg->vec[0], len))) {
+	if (!(tmp = putline (buf->curline, str->v, str->c))) {
 		strcpy (error, "insertion failed");
 		return FAIL;
 	}
@@ -47,22 +44,3 @@ insline (State *st, Buffer *buf, Arg *arg, char *error)
 	++buf->len;
 	return SUCC;
 }
-
-int
-insparse (String line, Buffer *buf, Arg *arg, char *error)
-{
-	if (!strcmp (line.v, ".\n"))
-		return FAIL;
-
-	if (!(arg->vec = malloc (sizeof *arg->vec))) die ("malloc");
-	if (!(arg->vec[0] = calloc (strlen (line.v) + 1, sizeof **arg->vec)))
-		die ("calloc");
-	if (!(arg->vec[1] = calloc (LINESIZE, sizeof **arg->vec)))
-		die ("calloc");
-
-	strcpy (arg->vec[0], line.v);
-	sprintf (arg->vec[1], "%ld", line.c);
-
-	return SUCC;
-}
-
