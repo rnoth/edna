@@ -15,15 +15,15 @@
 //#define PRINT_FMT	"%ld\t%s", buf->lineno, buf->curline->str /* like ed's `n' */
 //#define ERROR "%s\n", error		/* like ed's 'H', without the '?' */
 
-extern int cmdprompt (State *, Buffer *, Arg *);
-extern int cmderror  (State *, Buffer *, Arg *, char *);
-extern int insprompt (State *, Buffer *, Arg *);
+extern int cmdprompt (State *, Buffer *);
+extern int cmderror  (State *, Buffer *, char *);
+extern int insprompt (State *, Buffer *);
 extern int print     (State *, Buffer *, Arg *, char *);
 
 static const Mode modes[] = {
-       /* name,	       prompter,    parser,     evaluator,   handler, */
-	{ "command",   cmdprompt,   parseline,  evalcmd,     cmderror, },
-	{ "insert",    insprompt,   insparse,   insline,     inserror, },
+       /* name,	       prompter,    evaluator,   handler, */
+	{ "command",   cmdprompt,   evalcmd,     cmderror, },
+	{ "insert",    insprompt,   insline,     inserror, },
 };
 
 static const Command commands[] = {
@@ -50,7 +50,7 @@ static const Command commands[] = {
 
 /* functions */
 int
-cmdprompt (State *st, Buffer *buf, Arg *arg)
+cmdprompt (State *st, Buffer *buf)
 {
 	if (printf (PROMPT) < 0) die ("printf");
 	if (fflush (stdout) == EOF) warn ("fflush");
@@ -58,7 +58,7 @@ cmdprompt (State *st, Buffer *buf, Arg *arg)
 }
 
 int
-cmderror (State *st, Buffer *buf, Arg *arg, char *error)
+cmderror (State *st, Buffer *buf, char *error)
 {
 	if (!strcmp (error, "quit"))
 		return FAIL;
@@ -67,7 +67,7 @@ cmderror (State *st, Buffer *buf, Arg *arg, char *error)
 	return SUCC;
 }
 int
-insprompt (State *st, Buffer *buf, Arg *arg)
+insprompt (State *st, Buffer *buf)
 {
 	if (printf (INS_PROMPT) < 0) die ("printf");
 	if (fflush (stdout) == EOF) warn ("fflush");
