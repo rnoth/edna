@@ -4,6 +4,7 @@
 #include <ctype.h>
 
 #include "edna.h"
+#include "cmd.h"
 #include "addr.h"
 #include "set.h"
 #include "str.h"
@@ -32,7 +33,7 @@ static const Rule ruleset[] = {
 Selection
 evaladdr (struct tokaddr *tok, Buffer *buf, char *error)
 {
-	String s;
+	String *s;
 	size_t i, j, k;
 	enum ident *t;
 	Selection ret;
@@ -45,7 +46,7 @@ evaladdr (struct tokaddr *tok, Buffer *buf, char *error)
 	memset (values, 0, tok->height * sizeof *values);
 	memset (&ret, 0, sizeof ret);
 	i = j = k = 0;
-	for (; i < tok->height; ++i, s.v += strlen (s.v)) {
+	for (; i < tok->height; ++i, s->v += strlen (s->v)) {
 		if (ruleset[t[i]] & VALUE) {
 			if (i != tok->height - 1 && ruleset[t[i+1]] & VALUE) {
 				strcpy (error, "invalid sequence of values");
@@ -104,7 +105,7 @@ lexaddr (String *line)
 	enum ident tokstack[line->c];
 	struct tokaddr *tok;
 	char cur, prev, delim;
-	String tokline;
+	String *tokline;
 
 	tokline = makestring (line->c * 2);
 	/*
@@ -140,7 +141,7 @@ lexaddr (String *line)
 
 				/* the core of the loop */
 				if (cur != '\\' || prev == '\\')
-					tokline.v[tokline.c++] = cur;
+					tokline->v[tokline->c++] = cur;
 
 				prev = cur;
 				cur = *line->v++;
@@ -151,21 +152,21 @@ lexaddr (String *line)
 					break;
 			} while (cur);
 
-			tokline.v[tokline.c++] = 0;
+			tokline->v[tokline->c++] = 0;
 			delim = 0;
 			k = 0;
 		} else if (k == IDENT_LEN)
 			break;
 
-	tokline.v[tokline.c++] = 0;
+	tokline->v[tokline->c++] = 0;
 	tokstack[t++] = IDENT_LEN;
 	--line->v;
 
 	if (!(tok = malloc (sizeof *tok))) die ("malloc");
 	if (!(tok->stack = malloc (t * sizeof *tok->stack))) die ("malloc");
-	tok->str = makestring (tokline.c);
+	tok->str = makestring (tokline->c);
 
-	copystring (&tok->str, &tokline);
+	copystring (tok->str, tokline);
 	memset (tok->stack, IDENT_LEN, t);
 	memcpy (tok->stack, tokstack, t * sizeof *tok->stack);
 	tok->height = t;

@@ -12,7 +12,7 @@ extern int writebuf	(Buffer *, char *);
 int
 readbuf (Buffer *buf, char *error)
 {
-	String s;
+	String *s;
 
 	buf->file = fopen (buf->filename, "r+");
 	if (!buf->file ) {
@@ -24,9 +24,9 @@ readbuf (Buffer *buf, char *error)
 
 	/* TODO: no actual error handling */
 	while (!feof (buf->file)) {
-		if (!readline (&s, buf->file, error))
+		if (!readline (s, buf->file, error))
 			continue; /* usually means eof, go check */
-		buf->curline = putline (buf->curline, s.v, s.c);
+		buf->curline = putline (buf->curline, s->v, s->c);
 		++buf->lineno;
 		++buf->len;
 	}
