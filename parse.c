@@ -10,12 +10,12 @@
 #include "addr.h"
 #include "str.h"
 
-extern		int	parseline	(String, Buffer *, Arg *, char *);
+extern int		parseline	(String *, Buffer *, Arg *, char *);
 
 static struct reply*	lexline		(String);
 
 struct reply {
-	String str;
+	String *str;
 	size_t seg;
 	struct tokaddr *tok;
 };
@@ -23,7 +23,7 @@ struct reply {
 struct reply *
 lexline (String line)
 {
-	/* `line->c + 4' is enough for even pathological inputs[0],
+	/* `line.c + 4' is enough for even pathological inputs[0],
 	 * - one null byte delimits first line address
 	 * - one null byte delimits name
 	 * - two null bytes terminate the string. 
@@ -34,11 +34,11 @@ lexline (String line)
 	 */
 	char ch, delim; 
 	size_t seg;
-	String s;
+	String *s;
 	struct reply *reply;
 	struct tokaddr *tok;
 
-	chomp (line);
+	chomp (line); /* TODO: allow escaped newlines */
 	s = makestring (line.c + 4);
 	seg = 0;
 
@@ -48,36 +48,31 @@ lexline (String line)
 
 	/* line address */
 	tok = lexaddr (&line);
-	/*
-	for (; line.c && (ch = *line.v) && (isdigit (ch) || strchr ("+-", ch)); ++line.v, --line.c)
-		s.v[s.c++] = ch;
-	s.v[s.c++] = 0;
-	++seg;
-	*/
 
 	/* command name */
 	for (; line.c && isalpha (ch = *line.v); ++line.v, --line.c)
-		s.v[s.c++] = ch;
-	s.v[s.c++] = 0;
+		s->v[s->c++] = ch;
+	s->v[s->c++] = 0;
 	++seg;
 
 	/* delimiter */
-	delim = *line.v++;
+	delim = *line.v;
+	--line.c;
 
 	/* arbitrary argument vector */
-	for (; (line.c && *line.v);) {
+	for (; (line.c && *line.v++);) {
 		for (; (ch = *line.v) && ch != delim; --line.c, ++line.v)
-			s.v[s.c++] = ch;
-		s.v[s.c++] = 0;
+			s->v[s->c++] = ch;
+		s->v[s->c++] = 0;
 		++seg;
 	}
-	s.v[s.c++] = 0;
+	s->v[s->c] = 0;
 
 	/* finish */
 	if (!(reply = malloc (sizeof *reply))) die ("malloc");
 
-	reply->str = makestring (s.c);
-	copystring (&reply->str, &s);
+	reply->str = makestring (s->c);
+	copystring (reply->str, s);
 	reply->seg = seg;
 	reply->tok = tok;
 
@@ -87,16 +82,16 @@ lexline (String line)
 }
 
 int
-parseline (String line, Buffer *buf, Arg *arg, char *error)
+parseline (String *line, Buffer *buf, Arg *arg, char *error)
 {
 	String str;
 	size_t i, seg, len;
 	struct reply *reply;
 
-	reply = lexline (line);
+	reply = lexline (*line);
 
 	seg = reply->seg;
-	str = reply->str;
+	str = *reply->str;
 
 	/* line address */
 	arg->sel = evaladdr (reply->tok, buf, error);
@@ -105,7 +100,6 @@ parseline (String line, Buffer *buf, Arg *arg, char *error)
 
 	/* command name */
 	strcpy (arg->name, str.v);
-
 	str.v += strlen (str.v) + 1;
 	--seg;
 
