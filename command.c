@@ -74,8 +74,10 @@ evalcmd (State *st, Buffer *buf, String *str, char *error)
 	if (!*arg->sel.v) {
 		tok = lexaddr (chartostr(cmd->defaddr));
 		arg->sel = evaladdr (tok, buf, error);
-		if (!*arg->sel.v)
+		if (!*arg->sel.v) {
+			strcpy (error, "invalid selection");
 			goto finally;
+		}
 	}
 
 	if ((*cmd->func) (st, buf, arg, error) == FAIL)
