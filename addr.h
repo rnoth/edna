@@ -7,7 +7,7 @@
 
 typedef unsigned char	Rule;
 
-typedef Set		(*Evaluator)	(String, Buffer *, char *);
+typedef Set		(*Evaluator)	(String *, Buffer *, char *);
 
 enum direc {
 	LEFT,
@@ -21,7 +21,7 @@ enum ident {
 };
 
 struct tokaddr {
-	String str;
+	String *str;
 	enum ident*	stack;
 	size_t		height;
 };
@@ -31,7 +31,7 @@ extern 	Selection	evaladdr (struct tokaddr *, Buffer *, char *);
 
 extern 	Selection	resolveset	(Set, size_t, Buffer *, char *);
 
-extern 	Set		num	(String, Buffer *, char *);
-extern 	Set		symnum	(String, Buffer *, char *);
+extern 	Set		num	(String *, Buffer *, char *);
+extern 	Set		symnum	(String *, Buffer *, char *);
 
 #endif
