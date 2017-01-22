@@ -103,8 +103,10 @@ parseline (String *line, Buffer *buf, Arg *arg, char *error)
 	str.v += strlen (str.v) + 1;
 	--seg;
 
-	if (seg)
+	if (seg) {
 		if (!(arg->vec = malloc (seg * sizeof *arg->vec))) die ("malloc");
+		arg->cnt = seg;
+	}
 	for (i = 0; i < seg; ++i) {
 		len = strlen (str.v) + 1;
 		if (!(arg->vec[i] = malloc (len * sizeof *arg->vec[i])))
