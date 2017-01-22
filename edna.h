@@ -18,9 +18,7 @@
 typedef unsigned char	byte;
 typedef size_t		linenum;
 
-typedef struct Arg	Arg;
 typedef struct Buffer	Buffer;
-typedef struct Command	Command;
 typedef struct Line	Line;
 typedef struct Macro	Macro;
 typedef struct Mark	Mark;
@@ -30,17 +28,7 @@ typedef struct Register	Register;
 typedef struct State	State;
 typedef VECTOR_TAG (Line*, Selection) Selection;
 
-struct Arg {
-	byte	rel;	/* is address relative? */
-	int	addr;	/* deprecated */
-
-	Selection  sel;
-	char*	   name;
-	char*	   mode;
-
-	size_t	   cnt;	/* argc equivalent */
-	char**	   vec;	/* argv equivalent */
-};
+#include "cmd.h"
 
 struct Buffer {
 	/* file info */
@@ -58,13 +46,6 @@ struct Buffer {
 	/* misc. info */
 	Mode*	mode;
 	Mark*	marks;
-};
-
-struct Command {
-	char*	name;
-	int	(*func)	(State *, Buffer *, Arg *, char *);
-	char*	mode;
-	char*	defaddr;
 };
 
 struct Line {
@@ -88,17 +69,9 @@ struct Mark {
 
 struct Mode {
 	char*	name;
-	int	(*prompt)  (State *, Buffer *, Arg *);
-	int	(*parse)   (String, Buffer *, Arg *, char *);
-	int	(*eval)    (State *, Buffer *, Arg *, char *);
-	int	(*error)   (State *, Buffer *, Arg *, char *);
-};
-
-struct Record {
-	byte	ok;
-	char*	error;
-	Arg*	arg;
-	void*	diff;
+	int	(*prompt)  (State *, Buffer *);
+	int	(*eval)    (State *, Buffer *, String *, char *);
+	int	(*error)   (State *, Buffer *, char *);
 };
 
 struct Register {
@@ -125,29 +98,24 @@ extern int	rmbuf		(State *, size_t);
 extern int	returnbuf	(Buffer *, State *);
 
 /* command.c */
-extern int	cmdcmp		(const void *, const void *);
-extern int	cmdchck		(const void *, const void *);
-extern int	evalcmd		(State *, Buffer *, Arg *, char *);
+extern int	evalcmd		(State *, Buffer *, String *, char *);
 
 /* file.c */
 extern int	readbuf		(Buffer *, char *);
 extern int	writebuf	(Buffer *, char *);
 
 /* init.c */
-extern void	freearg		(Arg *);
 extern void	freestate	(State *);
 extern void	initst		(State *);
-extern Arg*	makearg		(void);
 extern State*	makestate	(void);
-extern int	parse_argv	(State *, String, int, char **);
+extern int	parse_argv	(State *, char *, int, char **);
 
 /* input.c */
 extern int	readline	(String *, FILE *, char *);
 
 /* insert.c */
-extern int	inserror	(State *, Buffer *, Arg *, char *);
-extern int	insparse	(String, Buffer *, Arg *, char *);
-extern int	insline		(State *, Buffer *, Arg *, char *);
+extern int	inserror	(State *, Buffer *, char *);
+extern int	insline		(State *, Buffer *, String *, char *);
 extern void	inshandle	(int);
 
 /* line.c */
@@ -158,9 +126,6 @@ extern Line*	walk		(Line *, int, char *);
 
 /* mode.c */
 extern int	setmode		(State *, Buffer *, char *);
-
-/* parse.c */
-extern int	parseline	(String, Buffer *, Arg *, char *);
 
 /* region.c */
 extern void	freelines	(Line *, Line *);
