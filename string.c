@@ -9,7 +9,7 @@ chartostr (char *src)
 {
 	String *ret;
 	if (!(ret = malloc (sizeof *ret))) die ("malloc");
-	*ret = makestring (strlen (src) + 1);
+	ret = makestring (strlen (src) + 1);
 	strcpy (ret->v, src);
 	ret->c = strlen (src);
 	return ret;
@@ -30,23 +30,25 @@ copystring (String *dest, String *src)
 }
 
 void
-freestring (String str)
+freestring (String *str)
 {
-	free (str.v);
+	free (str->v);
+	free (str);
 }
 
-String
+String *
 makestring (size_t len)
 {
-	String str;
+	String *ret;
 
-	if (!(str.v = calloc (len, sizeof *str.v)))
+	if (!(ret = calloc (1, sizeof *ret)))
+		die ("calloc");
+	if (!(ret->v = calloc (len, sizeof *ret->v)))
 		die ("calloc");
 
-	str.c = 0;
-	str.m = len;
+	ret->m = len;
 
-	return str;
+	return ret;
 }
 
 int
