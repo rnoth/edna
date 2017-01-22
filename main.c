@@ -4,48 +4,42 @@
 int
 main (int argc, char** argv)
 {
-	String s, err;
+	char err[80];
+	String *s;
 	State *st;
 	Buffer *buf;
-	Arg *arg;
 
 	/* init stuff */
-	st  = makestate ();
-	buf = makebuf (NULL);
-	arg = makearg ();
-	s   = makestring (LINESIZE);
-	err = makestring (LINESIZE);
+	st   = makestate ();
+	buf  = makebuf (NULL);
+	s    = makestring (LINESIZE);
+	*err = 0;
 
 	initst  (st);
 	parse_argv (st, err, argc, argv);
 	/* end init */
 
-	arg->addr = buf->lineno;
-	checkoutbuf (buf, st, MAX (0, (signed long) st->buffers.c - 1));
+	checkoutbuf (buf, st, 0);
 
 	/* main execution */
 	for (;;) {
 
-		if (!(*buf->mode->prompt) (st, buf, arg))
+		if (!(*buf->mode->prompt) (st, buf))
 			goto finally;
-		if (!readline (&s, stdin, err.v))
+		if (!readline (s, stdin, err))
 			goto finally;
-		if (!(*buf->mode->parse) (s, buf, arg, err.v))
-			goto finally;
-		if (!(*buf->mode->eval) (st, buf, arg, err.v))
+		if (!(*buf->mode->eval) (st, buf, s, err))
 			goto finally;
 		continue;
 
 	finally:
-		if (!(*buf->mode->error) (st, buf, arg, err.v))
+		if (!(*buf->mode->error) (st, buf, err))
 			break;
 	}
 	/* end main */
 
 	freestate	(st);
-	freearg		(arg);
 	freestring	(s);
-	freestring	(err);
 
 	return 0;
 }
