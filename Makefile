@@ -7,7 +7,7 @@ SOFLAGS ?= -lc -fPIC -shared -Wl,-rpath=$(shell pwd)
 ARFLAGS ?= rcs
 DEBUG   ?= yes
 
-SRC  != find . -name '*.c'
+SRC  != find . -maxdepth 1 -name '*.c'
 TEST != find ./tests -name '*.c' | sed s/.c$$// 
 OBJ  := ${SRC:.c=.o}
 LIB  := str.a
