@@ -8,7 +8,7 @@
 extern int	edit		(State *, Buffer *, Arg *, char *);
 extern int	filename	(State *, Buffer *, Arg *, char *);
 extern int	quit		(State *, Buffer *, Arg *, char *);
-extern int	write		(State *, Buffer *, Arg *, char *);
+extern int	cmd_write	(State *, Buffer *, Arg *, char *);
 
 int
 edit (State *st, Buffer *buf, Arg *arg, char *error)
@@ -64,7 +64,7 @@ quit (State *st, Buffer *buf, Arg *arg, char *error)
 		if (!strcmp (arg->mode, "force"))
 			goto end;
 		if (!strcmp (arg->mode, "write"))
-			if (write (st, buf, arg, error) == FAIL)
+			if (cmd_write (st, buf, arg, error) == FAIL)
 				return FAIL;
 		strcpy (error, "unknown option");
 		return FAIL;
@@ -81,7 +81,7 @@ end:
 }	
 
 int
-write (State *st, Buffer *buf, Arg *arg, char *error)
+cmd_write (State *st, Buffer *buf, Arg *arg, char *error)
 {
 	if (arg->cnt && arg->vec[0])
 		strcpy (buf->filename, arg->vec[0]);
