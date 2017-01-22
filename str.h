@@ -13,6 +13,7 @@ struct String {
 };
 
 /* string.c */
+extern int	appendstring	(String *, char *);
 extern void	freestring	(String *);
 extern String*	chartostr	(char *);
 extern int	copystring	(String *, String *);
