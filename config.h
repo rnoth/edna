@@ -43,8 +43,8 @@ static const Command commands[] = {
 	{ "prev",	switchbuf,	"prev",		".", },
 	{ "q",		quit,		NULL,		".", },
 	{ "s",		subst,		NULL,		".", },
-	{ "w",		write,		NULL,		"%", },
-	{ "wq",		quit,		"write",	"%", },
+	{ "w",		cmd_write,	NULL,		".", },
+	{ "wq",		quit,		"write",	".", },
 	{ "Q", 		quit,		"force",	".", },
 };
 
