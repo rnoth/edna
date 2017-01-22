@@ -7,7 +7,10 @@ SOFLAGS ?= -lc -fPIC -shared -Wl,-rpath=$(shell pwd)
 ARFLAGS ?= rcs
 DEBUG   ?= yes
 
-SRC  != find .  -maxdepth 1 -name '*.c' | sed s,./,,
+SRC  := address.c addr_num.c addr_utils.c buffer.c cmd_buffer.c cmd_file.c \
+	cmd_insert.c cmd_navigate.c cmd_print.c cmd_register.c cmd_sub.c command.c \
+	file.c init.c input.c insert.c line.c main.c mode.c parse.c region.c set.c\
+	util.c
 TEST != find ./tests -name '*.c' | sed s/.c$$// 
 OBJ  := ${SRC:.c=.o}
 LIB  := str.a
