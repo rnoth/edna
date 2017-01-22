@@ -5,6 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "util.h"
 #include "edna.h"
 
 extern int	readline	(String *, FILE *, char *);
@@ -13,32 +14,72 @@ int
 readline (String *str, FILE *file, char *error)
 {
 #	define CHUNK 20
+	char ch, *tmp, buf[6];
+	int i, ext, ret = SUCC;
 	size_t off = 0;
 
 	for (;;) {
-		if (!memset (str->v + (str->m - 1), '\n', 1)) die ("memset");
+		i = 0;
+		clearerr (file);
 
-		if (!fgets (str->v + off, str->m - off, file)) {
-			if (!feof (file)) { /* only report non-eof errors */
-				strcpy (error, "fgets: ");
-				strncpy (error + strlen (error), strerror (errno), LINESIZE);
+		if (off + 4 >= str->m) {
+			tmp = realloc (str->v, str->m + CHUNK);
+			if (!tmp) {
+				strncpy (error, strerror (errno), 20);
+				perror ("realloc");
+				return FAIL;
 			}
-			return FAIL;
+			str->v = tmp;
+			str->m += CHUNK;
 		}
 
-		if (str->v[str->m - 1] == '\n') /* got all of line */
+		if (!fread (&ch, 1, 1, file))
+			goto finally;
+
+		buf[i++] = ch;
+
+		if (!(ch & BIT (7))) {
+			str->v[off] = ch;
+			++str->c;
+			off += i;
+			if (ch == '\n')
+				break;
+			continue;
+		}
+
+
+		/* multibyte character */
+		ext = uchar_extent (ch);
+
+		for (; i < ext; ++i) {
+			fread (&ch, 1, 1, file);
+			if (!(ch & BIT (7))) {
+				strcpy (error, "invalid utf-8 sequence");
+				ret = FAIL;
+				i = -1;
+				break;
+			}
+			buf[i] = ch;
+		}
+		if (i != -1) { /* valid utf-8 */
+			buf[i] = 0;
+			strcpy (str->v + off, buf);
+			++str->c;
+			off += i;
+		}
+
+		continue;
+
+	finally:
+
+		if (feof(file))
 			break;
-
-		if (!resizestring (str, str->m + CHUNK)) {
-			strcpy (error, "error allocating buffer");
-			return FAIL; /* error */
-		}
-
-		off = str->c - 1;
+		strncpy (error, strerror (errno), 20);
+		perror ("fread");
+		return (FAIL);
 	}
 
-	str->c = strlen (str->v);
+	str->b = off;
 
-	return SUCC;
+	return (ret);
 }
-
