@@ -9,167 +9,112 @@
 #include "set.h"
 #include "str.h"
 
-const char *symbols[] = {
-	"1234567890",	/* NUM_LITERAL */
-	".$",		/* NUM_SYMBOL */
-	"",		/* IDENT_LEN */
-	NULL
-};
-
-const Evaluator evals[] = {
-	num,
-	symnum,
-};
-
-#define NO_GLOB		BIT(0)	/* don't treat contiguous sequences as on token */
-#define VALUE		BIT(1)	/* symbol to be evaluated */
-#define HOMOGENOUS	BIT(2)	/* use one functions for every member */
-
-static const Rule ruleset[] = {
-	VALUE | HOMOGENOUS,
-	NO_GLOB | VALUE,
-};
-
 Selection
-evaladdr (struct tokaddr *tok, Buffer *buf, char *error)
+getaddr (String *s, size_t *pos, buffer *buf, char *err)
 {
-	String *s;
-	size_t i, j, k;
-	enum ident *t;
-	Selection ret;
-	/*Operator oplist[tok->height];*/
-	Set sel, /*tmp,*/ values[tok->height];
+	Selection sel;
+	Node *tree;
 
-	s = tok->str;
-	t = tok->stack;
+	tree = parseaddr (s, pos, error);
+	if (!tree)
+		return NULL;
 
-	memset (values, 0, tok->height * sizeof *values);
-	memset (&ret, 0, sizeof ret);
-	i = j = k = 0;
-	for (; i < tok->height; ++i, s->v += strlen (s->v)) {
-		if (ruleset[t[i]] & VALUE) {
-			if (i != tok->height - 1 && ruleset[t[i+1]] & VALUE) {
-				strcpy (error, "invalid sequence of values");
-				goto finally;
-			}
+	sel = evaltree (tree, buf, error);
+	return resolveset (sel, buf->len, buf, err);
+}
 
-			/* this is ugly and should be fixed */
-			values[j++] = (*evals[t[i]]) (s, buf, error);
+Set
+evaltree (Node *cur, Buffer *buf, char *err)
+{
+	Operator op;
+	Evaluator ev;
+	Set sl, sr;
 
-		}/* else if (ruleset[t[i]] & BIN) {
-			if (i == 0) {
-				values[j++] = defaultarg (s, buf, LEFT, error);
-			}
+	if (!cur)
+		return NULL;
 
-			if (i == tok->height - 1 || ruleset[t[i+1]] & BIN) {
-				values[j++] = defaultarg (s, buf, RIGHT, error);
-			}
+	if (ruleset[cur->tok] & VALUE) {
+		ev = geteval (cur);
+		return ((ev) (buf, err));
+	} else if (ruleset[cur->tok] & OPERATOR) {
+		op = getop (cur);
 
-			oplist[k++] = getbinop (s);
+		sl = evaltree (cur->left, buf, err);
+		sr = evaltree (cur->right, buf, err);
 
-		} else if (ruleset[t[i]] & UN) {
-			if (i == tok->height - 1) {
-				strcpy (error, "dangling unary operator");
-				return NULL; / * FIXME: resource leak * /
-			}
+		return ((op) (sl, sr, buf, err);
+	} else
+		strcpy (err, "unknown token (this is not your fault)");
+		return NULL;
+}
 
-			if (!(ruleset[t[i+1]] & VALUE)) {
-				strcpy (error, "invalid argument to unary operator");
-				return NULL; / * FIXME: resource leak * /
-			}
+Node *
+next (String *s, *size_t pos)
+{
+	size_t i, j, len;
+	Node *tmp, *ret = NULL;
 
-			tmp = (*evals[t[i+1]]) (s + strlen (s), buf, error);
-			values[j++] = (*unops[strchr (symbols[UN_OP], *s) - s]) (s, tmp, buf, error);
-			s += strlen (s);
-			++i;
-		} else if (ruleset[t[i]] & ASSIGN) {
-		}*/
+	if (pos >= s->b)
+		return NULL;
+
+	i =j = 0;
+	for (; i < IDENT_LEN; ++i) {
+		tmp = (lexers[i]) (s, pos); /* try and find a match */
+		if (!tmp)
+			continue;
+		ret = tmp;
+		break;
 	}
 
-	sel = values[0];
-	/*i = 1;
-	for (; i < k; ++i)
-		if (!(sel = (*oplist[i]) (sel, values[i], buf, error)))
-			return NULL; / * FIXME: resource leak * /
-	*/
-
-	ret = resolveset (sel, buf->len, buf, error);
-finally:
 	return (ret);
 }
 
-struct tokaddr *
-lexaddr (String *line)
+Node *
+parseaddr (String *s, size_t *pos, char *err)
 {
-	size_t i = 0, k = 0, t = 0;
-	enum ident tokstack[line->c];
-	struct tokaddr *tok;
-	char cur, prev, delim;
-	String *tokline;
+	Node *cur, *new, *tmp;
+	Selection ret = NULL;
 
-	tokline = makestring (line->c * 2);
-	/*
-	 * justification: worst case string is '+++++...', where a delimiter is
-	 * required after every symbol, meaning the buffer must have length:
-	 *	<input len> * 2
-	 */
+	while (new = next(s, pos)) {
+		if (!cur) {
+			cur = new;
+			continue;
+		}
+		if (ruleset[tmp->tok] & VALUE) {
+			if (addnode (new) == FAIL) {
+				snprintf (err, 80,
+					"invalid sequence of values %ld bytes in",
+					pos)
+				goto error;
+			}
 
-	prev = delim = 0;
-	cur = *line->v++;
-	for (; cur && i < line->c; k < IDENT_LEN ? (++k) : (k = 0))
-		if (strchr (symbols[k], cur)) {
-			tokstack[t++] = k;
-			do {
-				if (cur == '\\' && prev != '\\')
+			continue;
+
+		} else if (ruleset[new->tok] & OPERATOR) {
+			if (cur->tok >= new->tok) { /* precedence */
+				if (addnode (cur, new))
 					continue;
-				/*if (ruleset[k] & DELIM) {
-					if (cur == delim) {
-						break;
-					}
-					if (!delim) {
-						cur = delim;
-					}
-				}*/
-				/*if (ruleset[k] & ASSIGN) {
-					if (prev == '=' && !delim) {
-						delim = cur;
-						continue;
-					}
-					if (cur == delim)
-						break;
-				}*/
+				else if (extendbranch_r (cur, new))
+					continue;
+				else {
+					strcpy (err, "parsing error (this is not your fault)");
+					goto error;
+				}
+			} else { /* cur->tok < new->tok */
+				if (addnode (new, cur)) {
+					cur = new;
+					continue;
+				} else {
+					strcpy (err, "parsing error (this is not your fault)");
+					goto error;
+				}
+			}
+		}
+	}
 
-				/* the core of the loop */
-				if (cur != '\\' || prev == '\\')
-					tokline->v[tokline->c++] = cur;
+	return getroot (cur);
 
-				prev = cur;
-				cur = *line->v++;
-
-				if (!(cur && strchr (symbols[k], cur)))
-					break;
-				if (ruleset[k] & NO_GLOB)
-					break;
-			} while (cur);
-
-			tokline->v[tokline->c++] = 0;
-			delim = 0;
-			k = 0;
-		} else if (k == IDENT_LEN)
-			break;
-
-	tokline->v[tokline->c++] = 0;
-	tokstack[t++] = IDENT_LEN;
-	--line->v;
-
-	if (!(tok = malloc (sizeof *tok))) die ("malloc");
-	if (!(tok->stack = malloc (t * sizeof *tok->stack))) die ("malloc");
-	tok->str = makestring (tokline->c);
-
-	copystring (tok->str, tokline);
-	memset (tok->stack, IDENT_LEN, t);
-	memcpy (tok->stack, tokstack, t * sizeof *tok->stack);
-	tok->height = t;
-
-	return tok;
+error:
+	freetree (cur);
+	return NULL;
 }
