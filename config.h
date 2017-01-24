@@ -10,10 +10,12 @@
 #define FILENAME	"/tmp/edna.hup"
 
 /* advanced examples */
-//#define PROMPT "%ld:", st->lineno	/* have line numbers in prompt */
-//#define INS_PROMPT "%ld|", buf->lineno	/* have line number in ins mode */
-//#define PRINT_FMT	"%ld\t%s", buf->lineno, buf->curline->str /* like ed's `n' */
-//#define ERROR "%s\n", error		/* like ed's 'H', without the '?' */
+#if 0
+#  define PROMPT	"%ld:", st->lineno			/* have line numbers in prompt */
+#  define INS_PROMPT	"%ld|", buf->lineno			/* have line number in ins mode */
+#  define PRINT_FMT	"%ld\t%s", buf->lineno,(*arg->sel.v)->str	/* like ed's 'n' */
+#  define ERROR		"%s\n", error				/* like ed's 'H', without the '?' */
+#endif
 
 extern int cmdprompt (State *, Buffer *);
 extern int cmderror  (State *, Buffer *, char *);
