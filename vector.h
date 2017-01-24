@@ -12,11 +12,11 @@
 		TYPE *v;  /* vector (data) */		\
 		size_t c; /* count (length) */		\
 		size_t m; /* memory allocated */	\
-		size_t z; /* size of unit */		\
+		size_t z; /* size of unit TODO: deprecate */		\
 	} INST
 
 #define VECTOR_TAG(TYPE, TAG)				\
-	struct TAG {				\
+	struct TAG {					\
 		TYPE	*v;				\
 		size_t	 c;				\
 		size_t	 m;				\
