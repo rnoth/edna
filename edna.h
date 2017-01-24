@@ -7,13 +7,12 @@
 #include <regex.h>
 
 #include "util.h"
+
 #include "vector.h"
+
 #include "str.h"
 
 #define LINESIZE (80)
-
-#define FAIL (0)
-#define SUCC (1)
 
 typedef unsigned char	byte;
 typedef size_t		linenum;
