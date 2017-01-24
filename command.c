@@ -49,27 +49,31 @@ cmdcmp (const void *a, const void *b)
 {
 	return strcmp (((Command *)a)->name, ((Command *)b)->name);
 }
-
+/* TODO: simplify */
 int
 evalcmd (State *st, Buffer *buf, String *str, char *error)
 {
 	int ret = FAIL;
-	struct tokaddr *tok;
+	void *tmp = NULL;	/* to hold the Selection* returned by getaddr() */
+	size_t pos;
+	String *s;		/* to hold the converted default address */
 	Command *cmd;
 	Arg *arg;
 
 	if (!(arg = calloc (1, sizeof *arg))) die ("calloc");
 	if (!(arg->name = calloc (20, sizeof *arg->name))) die ("calloc");
 
-	act.sa_handler = sighandle;
+	{
+		act.sa_handler = sighandle;
 
-	if (sigaction (SIGINT, &act, &old) == -1) {
-		perror ("sigaction");
-		return (FAIL);
+		if (sigaction (SIGINT, &act, &old) == -1) {
+			perror ("sigaction");
+			return (FAIL);
+		}
+
+		if (sigsetjmp (jbuf, 1))
+			goto finally;
 	}
-
-	if (sigsetjmp (jbuf, 1))
-		goto finally;
 
 	if (parseline (str, buf, arg, error) == FAIL)
 		goto finally;
@@ -89,13 +93,15 @@ evalcmd (State *st, Buffer *buf, String *str, char *error)
 		strcpy (arg->mode, cmd->mode);
 	}
 
-	if (!*arg->sel.v) {
-		tok = lexaddr (chartostr(cmd->defaddr));
-		arg->sel = evaladdr (tok, buf, error);
-		if (!*arg->sel.v) {
-			strcpy (error, "invalid selection");
+	/* TODO: this could be it's own function? */
+	if (!arg->sel.v) {
+		s = chartostr (cmd->defaddr);
+		pos = 0;
+		tmp = getaddr (s, &pos, buf, error);
+		if (!tmp)
 			goto finally;
-		}
+
+		arg->sel = *(Selection *)tmp;
 	}
 
 	if ((*cmd->func) (st, buf, arg, error) == FAIL)
@@ -105,6 +111,8 @@ evalcmd (State *st, Buffer *buf, String *str, char *error)
 
 finally:
 	cleanup (buf, arg);
+	if (tmp)
+		free (tmp);
 	return ret;
 
 }

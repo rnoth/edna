@@ -16,39 +16,31 @@ extern int		parseline	(String *, Buffer *, Arg *, char *);
 
 /* TODO: static declarations for helper functions */
 
-Line **
-getaddr (String *s, size_t pos, Buffer *buf, char *error)
-{
-	return evaladdr (s, pos, buf, error);
-}
-
 char *
 getname (String *s, size_t *pos)
 {
-	char cur[5], prev[5], *ret;
-	Bool esc;
+	char *cur, *ret;
+	short esc;
 	size_t i, ext;
-	wchat_t wc;
+	wchar_t wc;
 
 	i = 0;
-	cur = 0;
+	cur = NULL;
+	esc = 0;
 	ret = malloc (s->b);
 	if (!ret) die ("malloc");
 
 	do {
-		free (prev);
-		prev = cur;
-		cur  = get_uchar (s->v[*pos]);
+		cur  = get_uchar (s->v + *pos);
 		ext  = uchar_extent (*cur);
 		cur[ext] = 0;
-		(*pos) += ext;
 
 		if (*cur == '\\' && !esc) {
-			esc = True;
-			continue
+			esc = 1;
+			continue;
 		}
 
-		mbtowc (&wc, cur, ext));
+		mbtowc (&wc, cur, ext);
 
 		if (iswalpha (wc) || esc) {
 			memcpy (ret + i, cur, ext);
@@ -56,7 +48,10 @@ getname (String *s, size_t *pos)
 		} else
 			break;
 
-	} while (i < s.b);
+		(*pos) += ext;
+		free (cur);
+
+	} while (i < s->b);
 
 	ret[i] = 0;
 
@@ -70,18 +65,17 @@ getdelim (const String *s, const char *delim, size_t *pos)
 {
 	char *ret;
 	size_t i;
-	size_t len = strlen (delim);
-	int ext;
+	int ext, esc;
 
 	ret = malloc (s->b - *pos);
 	if (!ret) die ("malloc");
 
-	i = 0;
-	while (*pos < s.b) {
-		ext = uchar_extent (s->v + *pos);
+	i = esc = 0;
+	while (*pos < s->b) {
+		ext = uchar_extent (s->v[*pos]);
 		if (ext == -1)	/* TODO: don't just ignore invalid utf-8 */
 			continue;
-		if (!esc && strncmp (s->v, delim->v, MIN (ext, len))
+		if (!esc && !strcmp (s->v + *pos, delim))
 			break;
 		memcpy (ret + i, s->v + *pos, uchar_extent (s->v[*pos]));
 		*pos += ext;
@@ -105,7 +99,7 @@ setdelim (const String *s, size_t *pos)
 
 	ret = malloc (4);
 	if (!ret) die ("malloc");
-	ret = get_uchar (s->v);
+	ret = get_uchar (s->v + *pos);
 	ext = uchar_extent (*ret);
 	ret[ext] = 0;
 	(*pos) += ext;
@@ -119,30 +113,31 @@ parseline (String *s, Buffer *buf, Arg *arg, char *error)
 	int ret = FAIL;
 	void *tmp;
 	char *delim;
-	size_t pos;
+	size_t i, pos;
 
+	pos = 0;
 	/* line address */
-	if (!(tmp = getaddr (s, &pos, buf, error)
+	if (!(tmp = getaddr (s, &pos, buf, error)))
 		goto finally;
-	arg->sel = tmp;
-	if (!arg->sel.v)
-		goto finally;
+	arg->sel = *(Selection *)tmp;
 
 	/* command name */
 	if (!(tmp = getname (s, &pos)))
 		goto finally;
 	arg->name = tmp;
-		
+
 	/* argument vector */
 	delim = setdelim (s, &pos);
 
-	while (tmp = getdelim (s, delim, &pos)) {
+	for (i = 0; (tmp = getdelim (s, delim, &pos)); ++i) {
 		++arg->cnt;
 		arg->vec[i++] = tmp;
 	}
 
 	free (delim);
+	ret = SUCC;
 
 finally:
 	return (ret);
+
 }
