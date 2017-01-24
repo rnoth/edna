@@ -1,8 +1,8 @@
 # Makefile for edna v0.2
 CC ?= cc
 LD ?= ld
-CFLAGS  ?= -std=c99 -fPIC -W -Wall -Wextra -Wpedantic -Werror -pedantic-errors
-CPPFLAGS?= -D_POSIX_C_SOURCE=199309L
+CFLAGS  ?= -std=c89 -fPIC -W -Wall -Wextra -Wpedantic -Werror -pedantic-errors
+CPPFLAGS?= -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE
 LDFLAGS ?= -lc
 SOFLAGS ?= -lc -fPIC -shared -Wl,-rpath=$(shell pwd)
 ARFLAGS ?= rcs
