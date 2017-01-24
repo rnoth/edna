@@ -9,52 +9,82 @@
 #include "set.h"
 #include "str.h"
 
-Selection
-getaddr (String *s, size_t *pos, buffer *buf, char *err)
+const char *symbols[] = {
+	"1234567890\0",	/* NUM_LITERAL */
+	".\0"	"$\0",	/* NUM_SYMBOL */
+	"+\0" /*"-\0"*/,/* OP_ARITH */
+	NULL		/* IDENT_LEN */
+};
+
+const Lexer lexers[] = {
+	trynum,
+	trysym,
+	tryarith,
+	NULL
+};
+
+const Operator arithops[] = {
+	addr_plus,
+	NULL
+};
+
+const Evaluator nums[] = {
+	addr_num,
+	NULL
+};
+
+const Evaluator numsyms[] = {
+	addr_dot,
+	addr_dollar,
+	NULL
+};
+
+const Rule ruleset[] = {
+	VALUE | NUMBER,
+	VALUE | LINE,
+	OPERATOR,
+	0
+};
+
+void *
+getaddr (String *s, size_t *pos, Buffer *buf, char *err)
 {
-	Selection sel;
+	Set sel;
+	Selection *ret;
 	Node *tree;
 
-	tree = parseaddr (s, pos, error);
-	if (!tree)
-		return NULL;
-
-	sel = evaltree (tree, buf, error);
-	return resolveset (sel, buf->len, buf, err);
+	tree = parseaddr (s, pos, err);
+	sel  = evaltree (tree, buf, err);
+	ret  = resolveset (sel, buf->len, buf, err);
+	freetree (tree);
+	return (ret);
 }
 
 Set
 evaltree (Node *cur, Buffer *buf, char *err)
 {
-	Operator op;
-	Evaluator ev;
-	Set sl, sr;
-
 	if (!cur)
 		return NULL;
 
 	if (ruleset[cur->tok] & VALUE) {
-		ev = geteval (cur);
-		return ((ev) (buf, err));
+
+		return ((cur->ev) (cur, buf, err));
+
 	} else if (ruleset[cur->tok] & OPERATOR) {
-		op = getop (cur);
 
-		sl = evaltree (cur->left, buf, err);
-		sr = evaltree (cur->right, buf, err);
-
-		return ((op) (sl, sr, buf, err);
+		return ((cur->op) (cur->left, cur->right, buf, err));
 	} else
 		strcpy (err, "unknown token (this is not your fault)");
 		return NULL;
 }
 
 Node *
-next (String *s, *size_t pos)
+next (String *s, size_t *pos)
 {
-	size_t i, j, len;
+	size_t i, j;
 	Node *tmp, *ret = NULL;
 
-	if (pos >= s->b)
+	if (*pos >= s->b)
 		return NULL;
 
 	i =j = 0;
@@ -72,25 +102,25 @@ next (String *s, *size_t pos)
 Node *
 parseaddr (String *s, size_t *pos, char *err)
 {
-	Node *cur, *new, *tmp;
-	Selection ret = NULL;
+	Node *cur, *new;
 
-	while (new = next(s, pos)) {
+	cur = NULL;
+	while ((new = next(s, pos))) {
 		if (!cur) {
 			cur = new;
 			continue;
 		}
-		if (ruleset[tmp->tok] & VALUE) {
-			if (addnode (new) == FAIL) {
-				snprintf (err, 80,
-					"invalid sequence of values %ld bytes in",
-					pos)
-				goto error;
+		if (ruleset[new->tok] & VALUE) {
+
+			if (addnode (cur, new) == FAIL) {
+				sprintf (err, "invalid sequence of values %lu bytes in", *pos);
+				goto fail;
 			}
 
 			continue;
 
 		} else if (ruleset[new->tok] & OPERATOR) {
+
 			if (cur->tok >= new->tok) { /* precedence */
 				if (addnode (cur, new))
 					continue;
@@ -98,7 +128,7 @@ parseaddr (String *s, size_t *pos, char *err)
 					continue;
 				else {
 					strcpy (err, "parsing error (this is not your fault)");
-					goto error;
+					goto fail;
 				}
 			} else { /* cur->tok < new->tok */
 				if (addnode (new, cur)) {
@@ -106,7 +136,7 @@ parseaddr (String *s, size_t *pos, char *err)
 					continue;
 				} else {
 					strcpy (err, "parsing error (this is not your fault)");
-					goto error;
+					goto fail;
 				}
 			}
 		}
@@ -114,7 +144,8 @@ parseaddr (String *s, size_t *pos, char *err)
 
 	return getroot (cur);
 
-error:
+fail:
+	cur = getroot (cur);
 	freetree (cur);
 	return NULL;
 }
