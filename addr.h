@@ -2,72 +2,82 @@
 #ifndef _edna_addr_
 #define _edna_addr_
 
+#include <limits.h>
+
 #include "edna.h"
 #include "set.h"
+
+#define SETLEN (buf->len % (sizeof (subset) * CHAR_BIT))
+
+#define VALUE		BIT(0)	/* 0-ary operator */
+#define OPERATOR	BIT(1)	/* binary operator */
+#define NUMBER		BIT(2)	/* context-sensitive numerical value */
+#define LINE		BIT(3)  /* raw line address */
+
+enum Token {
+	NUM_LITERAL,
+	NUM_SYMBOL,
+	OP_ARITH,
+	IDENT_LEN
+};
 
 typedef unsigned int	Rule;
 typedef struct Node	Node;
 typedef enum Token	Token;
 
 /* TODO: merge evaluator and operator, make it take a Set vector */
-typedef Set	(*Evaluator)	(Buffer *, char *);
+typedef Set	(*Evaluator)	(Node *, Buffer *, char *);
 typedef Node*	(*Lexer)	(String *, size_t *);
-typedef Set	(*Operator)	(Set, Set, Buffer *, char *);
-
-enum Token {
-	NUM_LITERAL,
-	NUM_SYMBOL,
-	OP_ARITH,
-	IDENT_LEN,
-};
+typedef Set	(*Operator)	(Node *, Node *, Buffer *, char *);
 
 struct Node {
-	Token tok,
-	String *str,
-	Node *left,
-	Node *right,
+	Token  tok;
+	String *str;
+	Evaluator ev;
+	Operator op;
+	Node *left;
+	Node *right;
 	Node *up;
 };
 
-#define _ "\0	
+/*
+ * prototypes
+ */
 
-const char *symbols[] = {
-	"1234567890"	_ _,		/* NUM_LITERAL */
-	"." _ "$"	_ _,		/* NUM_SYMBOL */
-	"+" _ "-"	_ _,		/* OP_ARITH */
-	NULL,			/* IDENT_LEN */
-};
+/* core */
+extern 	Set		evaltree	(Node *, Buffer *, char *);
+extern	void*		getaddr		(String *, size_t *, Buffer *, char *);
+extern	Node*		next		(String *, size_t *);
+extern	Node*		parseaddr	(String *, size_t *, char *);
+extern 	Selection*	resolveset	(Set, size_t, Buffer *, char *);
 
-const Lexer lexers[] = {
-	trynum,
-	trysym,
-	tryarith,
-	NULL
-}
+/* lex */
+extern	Node*		trynum		(String *, size_t *);
+extern	Node*		trysym		(String *, size_t *);
+extern	Node* 		tryarith	(String *, size_t *);
 
-#undef _
+/* tree */
+extern int		addnode		(Node *, Node *);
+extern Node*		getroot		(Node *);
+extern int		extendbranch_r	(Node *, Node *);
+extern void		freetree	(Node *);
+extern void		freenode	(Node *);
+extern Node*		makenode	(void);
 
-const Evaluator evals[] = {
-	num,
-	symnum,
-};
+/* evaluators */
+extern Set		addr_num	(Node *, Buffer *, char *);
+extern Set		addr_dot	(Node *, Buffer *, char *);
+extern Set		addr_dollar	(Node *, Buffer *, char *);
 
-#define GLOB		BIT(0)	/* treat contiguous permutations as one token */
-#define VALUE		BIT(1)	/* symbol to be evaluated */
-#define HOMOGENOUS	BIT(2)	/* use one functions for every member */
-#define OPERATOR	BIT(3)	/* binary operator */
+/* operators */
+extern Set		addr_plus	(Node *, Node *, Buffer *, char *);
 
-const Rule ruleset[] = {
-	GLAB | VALUE | HOMOGENOUS,
-	VALUE,
-	OPERATOR,
-};
-
-extern 	Selection	evaladdr (struct tokaddr *, Buffer *, char *);
-
-extern 	Selection	resolveset	(Set, size_t, Buffer *, char *);
-
-extern 	Set		num	(String *, Buffer *, char *);
-extern 	Set		symnum	(String *, Buffer *, char *);
+/* tables */
+extern const char*	symbols[];
+extern const Evaluator	nums[];
+extern const Evaluator	numsyms[];
+extern const Operator	arithops[];
+extern const Lexer	lexers[];
+extern const Rule	ruleset[];
 
 #endif
