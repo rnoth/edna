@@ -1,17 +1,53 @@
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "util.h"
 #include "str.h"
 
+/* TODO: use FAIL and SUCC instead of 0 and 1 */
+
+#if 0
+int
+appendstring (String *dest, String *src)
+{
+	int ret = 0; /* false */
+	void *tmp;
+	if (dest->m <= dest->b + src->b) { /* not enough space */
+		tmp = realloc (dest->v, dest->b + src->b);
+		if (!tmp) [
+			ret = 1; /* error */
+			goto finally;
+		}
+		dest->v = tmp;
+		dest->m = dest->b + src->b;
+}
+#endif
+		
+int
+appendchar (String *dest, char src)
+{
+	/* TODO: this probably isn't the right behavior */
+	if (!isascii (src)) /* don't make an invalid utf-8 sequence */
+		return 0;
+	if (dest->b == dest->m && !resizestring (dest, dest->m * 2))
+		return 0;
+	dest->v[dest->b++] = src;
+	dest->v[dest->b++] = 0;
+	++dest->c;
+	return 1;
+}
+
 String *
 chartostr (char *src)
 {
 	String *ret;
-	if (!(ret = malloc (sizeof *ret))) die ("malloc");
+
 	ret = makestring (strlen (src) + 1);
+
 	strcpy (ret->v, src);
-	ret->c = strlen (src);
+	ret->b = strlen (src);
+	ret->c = strlen (src); /* TODO: not utf-8 aware */
 	return ret;
 }
 
@@ -58,9 +94,9 @@ resizestring (String *str, size_t len)
 
 	if (!(tmp = realloc (str->v, len))) {
 		warn ("realloc");
-		return 1;
+		return 0;
 	}
 	str->v = tmp;
 	str->m = len;
-	return 0;
+	return 1;
 }
