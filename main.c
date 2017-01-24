@@ -19,7 +19,7 @@ main (int argc, char** argv)
 	/* end init */
 
 	checkoutbuf (buf, st, 0);
-	*err = 0;
+	*err = 0; /* needed because readline() messes with err (FIXME) */
 
 	/* main execution */
 	for (;;) {
