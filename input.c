@@ -10,7 +10,7 @@
 
 extern int	readline	(String *, FILE *, char *);
 
-/* TODO: readline() should concer itself with error */
+/* TODO: readline() shouldn't concern itself with errors */
 int
 readline (String *str, FILE *file, char *error)
 {
