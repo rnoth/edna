@@ -26,7 +26,7 @@ main (int argc, char** argv)
 
 		if (!(*buf->mode->prompt) (st, buf))
 			goto finally;
-		if (!readline (s, stdin, err))
+		if (!(*buf->mode->input) (s, err))
 			goto finally;
 		if (!(*buf->mode->eval) (st, buf, s, err))
 			goto finally;
