@@ -1,8 +1,7 @@
 # Makefile for edna v0.2
 CC ?= cc
-LD ?= ld
-CFLAGS  ?= -std=c89 -fPIC -W -Wall -Wextra -Wpedantic -Werror -pedantic-errors
-CPPFLAGS?= -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE
+CFLAGS  ?= -std=c89 -fPIC -W -Wall -Wextra -Wpedantic -Werror
+CPPFLAGS?= #-D_POSIX_C_SOURCE=199309L
 LDFLAGS ?= -lc
 SOFLAGS ?= -lc -fPIC -shared -Wl,-rpath=$(shell pwd)
 ARFLAGS ?= rcs
@@ -11,26 +10,28 @@ DEBUG   ?= yes
 SRC  != find . -maxdepth 1 -name '*.c'
 OBJ  := ${SRC:.c=.o}
 TEST != find ./tests -name '*.c' | sed s/.c$$//
-LIB  := str.a
-DEPS := edna.h vector.h str.h
+LIB  := str.a vector.a set.a
 TARG := edna
-VERS := 0.2
+VERS := 0.1
 
 edna: deps.mk $(OBJ)
 
 # includes
 -include deps.mk
-include string.mk
-include vector.mk
 
 # conditionals
 ifdef DEBUG
 	CFLAGS += -g3 -O0
 endif
 
+# depencies
+str.a: string.o str_utf8.o
+vector.a: vector.o
+set.a: set.o
+
 # recipes
 edna: deps.mk $(OBJ) $(LIB)
-	@echo LD -o $@
+	@echo LD $@
 	@$(CC) $(LDFLAGS) -o $@ $(OBJ) $(LIB)
 
 libedna.so: deps.mk $(OBJ) $(LIB)
@@ -42,11 +43,16 @@ test: $(TEST)
 
 deps.mk: $(SRC)
 	@echo "Making deps.mk"
-	@$(CC) -MM $(SRC) > deps.mk
+	@$(CC) -M $(SRC) > deps.mk
 
 %.o: %.c
 	@echo CC $<
 	@$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
+
+%.a:
+	@echo AR $@
+	@ar $(ARFLAGS) $@ $+ > /dev/null
+	@printf "\e[A\e[2K" # ar has no --silent option
 
 tests/%_test: CFLAGS += -Wl,-rpath=$(shell pwd)
 tests/%_test: tests/%_test.c %.o libedna.so
