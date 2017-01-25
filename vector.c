@@ -1,19 +1,100 @@
 /* vector.c -- generic vector routines */
 #include <stdlib.h>
+#include <string.h>
 
-extern int _vec_insert (void *inst, size_t loc, void *item);
-#if 0
-_vec_insert(inst, loc, item)
+#include "vector.h"
+
+/*
+ * TODO: _vec_truncate(), _vec_clone()
+ */
+static int _expand_vec (Vector *);
+
+int
+_vec_append (Vector *inst, const void *data)
 {
-	if (inst->c >= inst->m) {
-		_resize_vec (inst, inst->c + 1);
-	}					
-
-	memmove (inst->v + loc + 1,		
-		 inst->v + loc,			
-		 inst->z * (inst->c - loc));	
-	*(inst->v + loc) = item;		
-	inst->c += 1;				
+	return _vec_insert (inst, inst->c, data);
 }
-#endif
 
+int
+_vec_concat (Vector *inst, const void *data, size_t len)
+{
+	if ((inst->c * inst->z + len) > inst->m * inst->z)
+		if (!_expand_vec (inst))
+			return (FAIL);
+
+	memmove (inst->v, data, len);
+	inst->c += len / inst->z;
+
+	return (SUCC);
+}
+
+int
+_vec_copy (Vector *dest, const Vector *src)
+{
+	if (dest->m < src->c)
+		if (!_expand_vec (dest))
+			return (FAIL);
+
+	memcpy ((char *)dest->v,
+		(char *)src->v,
+		src->z * src->c);
+
+	dest->c = src->c;
+
+	return (SUCC);
+}
+
+int
+_expand_vec (Vector *inst)
+{
+	void *tmp;
+
+	tmp = realloc (inst->v, inst->m * inst->z * 2);
+
+	if (tmp) {
+		inst->v = tmp;
+		inst->m *= 2;
+		return (SUCC);
+	} else {
+		perror ("realloc");
+		return (FAIL);
+	}
+}
+
+int
+_vec_insert (Vector *inst, size_t loc, const void *data)
+{
+	if (inst->c >= inst->m)
+		if (!_expand_vec (inst))
+			return (FAIL);
+
+	if (loc > inst->c)
+		loc = inst->c;
+
+	else if (loc < inst->c)
+		memmove ((char *)inst->v + loc + 1,
+			 (char *)inst->v + loc,
+				 inst->c - loc);
+
+	memcpy ((char *)inst->v + loc, data, inst->z);
+	inst->c += 1;
+	return (SUCC);
+
+}
+
+int
+_vec_remove (Vector *inst, size_t loc)
+{
+	if (loc > inst->c)
+		return (SUCC); /* should this be an error? */
+
+	if (inst->c && loc)
+		memmove ((char *)inst->v + loc - 1,
+			 (char *)inst->v + loc,
+				 inst->c - loc);
+	else
+		memset ((char *)inst->v + loc, 0, inst->z);
+
+	return (SUCC);
+
+}
