@@ -47,7 +47,8 @@ trynum (String *s, size_t *pos)
 	if (!ret->str->c) { /* no numbers */
 		freenode (ret);
 		ret = NULL;
-	}
+	} else
+		ret->ev = addr_num;
 
 	return (ret);
 
