@@ -7,6 +7,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <wchar.h>
+#include <wctype.h>
 
 #include "edna.h"
 #include "addr.h"
@@ -61,7 +62,7 @@ getname (String *s, size_t *pos)
 }
 
 char *
-getdelim (const String *s, const char *delim, size_t *pos)
+getarg (const String *s, const char *delim, size_t *pos)
 {
 	char *ret;
 	size_t i;
@@ -129,7 +130,7 @@ parseline (String *s, Buffer *buf, Arg *arg, char *error)
 	/* argument vector */
 	delim = setdelim (s, &pos);
 
-	for (i = 0; (tmp = getdelim (s, delim, &pos)); ++i) {
+	for (i = 0; (tmp = getarg (s, delim, &pos)); ++i) {
 		++arg->cnt;
 		arg->vec[i++] = tmp;
 	}
