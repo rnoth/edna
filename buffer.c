@@ -16,7 +16,7 @@ int
 addbuf (State *st, Buffer *buf)
 {
 	/* TODO: no error handling */
-	VEC_APPEND (Buffer*, st->buffers, buf);
+	vec_append (st->buffers, buf);
 	return SUCC;
 }
 
@@ -30,7 +30,7 @@ checkoutbuf (Buffer *dest, State *st, size_t which)
 
 	src = st->buffers.v[which];
 	memcpy (dest, src, sizeof *dest);
-	VEC_REMOVE (Buffer*, st->buffers, which);
+	vec_remove (st->buffers, which);
 
 	dest->mode = st->modes.v;
 
@@ -68,13 +68,13 @@ makebuf (char *filename)
 int
 returnbuf (Buffer *src, State *st)
 {
-	VEC_INSERT (Buffer*, st->buffers, 0, src);
+	vec_insert (st->buffers, 0, src);
 	return SUCC;
 }
 
 int
 rmbuf (State *st, size_t which)
 {
-	VEC_REMOVE (Buffer*, st->buffers, which);
+	vec_remove (st->buffers, which);
 	return SUCC;
 }
