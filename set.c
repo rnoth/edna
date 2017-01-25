@@ -1,7 +1,7 @@
 #include <limits.h>
 #include <stdlib.h>
+#include <string.h>
 
-#include "edna.h"
 #include "set.h"
 #include "util.h"
 
@@ -71,10 +71,11 @@ setintersect (Set A, Set B, size_t len)
 	return C;
 }
 
+/* doesn't work. needs a redesign */
 int
 setoffset (Set A, Set B, size_t len)
 {
-	Set C, tmp; /* pointer to the last elem of B */
+	Set C, tmp;
 	size_t off = 0;
 
 	for (tmp = B; *tmp; ++tmp)
