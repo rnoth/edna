@@ -2,6 +2,10 @@
 #ifndef _string_
 #define _string_
 
+#ifndef isascii
+#define isascii(C) (!((C) & (1<<7)))
+#endif
+
 typedef struct String	String;
 typedef unsigned long	rune;
 
