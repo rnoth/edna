@@ -9,27 +9,23 @@
 Selection *
 resolveset (Set A, size_t len, Buffer *buf, char *error)
 {
-	Selection *ret;
+	Selection *ret = NULL;
 	Set B;
 	size_t bit, off, *t, h;
 
-	if (!(t = calloc (len, sizeof *t))) die ("calloc");
+	if (!(ret = malloc (sizeof *ret))) die ("malloc");
 
-	if (!(ret = calloc (1, sizeof *ret))) die ("calloc");
-
-	/* TODO: once default addresses are implemented, come back and turn
-	 * this into an error or something */
-	if (!A) { /* no line address */
-		free (t);
+	if (!A)
 		return ret;
-	} /* TODO: remove special case */
 
-	MAKE_VECTOR (Line*, *ret, sizeof *A * CHAR_BIT);
+	make_vector (*ret);
+	if (!(t = calloc (len, sizeof *t))) die ("calloc");
 
 	off = 0;
 	for (h = 0, B = A; (unsigned)(B - A) < len; ) {
 		subset b;
 
+		/* note: not only is this incorrect, it doesn't belong here */
 		while (*B) {	/* convert bitset to stack of values */
 			b = *B & -*B;	/* isolate rightmost bit */
 
@@ -49,14 +45,13 @@ resolveset (Set A, size_t len, Buffer *buf, char *error)
 				free (t - h);
 				return (ret);
 			}
-			VEC_APPEND (Line*, ret, tmp);
+			vec_append (*ret, tmp);
 		}
 		++B;
 		off += sizeof *B;
 	}
 
 	free (t);
-	RESIZE_VEC (Line*, *ret, ret->c * ret->z);
 
 	return ret;
 }
