@@ -7,12 +7,35 @@
 
 #include "util.h"
 
+#define VECSIZ 16
+
+#define vec_append(inst, item)		_vec_append ((Vector *)&(inst), &(item))
+#define vec_concat(inst, data, len)	_vec_concat ((Vector *)&(inst), data, len)
+#define vec_copy(dest, src)		_vec_copy   ((Vector *)&(dest), (Vector *)&(src))
+#define vec_insert(inst, loc, item)	_vec_insert ((Vector *)&(inst), loc, &(item))
+#define vec_remove(inst, loc)		_vec_remove ((Vector *)&(inst), loc)
+
+typedef struct Vector Vector;
+
+extern int _vec_append (Vector *, const void *);
+extern int _vec_concat (Vector *, const void *, size_t);
+extern int _vec_copy (Vector *, const Vector *);
+extern int _vec_insert (Vector *, size_t, const void *);
+extern int _vec_remove (Vector *, size_t);
+
+struct Vector {
+	void *v;
+	size_t c;
+	size_t m;
+	size_t z;
+};
+
 #define VECTOR(TYPE, INST)				\
 	struct {					\
 		TYPE *v;  /* vector (data) */		\
 		size_t c; /* count (length) */		\
 		size_t m; /* memory allocated */	\
-		size_t z; /* size of unit TODO: deprecate */		\
+		size_t z; /* size of unit */		\
 	} INST
 
 #define VECTOR_TAG(TYPE, TAG)				\
@@ -23,112 +46,19 @@
 		size_t	 z;				\
 	}
 
-#define _tagged_vector(TAG, TYPE, INST)			\
-	struct TAG {					\
-		TYPE *v;				\
-		size_t c;				\
-		size_t m;				\
-		size_t z;				\
-	} INST
+/* note: the side effects con be removed if we're willing to add TYPE as arg */
+#define make_vector(INST) { /* beware: side effects */	\
+	(INST).c = 0;					\
+	(INST).z = sizeof *((INST).v);			\
+	(INST).v = calloc (VECSIZ, sizeof *((INST).v));	\
+	if (!(INST).v) die ("malloc");			\
+	(INST).m = VECSIZ;				\
+}
 
-#define MAKE_VECTOR(TYPE, INST, SIZE) {			\
-		_tagged_vector (vec, TYPE,		\
-					*inst); 	\
-		size_t size;				\
-							\
-		size = SIZE;				\
-		inst = (struct vec *) &(INST);		\
-							\
-		inst->v = calloc (size, 		\
-				sizeof (TYPE)); 	\
-		if (!inst->v) die ("calloc");		\
-		inst->c = 0;				\
-		inst->m = size; 			\
-		inst->z = sizeof (TYPE);		\
-	}
-
-#define _resize_vec(inst, size) {			\
-		long diff;				\
-		void *tmp;				\
-							\
-		diff = size - inst->m;			\
-		tmp = realloc (inst->v, size);		\
-		if (!tmp) {				\
-			warn ("realloc");		\
-			inst->v = tmp;			\
-		} else {				\
-			inst->v = tmp;			\
-			if (diff > 0)			\
-				memset (inst->v+inst->m,\
-					0, diff);		\
-			inst->m = size;			\
-		}					\
-	}
-
-#define RESIZE_VEC(TYPE, INST, SIZE) {			\
-		_tagged_vector (vec, TYPE, *inst);	\
-		size_t size;				\
-							\
-		inst = (struct vec *) &(INST);				\
-		size = SIZE;				\
-							\
-		_resize_vec (inst, size);		\
-	}
-
-#define _vec_insert(type, inst, loc, item) {		\
-		if (inst->c >= inst->m) {		\
-			_resize_vec (inst, inst->c + 1);\
-		}					\
-							\
-		memmove (inst->v + loc + 1,		\
-			 inst->v + loc,			\
-			 inst->z * (inst->c - loc));	\
-		*(inst->v + loc) = item;		\
-		inst->c += 1;				\
-	}
-
-
-#define VEC_INSERT(TYPE, INST, LOC, ITEM) {		\
-		_tagged_vector (vec, TYPE, *inst);	\
-		size_t	loc;				\
-		TYPE	item;				\
-							\
-		inst	= (struct vec *) &(INST);	\
-		loc	= LOC;				\
-		item	= ITEM;				\
-							\
-		_vec_insert (TYPE, inst, loc, item);	\
-	}
-
-#define VEC_APPEND(TYPE, INST, ITEM) {			\
-		_tagged_vector (vec, TYPE, *inst);	\
-		TYPE	item;				\
-							\
-		inst	= (struct vec *) &(INST);	\
-		item	= ITEM;				\
-							\
-		_vec_insert (TYPE, inst, inst->c, item);\
-	}
-
-#define VEC_REMOVE(TYPE, INST, LOC) {			\
-		_tagged_vector (vec, TYPE, *inst);	\
-		size_t	loc, seg;			\
-							\
-		inst	= (struct vec *) &(INST);	\
-		loc	= LOC;				\
-		seg 	= (inst->c - loc)		\
-			   * sizeof *inst->v;		\
-							\
-		if (loc <= inst->c) {			\
-			memmove (inst->v + loc,		\
-			      inst->v + loc + 1, seg);	\
-			--inst->c;			\
-		}					\
-	}
-			
-#define FREE_VECTOR(INST) {				\
-		free (INST.v); 				\
-	}
-
+#define free_vector(INST) {				\
+	free ((INST).v);				\
+	(INST).v = NULL;				\
+	(INST).m = 0;					\
+}
 
 #endif
