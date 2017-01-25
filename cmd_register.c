@@ -12,7 +12,6 @@ delete (State *st, Buffer *buf, Arg *arg, char *error)
 	Line **targ, *tmp;
 
 	targ = arg->sel.v;
-	//tlen = arg->sel.c;
 
 	if (!(*targ)->str) {
 		strcpy (error, "empty selection");

@@ -19,14 +19,14 @@ main (int argc, char** argv)
 	/* end init */
 
 	checkoutbuf (buf, st, 0);
-	*err = 0;
+	*err = 0; /* needed because readline() messes with err (FIXME) */
 
 	/* main execution */
 	for (;;) {
 
 		if (!(*buf->mode->prompt) (st, buf))
 			goto finally;
-		if (!readline (s, stdin, err))
+		if (!(*buf->mode->input) (s, err))
 			goto finally;
 		if (!(*buf->mode->eval) (st, buf, s, err))
 			goto finally;

@@ -6,66 +6,26 @@
 #include "set.h"
 #include "vector.h"
 
-/*
-Set
-defaultarg (char *s, Buffer *buf, enum direc d, char *error)
-{
-	if (*s == ',') {
-		if (d == LEFT)
-			return (*evals[NUM_LITERAL]) ("1", buf, error);
-		if (d == RIGHT)
-			return (*evals[NUM_SYMBOL]) ("$", buf, error);
-	} else if (d == LEFT) {
-		return (*evals[NUM_SYMBOL]) (".", buf, error);
-	} else if (d == RIGHT) {
-		return (*evals[NUM_SYMBOL]) ("1", buf, error);
-	}
-	return NULL; / * not reached * /
-}
-
-Operator
-getbinop (char *s)
-{
-	switch (*s) {
-	case '+':
-		return add;
-	case '-':
-		return sub;
-	case ',':
-		return range;
-	case '|':
-		return or;
-	case '&':
-		return and;
-	case '^':
-		return xor;
-	default:
-		return NULL;
-	}
-}
-*/
-
-Selection
+Selection *
 resolveset (Set A, size_t len, Buffer *buf, char *error)
 {
-	Selection ret;
+	Selection *ret = NULL;
 	Set B;
 	size_t bit, off, *t, h;
 
-	if (!(t = calloc (len, sizeof *t))) die ("calloc");
-	MAKE_VECTOR (Line*, ret, sizeof *A * CHAR_BIT);
+	if (!(ret = malloc (sizeof *ret))) die ("malloc");
 
-	/* TODO: once default addresses are implemented, come back and turn
-	 * this into an error or something */
-	if (!A) { /* no line address */
-		free (t);
+	if (!A)
 		return ret;
-	} /* TODO: remove special case */
+
+	make_vector (*ret);
+	if (!(t = calloc (len, sizeof *t))) die ("calloc");
 
 	off = 0;
 	for (h = 0, B = A; (unsigned)(B - A) < len; ) {
 		subset b;
 
+		/* note: not only is this incorrect, it doesn't belong here */
 		while (*B) {	/* convert bitset to stack of values */
 			b = *B & -*B;	/* isolate rightmost bit */
 
@@ -85,14 +45,13 @@ resolveset (Set A, size_t len, Buffer *buf, char *error)
 				free (t - h);
 				return (ret);
 			}
-			VEC_APPEND (Line*, ret, tmp);
+			vec_append (*ret, tmp);
 		}
 		++B;
 		off += sizeof *B;
 	}
 
 	free (t);
-	RESIZE_VEC (Line*, ret, ret.c * ret.z);
 
 	return ret;
 }

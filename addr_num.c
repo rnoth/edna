@@ -4,23 +4,19 @@
 #include "addr.h"
 
 Set
-num (String *s, Buffer *buf, char *error)
+addr_num (Node *nod, Buffer *buf, char *err)
 {
-	return setaddmemb (makeset (buf), buf->len, strtol (s->v, NULL, 10));
+	return setaddmemb (makeset (SETLEN), buf->len, strtol (nod->str->v, NULL, 10));
 }
 
 Set
-symnum (String *s, Buffer *buf, char *error)
+addr_dot (Node *nod, Buffer *buf, char *err)
 {
-	switch (*s->v) {
-	case '.':
-		return setaddmemb (makeset (buf), buf->len, buf->lineno);
-		break;
-	case '$':
-		return setaddmemb (makeset (buf), buf->len, buf->len);
-		break;
-	default:
-		return NULL;
-		break;
-	}
+	return setaddmemb (makeset (SETLEN), buf->len, buf->lineno);
+}
+
+Set
+addr_dollar (Node *nod, Buffer *buf, char *err)
+{
+	return setaddmemb (makeset (SETLEN), buf->len, buf->len);
 }

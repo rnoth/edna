@@ -1,9 +1,30 @@
 /* str_utf8.c -- utf8 conversion and parsing routines */
-#include <stdlib.h>
 #include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "str.h"
 #include "util.h"
+
+char *
+get_uchar (char *s)
+{
+	char *ret;
+	int ext;
+
+	ext = uchar_extent (*s);
+	if (ext == -1)
+		return NULL;
+
+	ret = malloc (ext + 1);
+	if (!ret) die ("malloc");
+
+	memcpy (ret, s, ext);
+	ret[ext] = 0;
+
+	return ret;
+		
+}
 
 int
 uchar_extent (unsigned char ch)
@@ -18,5 +39,4 @@ uchar_extent (unsigned char ch)
 		return (4);
 	else
 		return (-1); /* error */
-}
-	
+} 

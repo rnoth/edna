@@ -2,36 +2,82 @@
 #ifndef _edna_addr_
 #define _edna_addr_
 
+#include <limits.h>
+
 #include "edna.h"
 #include "set.h"
 
-typedef unsigned char	Rule;
+#define SETLEN (buf->len % (sizeof (subset) * CHAR_BIT))
 
-typedef Set		(*Evaluator)	(String *, Buffer *, char *);
+#define VALUE		BIT(0)	/* 0-ary operator */
+#define OPERATOR	BIT(1)	/* binary operator */
+#define NUMBER		BIT(2)	/* context-sensitive numerical value */
+#define LINE		BIT(3)  /* raw line address */
 
-enum direc {
-	LEFT,
-	RIGHT,
-};
-
-enum ident {
+enum Token {
 	NUM_LITERAL,
 	NUM_SYMBOL,
-	IDENT_LEN,
+	OP_ARITH,
+	IDENT_LEN
 };
 
-struct tokaddr {
-	String 		*str;
-	enum ident	*stack;
-	size_t		 height;
+typedef unsigned int	Rule;
+typedef struct Node	Node;
+typedef enum Token	Token;
+
+/* TODO: merge evaluator and operator, make it take a Set vector */
+typedef Set	(*Evaluator)	(Node *, Buffer *, char *);
+typedef Node*	(*Lexer)	(String *, size_t *);
+typedef Set	(*Operator)	(Node *, Node *, Buffer *, char *);
+
+struct Node {
+	Token  tok;
+	String *str;
+	Evaluator ev;
+	Operator op;
+	Node *left;
+	Node *right;
+	Node *up;
 };
 
-extern	struct tokaddr*	lexaddr		(String *);
-extern 	Selection	evaladdr	(struct tokaddr *, Buffer *, char *);
+/*
+ * prototypes
+ */
 
-extern 	Selection	resolveset	(Set, size_t, Buffer *, char *);
+/* core */
+extern 	Set		evaltree	(Node *, Buffer *, char *);
+extern	void*		getaddr		(String *, size_t *, Buffer *, char *);
+extern	Node*		next		(String *, size_t *);
+extern	Node*		parseaddr	(String *, size_t *, char *);
+extern 	Selection*	resolveset	(Set, size_t, Buffer *, char *);
 
-extern 	Set		num		(String *, Buffer *, char *);
-extern 	Set		symnum		(String *, Buffer *, char *);
+/* lex */
+extern	Node*		trynum		(String *, size_t *);
+extern	Node*		trysym		(String *, size_t *);
+extern	Node* 		tryarith	(String *, size_t *);
+
+/* tree */
+extern int		addnode		(Node *, Node *);
+extern Node*		getroot		(Node *);
+extern int		extendbranch_r	(Node *, Node *);
+extern void		freetree	(Node *);
+extern void		freenode	(Node *);
+extern Node*		makenode	(void);
+
+/* evaluators */
+extern Set		addr_num	(Node *, Buffer *, char *);
+extern Set		addr_dot	(Node *, Buffer *, char *);
+extern Set		addr_dollar	(Node *, Buffer *, char *);
+
+/* operators */
+extern Set		addr_plus	(Node *, Node *, Buffer *, char *);
+
+/* tables */
+extern const char*	symbols[];
+extern const Evaluator	nums[];
+extern const Evaluator	numsyms[];
+extern const Operator	arithops[];
+extern const Lexer	lexers[];
+extern const Rule	ruleset[];
 
 #endif

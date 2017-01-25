@@ -1,10 +1,13 @@
 /* parse.c -- functions for processing input */
-#include <stdio.h>
+#include <stdbool.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
 #include <ctype.h>
+#include <wchar.h>
+#include <wctype.h>
 
 #include "edna.h"
 #include "addr.h"
@@ -12,111 +15,130 @@
 
 extern int		parseline	(String *, Buffer *, Arg *, char *);
 
-static struct reply*	lexline		(String);
+/* TODO: static declarations for helper functions */
 
-struct reply {
-	String *str;
-	size_t seg;
-	struct tokaddr *tok;
-};
-
-struct reply *
-lexline (String line)
+char *
+getname (String *s, size_t *pos)
 {
-	/* `line.c + 4' is enough for even pathological inputs[0],
-	 * - one null byte delimits first line address
-	 * - one null byte delimits name
-	 * - two null bytes terminate the string. 
-	 * futhermore,
-	 * - every delimiter character is collapsed into a null byte
-	 * thus, bufsiz + 4 will always be enough
-	 * [0]: unless it's long enough to overflow
-	 */
-	char ch, delim; 
-	size_t seg;
-	String *s;
-	struct reply *reply;
-	struct tokaddr *tok;
+	char *cur, *ret;
+	short esc;
+	size_t i, ext;
+	wchar_t wc;
 
-	chomp (line); /* TODO: allow escaped newlines */
-	s = makestring (line.c + 4);
-	seg = 0;
+	i = 0;
+	cur = NULL;
+	esc = 0;
+	ret = malloc (s->b);
+	if (!ret) die ("malloc");
 
-	/* ignore leading whitespace */
-	for (; isspace (*line.v); ++line.v, --line.c)
-		;
+	do {
+		cur  = get_uchar (s->v + *pos);
+		ext  = uchar_extent (*cur);
+		cur[ext] = 0;
 
-	/* line address */
-	tok = lexaddr (&line);
+		if (*cur == '\\' && !esc) {
+			esc = 1;
+			continue;
+		}
 
-	/* command name */
-	for (; line.c && isalpha (ch = *line.v); ++line.v, --line.c)
-		s->v[s->c++] = ch;
-	s->v[s->c++] = 0;
-	++seg;
+		mbtowc (&wc, cur, ext);
 
-	/* delimiter */
-	delim = *line.v;
-	--line.c;
+		if (iswalpha (wc) || esc) {
+			memcpy (ret + i, cur, ext);
+			i += ext;
+		} else
+			break;
 
-	/* arbitrary argument vector */
-	for (; (line.c && *line.v++);) {
-		for (; (ch = *line.v) && ch != delim; --line.c, ++line.v)
-			s->v[s->c++] = ch;
-		s->v[s->c++] = 0;
-		++seg;
+		(*pos) += ext;
+		free (cur);
+
+	} while (i < s->b);
+
+	ret[i] = 0;
+
+	free (cur);
+
+	return (ret);
+}
+
+char *
+getarg (const String *s, const char *delim, size_t *pos)
+{
+	char *ret;
+	size_t i;
+	int ext, esc;
+
+	ret = malloc (s->b - *pos);
+	if (!ret) die ("malloc");
+
+	i = esc = 0;
+	while (*pos < s->b) {
+		ext = uchar_extent (s->v[*pos]);
+		if (ext == -1)	/* TODO: don't just ignore invalid utf-8 */
+			continue;
+		if (!esc && !strcmp (s->v + *pos, delim))
+			break;
+		memcpy (ret + i, s->v + *pos, uchar_extent (s->v[*pos]));
+		*pos += ext;
+		i += ext;
 	}
-	s->v[s->c] = 0;
 
-	/* finish */
-	if (!(reply = malloc (sizeof *reply))) die ("malloc");
+	if (!i) {
+		free (ret);
+		ret = NULL;
+	} else
+		ret[i] = 0; /* terminate */
 
-	reply->str = makestring (s->c);
-	copystring (reply->str, s);
-	reply->seg = seg;
-	reply->tok = tok;
+	return (ret);
+}
 
-	freestring (s);
+char *
+setdelim (const String *s, size_t *pos)
+{
+	char *ret;
+	int ext;
 
-	return reply;
+	ret = malloc (4);
+	if (!ret) die ("malloc");
+	ret = get_uchar (s->v + *pos);
+	ext = uchar_extent (*ret);
+	ret[ext] = 0;
+	(*pos) += ext;
+
+	return (ret);
 }
 
 int
-parseline (String *line, Buffer *buf, Arg *arg, char *error)
+parseline (String *s, Buffer *buf, Arg *arg, char *error)
 {
-	String str;
-	size_t i, seg, len;
-	struct reply *reply;
+	int ret = FAIL;
+	void *tmp;
+	char *delim;
+	size_t i, pos;
 
-	reply = lexline (*line);
-
-	seg = reply->seg;
-	str = *reply->str;
-
+	pos = 0;
 	/* line address */
-	arg->sel = evaladdr (reply->tok, buf, error);
-	if (!arg->sel.v)
-		return FAIL;
+	if (!(tmp = getaddr (s, &pos, buf, error)))
+		goto finally;
+	arg->sel = *(Selection *)tmp;
 
 	/* command name */
-	strcpy (arg->name, str.v);
-	str.v += strlen (str.v) + 1;
-	--seg;
+	if (!(tmp = getname (s, &pos)))
+		goto finally;
+	arg->name = tmp;
 
-	if (seg) {
-		if (!(arg->vec = malloc (seg * sizeof *arg->vec))) die ("malloc");
-		arg->cnt = seg;
-	}
-	for (i = 0; i < seg; ++i) {
-		len = strlen (str.v) + 1;
-		if (!(arg->vec[i] = malloc (len * sizeof *arg->vec[i])))
-			die ("malloc");
-		strcpy (arg->vec[i], str.v);
-		str.v += len;
+	/* argument vector */
+	delim = setdelim (s, &pos);
+
+	for (i = 0; (tmp = getarg (s, delim, &pos)); ++i) {
+		++arg->cnt;
+		arg->vec[i++] = tmp;
 	}
 
-	freestring (reply->str);
-	free (reply);
+	free (delim);
+	ret = SUCC;
 
-	return SUCC;
+finally:
+	return (ret);
+
 }

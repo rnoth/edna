@@ -1,20 +1,19 @@
 /* command.c -- interface for executing commands */
+#define _POSIX_C_SOURCE 199309L
 #include <setjmp.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
+#undef _POSIX_C_SOURCE
 
 #include "edna.h"
 #include "cmd.h"
 #include "addr.h"
 
 static void	cleanup	(Buffer *, Arg *arg);
-extern int	cmdchck (const void *a, const void *b);
-extern int	cmdcmp (const void *a, const void *b);
-extern int	evalcmd	(State *st, Buffer *, String *, char *error);
 static void	sighandle (int);
 
-static sigjmp_buf	jbuf;
+static sigjmp_buf jbuf;
 static struct sigaction act, old;
 
 void
@@ -31,11 +30,23 @@ cleanup (Buffer *buf, Arg *arg)
 			free (arg->vec[arg->cnt]);
 		free (arg->vec);
 	}
-	free (arg);
+	free_vector (arg->sel);
 
 	/* leave the structs in a sane state */
 	if (!buf->curline)
 		buf->curline = makeline ();
+}
+
+int
+setup (void)
+{
+	act.sa_handler = sighandle;
+
+	if (sigaction (SIGINT, &act, &old) == -1) {
+		perror ("sigaction");
+		return FAIL;
+	}
+	return SUCC;
 }
 
 int
@@ -49,32 +60,31 @@ cmdcmp (const void *a, const void *b)
 {
 	return strcmp (((Command *)a)->name, ((Command *)b)->name);
 }
-
+/* TODO: simplify */
 int
 evalcmd (State *st, Buffer *buf, String *str, char *error)
 {
 	int ret = FAIL;
-	struct tokaddr *tok;
+	size_t pos = 0;
+	String *s;		/* to hold the converted default address */
 	Command *cmd;
-	Arg *arg;
+	Arg arg;
 
-	if (!(arg = calloc (1, sizeof *arg))) die ("calloc");
-	if (!(arg->name = calloc (20, sizeof *arg->name))) die ("calloc");
-
-	act.sa_handler = sighandle;
-
-	if (sigaction (SIGINT, &act, &old) == -1) {
-		perror ("sigaction");
+	if (setup() == FAIL)
 		return (FAIL);
-	}
+
+	memset (&arg, 0, sizeof arg);
+	if (!(arg.name = calloc (20, 1)))
+		die ("calloc");
+	make_vector (arg.sel);
 
 	if (sigsetjmp (jbuf, 1))
 		goto finally;
 
-	if (parseline (str, buf, arg, error) == FAIL)
+	if (parseline (str, buf, &arg, error) == FAIL)
 		goto finally;
 
-	cmd = bsearch (arg->name, st->cmds.v, st->cmds.c,
+	cmd = bsearch (arg.name, st->cmds.v, st->cmds.c,
 			sizeof *st->cmds.v, &cmdchck);
 
 	if (!cmd) {
@@ -84,27 +94,32 @@ evalcmd (State *st, Buffer *buf, String *str, char *error)
 	}
 
 	if (cmd->mode) {
-		arg->mode = malloc (strlen (cmd->mode) * sizeof *arg->mode);
-		if (!arg->mode) die("malloc");
-		strcpy (arg->mode, cmd->mode);
+		arg.mode = malloc (strlen (cmd->mode) * sizeof *arg.mode);
+		if (!arg.mode) die("malloc");
+		strcpy (arg.mode, cmd->mode);
 	}
 
-	if (!*arg->sel.v) {
-		tok = lexaddr (chartostr(cmd->defaddr));
-		arg->sel = evaladdr (tok, buf, error);
-		if (!*arg->sel.v) {
-			strcpy (error, "invalid selection");
+	/* TODO: this could be it's own function? */
+	if (!arg.sel.v) {
+		Selection *tmp;
+		s = chartostr (cmd->defaddr);
+		tmp = getaddr (s, &pos, buf, error);
+		if (!tmp)
 			goto finally;
-		}
+
+		make_vector (arg.sel);
+		vec_copy (arg.sel, *tmp);
+		free_vector (*tmp);
+		free (tmp);
 	}
 
-	if ((*cmd->func) (st, buf, arg, error) == FAIL)
+	if ((*cmd->func) (st, buf, &arg, error) == FAIL)
 		goto finally;
 
 	ret = SUCC;
 
 finally:
-	cleanup (buf, arg);
+	cleanup (buf, &arg);
 	return ret;
 
 }

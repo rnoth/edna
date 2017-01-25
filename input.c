@@ -8,10 +8,23 @@
 #include "util.h"
 #include "edna.h"
 
-extern int	readline	(String *, FILE *, char *);
+int
+grabline (String *s, char *err)
+{
+	int ret = SUCC;
+
+	errno = 0;
+	if (!readline (s, stdin)) {
+		strncpy (err, strerror (errno), 20);
+		ret = FAIL;
+	}
+
+	return (ret);
+
+}
 
 int
-readline (String *str, FILE *file, char *error)
+readline (String *str, FILE *file)
 {
 #	define CHUNK 20
 	char ch, *tmp, buf[6];
@@ -22,23 +35,23 @@ readline (String *str, FILE *file, char *error)
 		i = 0;
 		clearerr (file);
 
-		if (off + 4 >= str->m) {
+		if (off + 4 >= str->m) { /* TODO: move resize logic to str.h */
 			tmp = realloc (str->v, str->m + CHUNK);
 			if (!tmp) {
-				strncpy (error, strerror (errno), 20);
 				perror ("realloc");
-				return FAIL;
+				ret = FAIL;
+				break;
 			}
 			str->v = tmp;
 			str->m += CHUNK;
 		}
 
 		if (!fread (&ch, 1, 1, file))
-			goto finally;
+			goto fail;
 
 		buf[i++] = ch;
 
-		if (!(ch & BIT (7))) {
+		if (isascii(ch)) {
 			str->v[off] = ch;
 			++str->c;
 			off += i;
@@ -53,34 +66,24 @@ readline (String *str, FILE *file, char *error)
 
 		for (; i < ext; ++i) {
 			fread (&ch, 1, 1, file);
-			if (!(ch & BIT (7))) {
-				strcpy (error, "invalid utf-8 sequence");
-				ret = FAIL;
-				i = -1;
-				break;
-			}
 			buf[i] = ch;
 		}
-		if (i != -1) { /* valid utf-8 */
-			buf[i] = 0;
-			strcpy (str->v + off, buf);
-			++str->c;
-			off += i;
-		}
+
+		buf[i] = 0;
+		strcpy (str->v + off, buf);
+		++str->c;
+		off += i;
 
 		continue;
 
-	finally:
+	fail:
 
-		if (feof(file)) /* eof? */
-			strcpy (error, "eof");
-		else { /* actual error occurred */
-			strncpy (error, strerror (errno), 20);
+		if (!feof(file))
 			perror ("fread");
-		}
+
 		ret = FAIL;
 		break;
-	}
+		}
 
 	str->b = off;
 	str->v[off] = 0;
