@@ -39,5 +39,4 @@ uchar_extent (unsigned char ch)
 		return (4);
 	else
 		return (-1); /* error */
-}
-	
+} 
