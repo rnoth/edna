@@ -15,26 +15,25 @@ extern int	parse_argv	(State *, char *, int, char **);
 void
 freestate (State *st)
 {
-	FREE_VECTOR (st->cmds);
-	FREE_VECTOR (st->modes);
+	free_vector (st->buffers);
+	free_vector (st->cmds);
+	free_vector (st->modes);
 }
 
 void
 initst (State *st)
 {
 	/* st->buffers */
-	MAKE_VECTOR (Buffer*, st->buffers, 1);
+	make_vector (st->buffers);
 
 	/* st->commands */
-	MAKE_VECTOR (Command, st->cmds, sizeof commands);
-	if (!memcpy (st->cmds.v, commands, sizeof commands)) die ("memcpy");
-	st->cmds.c = LEN (commands);
+	make_vector (st->cmds);
+	vec_concat (st->cmds, commands, sizeof commands);
 	qsort (st->cmds.v, st->cmds.c, sizeof *commands, &cmdcmp);
 
 	/* st->modes */
-	MAKE_VECTOR (Mode, st->modes, sizeof modes);
-	if (!memcpy (st->modes.v, modes, sizeof modes)) die ("memcpy");
-	st->modes.c = LEN (modes);
+	make_vector (st->modes);
+	vec_concat (st->modes, modes, sizeof modes);
 }
 
 State *
