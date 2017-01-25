@@ -4,7 +4,7 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
-#undef _POSIX_C_SOURCE 
+#undef _POSIX_C_SOURCE
 
 #include "edna.h"
 #include "cmd.h"
