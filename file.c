@@ -10,22 +10,35 @@ extern int readbuf	(Buffer *, char *);
 extern int writebuf	(Buffer *, char *);
 
 int
-readbuf (Buffer *buf, char *error)
+readbuf (Buffer *buf, char *err)
 {
+	int ret = SUCC;
 	String *s;
 
 	buf->file = fopen (buf->filename, "r+");
 	if (!buf->file ) {
 		warn ("fopen");
-		return FAIL;
+		return (FAIL);
 	}
 
 	s = makestring (LINESIZE);
 
 	/* TODO: no actual error handling */
+	errno = 0;
 	while (!feof (buf->file)) {
-		if (!readline (s, buf->file, error))
-			continue; /* usually means eof, go check */
+
+		if (!readline (s, buf->file)) {
+
+			if (errno) {
+				ret = FAIL;
+				strncpy (err, strerror (errno), 20);
+				break;
+
+			} else
+				continue;
+
+		}
+
 		buf->curline = putline (buf->curline, s->v, s->c);
 		++buf->lineno;
 		++buf->len;
@@ -33,7 +46,7 @@ readbuf (Buffer *buf, char *error)
 	clearerr (buf->file);
 
 	freestring (s);
-	return SUCC;
+	return (ret);
 }
 
 int
