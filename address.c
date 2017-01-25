@@ -67,11 +67,9 @@ evaltree (Node *cur, Buffer *buf, char *err)
 		return NULL;
 
 	if (ruleset[cur->tok] & VALUE) {
-
 		return ((cur->ev) (cur, buf, err));
 
 	} else if (ruleset[cur->tok] & OPERATOR) {
-
 		return ((cur->op) (cur->left, cur->right, buf, err));
 	} else
 		strcpy (err, "unknown token (this is not your fault)");
@@ -93,6 +91,7 @@ next (String *s, size_t *pos)
 		if (!tmp)
 			continue;
 		ret = tmp;
+		ret->tok = i;
 		break;
 	}
 
@@ -117,16 +116,19 @@ parseaddr (String *s, size_t *pos, char *err)
 				goto fail;
 			}
 
+			cur = new;
 			continue;
 
 		} else if (ruleset[new->tok] & OPERATOR) {
 
 			if (cur->tok >= new->tok) { /* precedence */
-				if (addnode (cur, new))
+				if (addnode (cur, new)) {
+					cur = new;
 					continue;
-				else if (extendbranch_r (cur, new))
+				} else if (extendbranch_r (cur, new)) {
+					cur = new;
 					continue;
-				else {
+				} else {
 					strcpy (err, "parsing error (this is not your fault)");
 					goto fail;
 				}
