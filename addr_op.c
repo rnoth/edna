@@ -43,6 +43,7 @@ addr_plus (Node *left, Node *right, Buffer *buf, char *err)
 
 	}
 
+	return (ret);
 
 fail:
 	strcpy (err, "invalid line address");
