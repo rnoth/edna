@@ -25,10 +25,16 @@ getname (String *s, size_t *pos)
 	size_t i, ext;
 	wchar_t wc;
 
+	if (s->b - *pos) {
+		ret = malloc (1);
+		memcpy (ret, "", 1);
+		return ret;
+	}
+
 	i = 0;
 	cur = NULL;
 	esc = 0;
-	ret = malloc (s->b);
+	ret = malloc (s->b - *pos);
 	if (!ret) die ("malloc");
 
 	do {
@@ -68,6 +74,9 @@ getarg (const String *s, const char *delim, size_t *pos)
 	size_t i;
 	int ext, esc;
 
+	if (s->b - *pos <= 0)
+		return (NULL);
+
 	ret = malloc (s->b - *pos);
 	if (!ret) die ("malloc");
 
@@ -97,6 +106,9 @@ setdelim (const String *s, size_t *pos)
 {
 	char *ret;
 	int ext;
+
+	if (s->b - *pos <= 0)
+		return (NULL);
 
 	ret = malloc (4);
 	if (!ret) die ("malloc");
