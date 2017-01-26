@@ -1,6 +1,3 @@
 Known issues
-- sending a EOF on stdin (^D) cause an infinite loop, endlessly printing :? 
-- gotol (and addressing in general) is broken
-- file writing logic is bugged. something to do with buf->top
-- the `f' ignores its arguments
-- there are still some subtle memory related bugs in vector.h
+ - parse.c needs a reorg. currently has errors if it reaches the end of the buffer early
+ - evalcmd is big and bloated
