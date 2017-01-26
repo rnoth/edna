@@ -15,7 +15,7 @@
 
 #define die(X) { \
 	perror (X); \
-	exit (1); \
+	abort (); \
 };
 
 #define warn(X) { \
