@@ -8,6 +8,7 @@ Set
 addr_plus (Node *left, Node *right, Buffer *buf, char *err)
 {
 	Set ret = NULL, pos = NULL;
+	size_t off;
 
 	if (left)
 		pos = evaltree (left, buf, err);
@@ -25,7 +26,9 @@ addr_plus (Node *left, Node *right, Buffer *buf, char *err)
 		if (!ret)
 			goto fail;
 
-		if (!setoffset (ret, pos, SETLEN))
+		off = setrightmost (pos, SETLEN);
+
+		if (!setshiftleft (ret, SETLEN, off))
 			goto fail;
 
 	} else { /* default to one */
@@ -33,7 +36,9 @@ addr_plus (Node *left, Node *right, Buffer *buf, char *err)
 		ret = makeset (SETLEN);
 		setaddmemb (ret, SETLEN, 1);
 
-		if (!setoffset (ret, pos, SETLEN))
+		off = setrightmost (pos, SETLEN);
+
+		if (!setshiftleft (ret, SETLEN, off))
 			goto fail;
 
 	}
