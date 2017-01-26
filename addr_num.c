@@ -6,17 +6,17 @@
 Set
 addr_num (Node *nod, Buffer *buf, char *err)
 {
-	return setaddmemb (makeset (SETLEN), buf->len, strtol (nod->str->v, NULL, 10));
+	return setaddmemb (makeset (SETLEN), SETLEN, strtol (nod->str->v, NULL, 10));
 }
 
 Set
 addr_dot (Node *nod, Buffer *buf, char *err)
 {
-	return setaddmemb (makeset (SETLEN), buf->len, buf->lineno);
+	return setaddmemb (makeset (SETLEN), SETLEN, buf->lineno);
 }
 
 Set
 addr_dollar (Node *nod, Buffer *buf, char *err)
 {
-	return setaddmemb (makeset (SETLEN), buf->len, buf->len);
+	return setaddmemb (makeset (SETLEN), SETLEN, buf->len);
 }
