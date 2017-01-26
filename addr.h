@@ -7,7 +7,7 @@
 #include "edna.h"
 #include "set.h"
 
-#define SETLEN (buf->len % (sizeof (subset) * CHAR_BIT))
+#define SETLEN (1 + buf->len / (sizeof (subset) * CHAR_BIT))
 
 #define VALUE		BIT(0)	/* 0-ary operator */
 #define OPERATOR	BIT(1)	/* binary operator */
