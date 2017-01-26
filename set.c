@@ -71,27 +71,71 @@ setintersect (Set A, Set B, size_t len)
 	return C;
 }
 
-/* doesn't work. needs a redesign */
 int
-setoffset (Set A, Set B, size_t len)
+setrightmost (Set A, size_t len)
 {
-	Set C, tmp;
-	size_t off = 0;
+	Set C = NULL;
+	subset c;
+	size_t i, j;
 
-	for (tmp = B; *tmp; ++tmp)
-		if (*tmp)
-			C = tmp;
+	for (i = 0; i < len; ++i)
+		if (A[i])
+			C = A + i;
 
-	for (tmp = C; *tmp >>= 1; ++off)
-		;
-	++off;
+	if (!C)
+		return (0);
 
-	if (off > len * sizeof (subset))
-		return FAIL;
+	c = *C;
+	do {
+		++j;
+	} while (c >> 1);
 
-	memmove (A, A + off, off);
+	j += i * 32;
 
-	return SUCC;
+	return (j);
+}
+
+Set
+setshift (Set A, size_t len, size_t off, int left)
+{
+	doubleset d;
+	Set B;
+	size_t i;
+
+	if (len * 32 < off)
+		return (NULL);
+
+	B = makeset (len);
+
+	for (i = len; i --> 0; d = 0){
+		if (left) {
+			if (i != len - 1)
+				d = A[i+1];
+			d <<= 32;
+			d |= A[i];
+
+			d <<= off % 32;
+		} else {
+			d = A[i];
+			d <<= 32;
+
+			if (i)
+				d |= A[i - 1];
+
+			d >>= off % 32;
+		}
+
+		d >>= 32;
+		B[i] = d;
+	}
+
+	memset (A, 0, len);
+	memcpy (A + off / 32, B, len - off / 32);
+
+	freeset (B);
+
+	return (A);
+
 }
 
 Set
