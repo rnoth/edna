@@ -131,7 +131,11 @@ parseline (String *s, Buffer *buf, Arg *arg, char *error)
 	delim = setdelim (s, &pos);
 
 	for (i = 0; (tmp = getarg (s, delim, &pos)); ++i) {
-		++arg->cnt;
+		arg->vec = realloc (arg->vec, ++arg->cnt);
+		if (!arg->vec) {
+			perror ("realloc");
+			goto finally;
+		}
 		arg->vec[i++] = tmp;
 	}
 
