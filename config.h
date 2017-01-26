@@ -30,7 +30,7 @@ static const Mode modes[] = {
 
 static const Command commands[] = {
        /* name,		func,		mode		defaddr */
-	{ "",		gotol,		NULL,		".", },
+	{ "",		print,		NULL,		".+1", },
 	{ "a",		insert,		"append",	".", },
 	{ "c",		insert,		"change",	".", },
 	{ "d",		delete,		NULL,		".", },
@@ -81,9 +81,12 @@ print (State *st, Buffer *buf, Arg *arg, char *error)
 {
 	if (!buf->curline->str) {
 		strcpy (error, "empty buffer");
-		return FAIL;
+		return (FAIL);
 	}
 
+
 	if (printf (PRINT_FMT) < 0) die ("printf");
-	return SUCC;
+	buf->curline = *arg->sel.v;
+	buf->lineno = getlineno (buf->curline);
+	return (SUCC);
 }
