@@ -86,11 +86,12 @@ setrightmost (Set A, size_t len)
 		return (0);
 
 	c = *C;
+	j = 0;
 	do {
 		++j;
-	} while (c >> 1);
+	} while (c >>= 1);
 
-	j += i * 32;
+	j += --i * 32;
 
 	return (j);
 }
@@ -107,6 +108,7 @@ setshift (Set A, size_t len, size_t off, int left)
 
 	B = makeset (len);
 
+	d = 0;
 	for (i = len; i --> 0; d = 0){
 		if (left) {
 			if (i != len - 1)
@@ -115,6 +117,7 @@ setshift (Set A, size_t len, size_t off, int left)
 			d |= A[i];
 
 			d <<= off % 32;
+			B[i] = d;
 		} else {
 			d = A[i];
 			d <<= 32;
@@ -123,10 +126,10 @@ setshift (Set A, size_t len, size_t off, int left)
 				d |= A[i - 1];
 
 			d >>= off % 32;
+			d >>= 32;
+			B[i] = d;
 		}
 
-		d >>= 32;
-		B[i] = d;
 	}
 
 	memset (A, 0, len);
