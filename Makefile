@@ -31,7 +31,7 @@ set.a: set.o
 
 # recipes
 edna: deps.mk $(OBJ) $(LIB)
-	@echo LD $@
+	@echo LD -o $@
 	@$(CC) $(LDFLAGS) -o $@ $(OBJ) $(LIB)
 
 libedna.so: deps.mk $(OBJ) $(LIB)
