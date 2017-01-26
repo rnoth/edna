@@ -13,7 +13,7 @@ resolveset (Set A, size_t len, Buffer *buf, char *error)
 	Set B;
 	size_t bit, off, *t, h;
 
-	if (!(ret = malloc (sizeof *ret))) die ("malloc");
+	if (!(ret = calloc (1, sizeof *ret))) die ("calloc");
 
 	if (!A)
 		return ret;
@@ -43,7 +43,8 @@ resolveset (Set A, size_t len, Buffer *buf, char *error)
 			tmp = walk (buf->top, *--t, error);
 			if (!tmp) {
 				free (t - h);
-				return (ret);
+				free (ret);
+				return (NULL);
 			}
 			vec_append (*ret, tmp);
 		}
