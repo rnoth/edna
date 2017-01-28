@@ -94,6 +94,7 @@ _vec_remove (Vector *inst, size_t loc)
 				 inst->c - loc);
 	else
 		memset ((char *)inst->v + loc, 0, inst->z);
+	--inst->c;
 
 	return (SUCC);
 
