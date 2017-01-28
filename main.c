@@ -5,6 +5,7 @@ int
 main (int argc, char** argv)
 {
 	char err[80];
+	void *var;
 	String *s;
 	State *st;
 	Buffer *buf;
@@ -13,33 +14,31 @@ main (int argc, char** argv)
 	st   = makestate ();
 	buf  = makebuf (NULL);
 	s    = makestring (LINESIZE);
+	*err = 0;
 
 	initst  (st);
-	parse_argv (st, err, argc, argv);
+	if (FAIL == parse_argv (st, err, argc, argv)) goto exit;
 	/* end init */
 
-	checkoutbuf (buf, st, 0);
-	*err = 0; /* needed because readline() messes with err (FIXME) */
-
 	/* main execution */
+	if (FAIL == checkoutbuf (buf, st, 0)) goto exit;
 	for (;;) {
 
-		if (!(*buf->mode->prompt) (st, buf))
-			goto finally;
-		if (!(*buf->mode->input) (s, err))
-			goto finally;
-		if (!(*buf->mode->eval) (st, buf, s, err))
-			goto finally;
+		if (FAIL == buf->mode->prompt (st, buf))	  goto finally;
+		if (FAIL == buf->mode->input (s, err))		  goto finally;
+		if (FAIL == buf->mode->parse (s, &var, buf, err)) goto finally;
+		if (FAIL == buf->mode->eval (st, buf, var, err))  goto finally;
 		continue;
 
 	finally:
-		if (!(*buf->mode->error) (st, buf, err))
+		if (FAIL == buf->mode->error (st, buf, err))
 			break;
 	}
 	/* end main */
 
+exit:
 	freestate	(st);
 	freestring	(s);
 
-	return 0;
+	return (0);
 }
