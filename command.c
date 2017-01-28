@@ -31,22 +31,11 @@ cleanup (Buffer *buf, Arg *arg)
 		free (arg->vec);
 	}
 	free_vector (arg->sel);
+	free (arg);
 
 	/* leave the structs in a sane state */
 	if (!buf->curline)
 		buf->curline = makeline ();
-}
-
-int
-setup (void)
-{
-	act.sa_handler = sighandle;
-
-	if (sigaction (SIGINT, &act, &old) == -1) {
-		perror ("sigaction");
-		return FAIL;
-	}
-	return SUCC;
 }
 
 int
@@ -60,69 +49,6 @@ cmdcmp (const void *a, const void *b)
 {
 	return strcmp (((Command *)a)->name, ((Command *)b)->name);
 }
-/* TODO: simplify */
-int
-evalcmd (State *st, Buffer *buf, String *str, char *error)
-{
-	int ret = FAIL;
-	size_t pos = 0;
-	String *s;		/* to hold the converted default address */
-	Command *cmd;
-	Arg arg;
-
-	if (setup() == FAIL)
-		return (FAIL);
-
-	memset (&arg, 0, sizeof arg);
-	if (!(arg.name = calloc (20, 1)))
-		die ("calloc");
-	make_vector (arg.sel);
-
-	if (sigsetjmp (jbuf, 1))
-		goto finally;
-
-	if (parseline (str, buf, &arg, error) == FAIL)
-		goto finally;
-
-	cmd = bsearch (arg.name, st->cmds.v, st->cmds.c,
-			sizeof *st->cmds.v, &cmdchck);
-
-	if (!cmd) {
-		strcpy (error, "unknown command");
-		ret = FAIL;
-		goto finally;
-	}
-
-	if (cmd->mode) {
-		arg.mode = malloc (strlen (cmd->mode) * sizeof *arg.mode);
-		if (!arg.mode) die("malloc");
-		strcpy (arg.mode, cmd->mode);
-	}
-
-	/* TODO: this could be it's own function? */
-	if (!arg.sel.v) {
-		Selection *tmp;
-		s = chartostr (cmd->defaddr);
-		tmp = getaddr (s, &pos, buf, error);
-		if (!tmp)
-			goto finally;
-
-		make_vector (arg.sel);
-		vec_copy (arg.sel, *tmp);
-		free_vector (*tmp);
-		free (tmp);
-	}
-
-	if ((*cmd->func) (st, buf, &arg, error) == FAIL)
-		goto finally;
-
-	ret = SUCC;
-
-finally:
-	cleanup (buf, &arg);
-	return ret;
-
-}
 
 void
 sighandle (int signo) {
@@ -131,4 +57,94 @@ sighandle (int signo) {
 		siglongjmp (jbuf, 1);
 		break;
 	}
+}
+
+#if 0
+int
+cmdinit (State *st, Buffer *buf)
+{
+	act.sa_handler = sighandle;
+
+	if (sigaction (SIGINT, &act, &old) == -1) {
+		perror ("sigaction");
+		return FAIL;
+	}
+	return (SUCC);
+}
+#endif
+
+int
+cmdparse (String *str, void *v, Buffer *buf, char *err)
+{
+	Arg **arg;
+
+	arg = (Arg **)v;
+	*arg = calloc (1, sizeof **arg);
+	make_vector ((*arg)->sel);
+
+	if (parseline (str, buf, *arg, err) == FAIL)
+		goto fail;
+
+	return (SUCC);
+
+fail:
+	free_vector ((*arg)->sel);
+	free (*arg);
+	return (FAIL);
+
+}
+
+int
+cmdeval (State *st, Buffer *buf, Arg *arg, char *err)
+{
+	int ret = FAIL;
+	size_t pos = 0;
+	Command *cmd;
+	Selection *sel;
+	String *addr;
+
+	act.sa_handler = sighandle;
+
+	if (sigaction (SIGINT, &act, &old) == -1) {
+		perror ("sigaction");
+		return FAIL;
+	}
+	if (sigsetjmp (jbuf, 1))
+		goto finally;
+
+	cmd = bsearch (arg->name, st->cmds.v, st->cmds.c,
+			sizeof *st->cmds.v, &cmdchck);
+
+	if (!cmd) {
+		strcpy (err, "unknown command");
+		ret = FAIL;
+		goto finally;
+	}
+
+	if (cmd->mode) {
+		arg->mode = malloc (strlen (cmd->mode) * sizeof *arg->mode);
+		if (!arg->mode) die("malloc");
+		strcpy (arg->mode, cmd->mode);
+	}
+	if (!arg->sel.v) {
+		addr = chartostr (cmd->defaddr);
+		sel = getaddr (addr, &pos, buf, err);
+		if (sel == NULL || sel == ERR)
+			goto finally;
+
+		vec_copy (arg->sel, *sel);
+		free_vector (*sel);
+		free (sel);
+	}
+
+
+	if (cmd->func (st, buf, arg, err) == FAIL)
+		goto finally;
+
+	ret = SUCC;
+
+finally:
+	cleanup (buf, arg);
+	return ret;
+
 }
