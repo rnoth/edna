@@ -14,6 +14,8 @@ tryarith (String *s, size_t *pos)
 	Node *ret;
 	size_t i, j, len;
 
+	len = 0;
+
 	for (i = j = 0; symbols[OP_ARITH][i]; i += len + 1, ++j) {
 		len = strlen (symbols[OP_ARITH] + i);
 		if (!strncmp (s->v + *pos, symbols[OP_ARITH] + i, len))
