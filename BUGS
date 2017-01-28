@@ -1,3 +1,0 @@
-Known issues
- - parse.c needs a reorg. currently has errors if it reaches the end of the buffer early
- - evalcmd is big and bloated
