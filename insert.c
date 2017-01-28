@@ -1,4 +1,3 @@
-#include <limits.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,26 +5,31 @@
 
 #include "edna.h"
 
-
-extern int inserror (State *st, Buffer *buf, char *error);
-extern int insline (State *st, Buffer *buf, String *str, char *error);
-
 int
-inserror (State *st, Buffer *buf, char *error)
+inserror (State *st, Buffer *buf, char *err)
 {
 	if (feof (buf->file))
 		clearerr (buf->file);
 	setmode (st, buf, "command");
-	return SUCC;
+	return (SUCC);
 }
 
 int
-insline (State *st, Buffer *buf, String *str, char *error)
+insparse (String *s, void *v, Buffer *buf, char *err)
+{
+	String **ret;
+
+	ret = (String **)v;
+	if (!strcmp (s->v, ".\n"))
+		return (FAIL);
+	*ret = s;
+	return (SUCC);
+}
+
+int
+insline (State *st, Buffer *buf, String *str, char *err)
 {
 	Line *tmp, *new;
-
-	if (!strcmp (str->v, ".\n"))
-		return FAIL;
 
 	if (buf->curline == buf->top) {
 		new = makeline();
@@ -34,13 +38,13 @@ insline (State *st, Buffer *buf, String *str, char *error)
 	}
 
 	if (!(tmp = putline (buf->curline, str->v, str->c))) {
-		strcpy (error, "insertion failed");
-		return FAIL;
+		strcpy (err, "insertion failed");
+		return (FAIL);
 	}
 
 	buf->curline = tmp;
 
 	++buf->lineno;
 	++buf->len;
-	return SUCC;
+	return (SUCC);
 }
