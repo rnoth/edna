@@ -22,10 +22,40 @@ setaddmemb (Set A, size_t len, size_t memb)
 	for (j = 0; j < len && memb > 0; ++j, memb -= i)
 		if (memb <= i) {
 			A[j] |= BIT (memb - 1);
-			return A;
+			return (A);
 		}
 
-	return NULL;
+	return (A);
+}
+
+Set
+setaddrange (Set A, size_t len, size_t beg, size_t end)
+{
+	size_t i, j;
+	unsigned int k;
+
+	if (beg > end)
+		return (NULL);
+
+	if (end > len)
+		return (NULL);
+
+	for (i = j = 0; i < len && j < len; i += 32, ++j) {
+		if (i + 31 < beg) {
+			k = BIT (beg - i);
+			k -= 1;
+			if (end - i < 32) {
+				j = BIT (i - end);
+				k -= 1;
+				k ^= j;
+			}
+			A[j] |= k;
+		}
+		if (i + 31 > end)
+			break;
+	}
+
+	return (A);
 }
 
 Set
