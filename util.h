@@ -5,8 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FAIL 0
-#define SUCC 1
+#define FAIL (0)
+#define SUCC (1)
+#define ERR ((void *)-1)
 
 #define MAX(X,Y)	((X) > (Y) ? (X) : (Y))
 #define MIN(X,Y)	((X) < (Y) ? (X) : (Y))
