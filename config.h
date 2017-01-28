@@ -23,9 +23,9 @@ extern int insprompt (State *, Buffer *);
 extern int print     (State *, Buffer *, Arg *, char *);
 
 static const Mode modes[] = {
-       /* name,	       prompter,    reader     evaluator,   handler, */
-	{ "command",   cmdprompt,   grabline,   evalcmd,     cmderror, },
-	{ "insert",    insprompt,   grabline,   insline,     inserror, },
+       /* name,	       init,   prompter,    reader      parser,     evaluator,   handler, */
+        { "command",   NULL,   cmdprompt,   grabline,   cmdparse,   cmdeval,     cmderror, },
+        { "insert",    NULL,   insprompt,   grabline,   insparse,   insline,     inserror, },
 };
 
 static const Command commands[] = {
