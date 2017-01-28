@@ -7,11 +7,6 @@
 
 #include "edna.h"
 
-extern size_t	getlineno	(Line *);
-extern Line*	makeline	();
-extern Line*	putline		(Line *, char *, size_t);
-extern Line*	walk		(Line *, int, char *error);
-
 static Line*	changeline	(Line *, char *, size_t);
 
 Line *
@@ -29,16 +24,33 @@ changeline (Line *l, char *line, size_t len)
 }
 
 size_t
-getlineno (Line *targ)
+getlineno (const Line *targ)
 {
 	size_t lineno;
 
 	lineno = 1;
-	while ((targ = targ->prev))
+	while ((targ = getprev(targ)))
 		++lineno;
 
 	return (lineno);
 }
+
+Line *
+getnext (const Line *li)
+{
+	if (li == NULL)
+		return (NULL);
+	return (li->next);
+}
+
+Line *
+getprev (const Line *li)
+{
+	if (li == NULL)
+		return (NULL);
+	return (li->prev);
+}
+
 Line*
 makeline ()
 {
