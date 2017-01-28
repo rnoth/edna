@@ -2,14 +2,8 @@
 #ifndef _edna_
 #define _edna_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <regex.h>
-
 #include "util.h"
-
 #include "vector.h"
-
 #include "str.h"
 
 #define LINESIZE (80)
@@ -17,14 +11,10 @@
 typedef unsigned char	byte;
 typedef size_t		linenum;
 
-typedef struct Buffer	Buffer;
-typedef struct Line	Line;
-typedef struct Macro	Macro;
-typedef struct Mark	Mark;
-typedef struct Mode	Mode;
-typedef struct Record	Record;
-typedef struct Register	Register;
-typedef struct State	State;
+typedef struct Buffer	 Buffer;
+typedef struct Line	 Line;
+typedef struct Mode	 Mode;
+typedef struct State	 State;
 typedef VECTOR_TAG (Line*, Selection) Selection;
 
 #include "cmd.h"
@@ -44,7 +34,6 @@ struct Buffer {
 
 	/* misc. info */
 	Mode*	mode;
-	Mark*	marks;
 };
 
 struct Line {
@@ -54,51 +43,33 @@ struct Line {
 	Line*	prev;
 };
 
-struct Macro {
-	char*	name;	/* macro name, not command name */
-	Command	cmd;
-	Arg	arg;
-};
-
-struct Mark {
-	char*	name;
-	Line*	line;
-	linenum	lineno;
-};
-
 struct Mode {
 	char*	name;
-	int	(*prompt)  (State *, Buffer *);
-	int	(*input)   (String *, char *);
-	int	(*eval)    (State *, Buffer *, String *, char *);
-	int	(*error)   (State *, Buffer *, char *);
-};
-
-struct Register {
-	char*	name;
-	char*	str;
+	int	(*init)	   ();
+	int	(*prompt)  ();
+	int	(*input)   ();
+	int	(*parse)   (String *, /*@out@*/void *, Buffer *, char *);
+	int	(*eval)    ();
+	int	(*error)   ();
 };
 
 struct State {
 	VECTOR (Command, cmds);
 	VECTOR (Buffer*, buffers);
 	VECTOR (Mode,	 modes);
-#if 0
-	Macro*		 macros;
-	Register*	 regs;
-#endif
 };
 
 /* buffer.c */
 extern int	addbuf		(State *, Buffer *);
 extern int	checkoutbuf	(Buffer *, State *, size_t);
-extern Buffer*	makebuf		(char *);
+extern Buffer*	makebuf		(/*@null@*/ char *);
 extern void	freebuf		(Buffer *);
 extern int	rmbuf		(State *, size_t);
 extern int	returnbuf	(Buffer *, State *);
 
 /* command.c */
-extern int	evalcmd		(State *, Buffer *, String *, char *);
+extern int	cmdparse	(String *, void *, Buffer *, char *);
+extern int	cmdeval		(State *, Buffer *, Arg *, char *);
 
 /* file.c */
 extern int	readbuf		(Buffer *, char *);
@@ -116,11 +87,14 @@ extern int	readline	(String *, FILE *);
 
 /* insert.c */
 extern int	inserror	(State *, Buffer *, char *);
+extern int	insparse	(String *, void *, Buffer *, char *);
 extern int	insline		(State *, Buffer *, String *, char *);
 extern void	inshandle	(int);
 
 /* line.c */
-extern size_t	getlineno	(Line *);
+extern size_t	getlineno	(const Line *);
+extern Line*	getnext		(const Line *);
+extern Line*	getprev		(const Line *);
 extern Line*	makeline	(void);
 extern Line*	putline		(Line *, char *, size_t);
 extern Line*	walk		(Line *, int, char *);
