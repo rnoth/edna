@@ -13,13 +13,13 @@ cmd_switchbuf (State *st, Buffer *buf, Arg *arg, char *error)
 
 	} else if (!strcmp (arg->mode, "next")) {
 		returnbuf (buf, st);
-		checkoutbuf (buf, st, st->buffers.c - 1);
+		checkoutbuf (buf, st, 0);
 
 		return (SUCC);
 
 	} else if (!strcmp (arg->mode, "prev")) {
 		returnbuf (buf, st);
-		checkoutbuf (buf, st, 0);
+		checkoutbuf (buf, st, st->buffers.c - 1);
 
 		return (SUCC);
 	}
@@ -45,9 +45,6 @@ cmd_openbuf (State *st, Buffer *buf, Arg *arg, char *error)
 		readbuf (tmp, error);
 		addbuf (st, tmp);
 	} while (++i < arg->param.c);
-
-	returnbuf (buf, st);
-	checkoutbuf (buf, st, st->buffers.c - 1);
 
 	return SUCC;
 }
