@@ -14,28 +14,32 @@ appendstring (String *dest, String *src)
 	int ret = 0; /* false */
 	void *tmp;
 	if (dest->m <= dest->b + src->b) { /* not enough space */
-		tmp = realloc (dest->v, dest->b + src->b);
-		if (!tmp) [
-			ret = 1; /* error */
-			goto finally;
-		}
-		dest->v = tmp;
-		dest->m = dest->b + src->b;
 }
 #endif
 		
 int
 appendchar (String *dest, char src)
 {
-	/* TODO: this probably isn't the right behavior */
-	if (!isascii (src)) /* don't make an invalid utf-8 sequence */
-		return 0;
-	if (dest->b == dest->m && !resizestring (dest, dest->m * 2))
-		return 0;
-	dest->v[dest->b++] = src;
-	dest->v[dest->b++] = 0;
+	if (dest->b + 1 >= dest->m)
+		if (resizestring (dest, dest->m * 2) == FAIL)
+			return (FAIL);
+	dest->v[dest->b - 1] = src;
+	dest->v[dest->b] = 0;
 	++dest->c;
-	return 1;
+	++dest->b;
+	return (SUCC);
+}
+
+int
+appendchars (String *dest, char *src)
+{
+	if (dest->b + strlen (src) > dest->m)
+		if (resizestring (dest, dest->m * 2))
+			return (FAIL);
+	strcat (dest->v, src);
+	dest->b += strlen (src);
+	dest->c += ustrlen (src);
+	return (SUCC);
 }
 
 String *
@@ -52,17 +56,28 @@ chartostr (char *src)
 }
 
 int
+copychars (String *dest, const char *src)
+{
+	if (dest->m < strlen (src))
+		if (resizestring (dest, dest->m * 2) == FAIL)
+			return (FAIL);
+
+	strcpy (dest->v, src);
+	dest->b = strlen (src) + 1;
+	dest->c = ustrlen (src);
+	return (SUCC);
+}
+
+int
 copystring (String *dest, String *src)
 {
-	/* TODO: recover from errors instead of just returing failure */
-	if (!dest || !dest->v)
-		return 0; /* error */
 	if (dest->m < src->c)
-		return 0;
+		if (FAIL == resizestring (dest, src->m))
+			return (FAIL);
 	memset (dest->v, 0, dest->m);
 	memcpy (dest->v, src->v, src->c);
 	dest->c = src->c;
-	return 1;
+	return (SUCC);
 }
 
 void
@@ -83,6 +98,7 @@ makestring (size_t len)
 		die ("calloc");
 
 	ret->m = len;
+	ret->b = 1;
 
 	return ret;
 }
