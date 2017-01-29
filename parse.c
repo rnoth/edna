@@ -25,7 +25,7 @@ getname (const String *s, size_t *pos)
 	size_t off, ext;
 	wchar_t wc;
 
-	if (0 >= s->b - *pos)
+	if (*pos >= s->b - 1)
 		return (ERR);
 
 	off = esc = ext = 0;
@@ -56,7 +56,7 @@ getname (const String *s, size_t *pos)
 		free (cur);
 		cur = NULL;
 
-	} while (off < s->b);
+	} while (*pos < s->b);
 	ret[off] = 0;
 
 	if (!cur) free (cur);
@@ -69,7 +69,7 @@ setdelim (const String *s, size_t *pos)
 	char *ret;
 	int ext;
 
-	if (s->b - *pos <= 0)
+	if (*pos >= s->b - 1)
 		return (NULL);
 
 	ret = get_uchar (s->v + *pos);
@@ -87,14 +87,14 @@ getarg (const String *s, const char *delim, size_t *pos)
 	size_t off;
 	int ext, esc;
 
-	if (s->b - *pos <= 0)
+	if (*pos >= s->b)
 		return (NULL);
 
-	ret = malloc (s->b - *pos);
+	ret = malloc (s->b - *pos + 1);
 	if (!ret) die ("malloc");
 
 	off = esc = ext = 0;
-	while (*pos < s->b) {
+	while (*pos < s->b - 1) {
 		ext = uchar_extent (s->v[*pos]);
 		if (ext == -1)
 			ext = 1;
@@ -103,7 +103,7 @@ getarg (const String *s, const char *delim, size_t *pos)
 			esc = 1;
 			continue;
 		}
-		if (!esc && !strcmp (s->v + *pos, delim))
+		if (!esc && !strncmp (s->v + *pos, delim, strlen (delim)))
 			break;
 		else if (s->v[*pos] == '\n')
 			break;
@@ -114,6 +114,10 @@ getarg (const String *s, const char *delim, size_t *pos)
 		off += ext;
 	}
 
+	if (off == 0) {
+		free (ret);
+		return (NULL);
+	}
 	*pos += ext;
 	ret[off] = 0; /* terminate */
 	return (ret);
@@ -137,33 +141,39 @@ parseline (String *s, Buffer *buf, Arg *arg, char *error)
 
 	/* command name */
 	tmp = getname (s, &pos);
-	if (tmp == ERR)
+	if (tmp == ERR) {
+		strcpy (error, "parseline(): getname() returned ERR");
 		goto finally;
+	}
 	arg->name = tmp;
 
 	/* delimiter */
 	tmp = setdelim (s, &pos);
-	if (tmp == ERR)
+	if (tmp == ERR) {
+		strcpy (error, "parseline(): setdelim() returned ERR");
 		goto finally;
+	}
 	delim = tmp;
 
 	/* argument vector */
-	for (;;) {
+	tmp = getarg (s, delim, &pos);
+	if (tmp == ERR)
+		goto cleanup_delim;
+	if (tmp)
+		make_vector (arg->param);
+	while (tmp) {
+		vec_append (arg->param, tmp);
 		tmp = getarg (s, delim, &pos);
-		if (tmp == ERR)
-			goto finally;
-		if (tmp == NULL)
-			break;
-		arg->vec = realloc (arg->vec, ++arg->cnt);
-		if (!arg->vec) {
-			perror ("realloc");
-			goto finally;
+		if (tmp == ERR) {
+			strcpy (error, "parselin(): getarg() returned ERR");
+			goto cleanup_delim;
 		}
-		arg->vec[arg->cnt - 1] = tmp;
 	}
 
-	free (delim);
 	ret = SUCC;
+
+cleanup_delim:
+	free (delim);
 
 finally:
 	return (ret);
