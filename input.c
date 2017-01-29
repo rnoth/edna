@@ -14,9 +14,13 @@ grabline (String *s, char *err)
 	int ret = SUCC;
 
 	errno = 0;
-	if (!readline (s, stdin)) {
-		strncpy (err, strerror (errno), 20);
+	if (FAIL == readline (s, stdin)) {
+		if (feof (stdin))
+			strcpy (err, "quit");
+		else
+			strncpy (err, strerror (errno), 20);
 		ret = FAIL;
+		clearerr (stdin);
 	}
 
 	return (ret);
@@ -27,24 +31,13 @@ int
 readline (String *str, FILE *file)
 {
 #	define CHUNK 20
-	char ch, *tmp, buf[6];
+	char ch, buf[5];
 	int i, ext, ret = SUCC;
-	size_t off = 0;
 
+	copychars (str, "");
 	for (;;) {
 		i = 0;
 		clearerr (file);
-
-		if (off + 4 >= str->m) { /* TODO: move resize logic to str.h */
-			tmp = realloc (str->v, str->m + CHUNK);
-			if (!tmp) {
-				perror ("realloc");
-				ret = FAIL;
-				break;
-			}
-			str->v = tmp;
-			str->m += CHUNK;
-		}
 
 		if (!fread (&ch, 1, 1, file))
 			goto fail;
@@ -52,9 +45,7 @@ readline (String *str, FILE *file)
 		buf[i++] = ch;
 
 		if (isascii(ch)) {
-			str->v[off] = ch;
-			++str->c;
-			off += i;
+			appendchar (str, ch);
 			if (ch == '\n')
 				break;
 			continue;
@@ -70,9 +61,7 @@ readline (String *str, FILE *file)
 		}
 
 		buf[i] = 0;
-		strcpy (str->v + off, buf);
-		++str->c;
-		off += i;
+		appendchars (str, buf);
 
 		continue;
 
@@ -84,9 +73,6 @@ readline (String *str, FILE *file)
 		ret = FAIL;
 		break;
 		}
-
-	str->b = off;
-	str->v[off] = 0;
 
 	return (ret);
 }
