@@ -19,7 +19,9 @@ cmd_switchbuf (State *st, Buffer *buf, Arg *arg, char *error)
 
 	} else if (!strcmp (arg->mode, "prev")) {
 		returnbuf (buf, st);
-		checkoutbuf (buf, st, st->buffers.c - 1);
+		checkoutbuf (buf, st, (st->buffers.c != 1)
+					? st->buffers.c - 2
+					: 0 );
 
 		return (SUCC);
 	}
