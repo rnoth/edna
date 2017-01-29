@@ -5,6 +5,12 @@
 #include "edna.h"
 #include "cmd.h"
 
+/* TODO: assumes way too much about the internals of String */
+#if 0 
+/*
+ * retiring this after switching from arg->vec to arg->param.
+ * I just don't feel like maintaining this at the moment
+ */
 int
 subst (State *st, Buffer *buf, Arg *arg, char *error)
 {
@@ -23,12 +29,12 @@ subst (State *st, Buffer *buf, Arg *arg, char *error)
 
 	if (!(m = malloc (sizeof *m))) die ("malloc");
 
-	if (regexec (re, buf->curline->str, 1, m, 0) == REG_NOMATCH) {
+	if (regexec (re, buf->curline->str->v, 1, m, 0) == REG_NOMATCH) {
 		strcpy (error, "no matches");
 		goto finally;
 	}
 
-	i = strlen (buf->curline->str + m->rm_eo);
+	i = strlen (buf->curline->str->v + m->rm_eo);
 	if (m->rm_so + i + strlen (arg->vec[1])
 	    > buf->curline->len) {
 		strcpy (error, "too large a replacement (FIXME)");
@@ -36,10 +42,10 @@ subst (State *st, Buffer *buf, Arg *arg, char *error)
 	}
 
 	if (!(tail = malloc (i))) die ("malloc");
-	memcpy (tail, buf->curline->str+ m->rm_eo, i + 1);
-	memcpy (buf->curline->str + m->rm_so, arg->vec[1], strlen (arg->vec[1]) + 1);
-	j = strlen (buf->curline->str);
-	memcpy (buf->curline->str + j, tail, i + 1);
+	memcpy (tail, buf->curline->str->v + m->rm_eo, i + 1);
+	memcpy (buf->curline->str->v + m->rm_so, arg->vec[1], strlen (arg->vec[1]) + 1);
+	j = strlen (buf->curline->str->v);
+	memcpy (buf->curline->str->v + j, tail, i + 1);
 
 	regfree (re);
 	free (m);
@@ -52,3 +58,4 @@ finally:
 	free (m);
 	return SUCC;
 }
+#endif
