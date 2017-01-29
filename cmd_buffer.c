@@ -4,26 +4,24 @@
 #include "edna.h"
 #include "cmd.h"
 
-extern int	switchbuf	(State *, Buffer *, Arg *, char *);
-extern int	openbuf		(State *, Buffer *, Arg *, char *);
-
 int
-switchbuf (State *st, Buffer *buf, Arg *arg, char *error)
+cmd_switchbuf (State *st, Buffer *buf, Arg *arg, char *error)
 {
 	if (!arg->mode) {
 		strcpy (error, "no option specified");
-		return FAIL;
+		return (FAIL);
+
 	} else if (!strcmp (arg->mode, "next")) {
-		/* TODO: this code shouldn't run
-		 * into errors, but it should handle
-		 * them in any case */
-		returnbuf (buf, st);
-		checkoutbuf (buf, st, 1);
-		return SUCC;
-	} else if (!strcmp (arg->mode, "prev")) {
 		returnbuf (buf, st);
 		checkoutbuf (buf, st, st->buffers.c - 1);
-		return SUCC;
+
+		return (SUCC);
+
+	} else if (!strcmp (arg->mode, "prev")) {
+		returnbuf (buf, st);
+		checkoutbuf (buf, st, 0);
+
+		return (SUCC);
 	}
 
 	strcpy (error, "unknown option");
@@ -31,22 +29,22 @@ switchbuf (State *st, Buffer *buf, Arg *arg, char *error)
 }
 
 int
-openbuf (State *st, Buffer *buf, Arg *arg, char *error)
+cmd_openbuf (State *st, Buffer *buf, Arg *arg, char *error)
 {
 	Buffer *tmp;
-	size_t i = 0;
+	size_t i;
 
-	if (!arg->cnt) {
-		strcpy (error, "no filename provided");
+	if (!arg->param.c) {
+		strcpy (error, "no filenames provided");
 		return FAIL;
 	}
 
-	/* TODO: error handling */
+	i = 0;
 	do {
-		tmp = makebuf (arg->vec[i]);
+		tmp = makebuf (arg->param.v[i]);
 		readbuf (tmp, error);
 		addbuf (st, tmp);
-	} while (++i < arg->cnt);
+	} while (++i < arg->param.c);
 
 	returnbuf (buf, st);
 	checkoutbuf (buf, st, st->buffers.c - 1);
