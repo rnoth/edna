@@ -88,12 +88,12 @@ _vec_remove (Vector *inst, size_t loc)
 	if (loc > inst->c)
 		return (SUCC); /* should this be an error? */
 
-	memset ((char *)inst->v + loc, 0, inst->z);
+	memset ((char *)inst->v + loc * inst->z, 0, inst->z);
 	--inst->c;
 
 	if (loc < inst->c)
-		memmove ((char *)inst->v + (loc - 1) * inst->z,
-			 (char *)inst->v + loc * inst->z,
+		memmove ((char *)inst->v + loc * inst->z,
+			 (char *)inst->v + (loc + 1) * inst->z,
 			 (inst->c - loc) * inst->z);
 
 	return (SUCC);
