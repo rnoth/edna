@@ -7,7 +7,7 @@
 #include "util.h"
 
 char *
-get_uchar (char *s)
+get_uchar (const char *s)
 {
 	char *ret;
 	int ext;
@@ -27,7 +27,7 @@ get_uchar (char *s)
 }
 
 int
-uchar_extent (unsigned char ch)
+uchar_extent (const unsigned char ch)
 {
 	if (isascii (ch))
 		return (1);
@@ -40,3 +40,14 @@ uchar_extent (unsigned char ch)
 	else
 		return (-1); /* error */
 } 
+
+size_t
+ustrlen (const char *s)
+{
+	size_t ret = 0;
+
+	while (*s && ++ret)
+		s += uchar_extent (*s);
+
+	return (ret);
+}
