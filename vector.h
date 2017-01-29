@@ -10,7 +10,7 @@
 #define VECSIZ 16
 
 #define vec_append(inst, item)		_vec_append ((Vector *)&(inst), &(item))
-#define vec_concat(inst, data, len)	_vec_concat ((Vector *)&(inst), data, len)
+#define vec_concat(inst, data, len)	_vec_concat ((Vector *)&(inst), data, len * sizeof *data)
 #define vec_copy(dest, src)		_vec_copy   ((Vector *)&(dest), (Vector *)&(src))
 #define vec_insert(inst, loc, item)	_vec_insert ((Vector *)&(inst), loc, &(item))
 #define vec_remove(inst, loc)		_vec_remove ((Vector *)&(inst), loc)
