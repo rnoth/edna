@@ -22,17 +22,6 @@ addnode (Node *mother, Node *child)
 	return ret;
 }
 
-int
-extendbranch_r (Node *mother, Node *child)
-{
-	if (!addnode (child, mother->right))
-		return (FAIL);
-
-	mother->right = child;
-
-	return (SUCC);
-}
-
 Node *
 getroot (Node *cur)
 {
@@ -44,7 +33,7 @@ getroot (Node *cur)
 void
 freenode (Node *cur)
 {
-	free (cur->str);
+	freestring (cur->str);
 	free (cur);
 }
 
