@@ -15,9 +15,14 @@ extern int	parse_argv	(State *, char *, int, char **);
 void
 freestate (State *st)
 {
+	size_t i;
+
+	for (i = 0; i < st->buffers.c; ++i)
+		freebuf (st->buffers.v[i]);
 	free_vector (st->buffers);
 	free_vector (st->cmds);
 	free_vector (st->modes);
+	free (st);
 }
 
 void
