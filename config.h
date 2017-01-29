@@ -4,7 +4,7 @@
 
 /* settings */
 #define PROMPT		"\r\033[K:"
-#define PRINT_FMT	"%s", (*arg->sel.v)->str
+#define PRINT_FMT	"%s", (*arg->sel.v)->str->v
 #define INS_PROMPT	" \b"
 #define ERROR		"?\n"
 #define FILENAME	"/tmp/edna.hup"
@@ -30,24 +30,24 @@ static const Mode modes[] = {
 
 static const Command commands[] = {
        /* name,		func,		mode		defaddr */
-	{ "",		print,		NULL,		".+1", },
-	{ "a",		insert,		"append",	".", },
-	{ "c",		insert,		"change",	".", },
-	{ "d",		delete,		NULL,		".", },
-	{ "e",		edit,		NULL,		".", },
-	{ "E",		edit,		"force",	".", },
-	{ "f",		filename,	NULL,		".", },
-	{ "h",		help,		NULL,		".", },
-	{ "i",		insert,		NULL,		".", },
-	{ "next",	switchbuf,	"next",		".", },
-	{ "o",		openbuf,	NULL,		".", },
-	{ "p",		print,		NULL,		".", },
-	{ "prev",	switchbuf,	"prev",		".", },
-	{ "q",		quit,		NULL,		".", },
-	{ "s",		subst,		NULL,		".", },
-	{ "w",		cmd_write,	NULL,		".", },
-	{ "wq",		quit,		"write",	".", },
-	{ "Q", 		quit,		"force",	".", },
+	{ "",		cmd_print,	NULL,		".+1", },
+	{ "a",		cmd_insert,	"append",	".", },
+	{ "c",		cmd_insert,	"change",	".", },
+	{ "d",		cmd_delete,	NULL,		".", },
+	{ "e",		cmd_edit,	NULL,		NULL, },
+	{ "E",		cmd_edit,	"force",	NULL, },
+	{ "f",		cmd_filename,	NULL,		NULL, },
+	{ "h",		cmd_help,	NULL,		NULL, },
+	{ "i",		cmd_insert,	"insert",	".", },
+	{ "next",	cmd_switchbuf,	"next",		NULL, },
+	{ "o",		cmd_openbuf,	NULL,		NULL, },
+	{ "p",		cmd_print,	NULL,		".", },
+	{ "prev",	cmd_switchbuf,	"prev",		NULL, },
+	{ "q",		cmd_quit,	NULL,		NULL, },
+//	{ "s",		subst,		NULL,		".", },
+	{ "w",		cmd_write,	NULL,		NULL, },
+	{ "wq",		cmd_quit,	"write",	".", },
+	{ "Q", 		cmd_quit,	"force",	".", },
 };
 
 /* functions */
@@ -77,13 +77,12 @@ insprompt (State *st, Buffer *buf)
 }
 
 int
-print (State *st, Buffer *buf, Arg *arg, char *error)
+cmd_print (State *st, Buffer *buf, Arg *arg, char *error)
 {
 	if (!buf->curline->str) {
 		strcpy (error, "empty buffer");
 		return (FAIL);
 	}
-
 
 	if (printf (PRINT_FMT) < 0) die ("printf");
 	buf->curline = *arg->sel.v;
