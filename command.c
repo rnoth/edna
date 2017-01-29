@@ -10,7 +10,8 @@
 #include "cmd.h"
 #include "addr.h"
 
-static void	cleanup	(Buffer *, Arg *arg);
+static void	cleanup	(Buffer *, Arg *);
+static int	runcmd (State *, Buffer *, Command *, Arg *, char *err);
 static void	sighandle (int);
 
 static sigjmp_buf jbuf;
@@ -39,15 +40,39 @@ cleanup (Buffer *buf, Arg *arg)
 }
 
 int
-cmdchck (const void *a, const void *b)
+runcmd (State *st, Buffer *buf, Command *cmd, Arg *arg, char *err)
 {
-	return strcmp (((char *)a), ((Command *)b)->name);
-}
+	size_t pos = 0;
+	Selection *sel;
+	String *addr;
+	if (!cmd) {
+		strcpy (err, "unknown command");
+		goto fail;
+	}
 
-int
-cmdcmp (const void *a, const void *b)
-{
-	return strcmp (((Command *)a)->name, ((Command *)b)->name);
+	if (cmd->mode) {
+		arg->mode = malloc (strlen (cmd->mode) * sizeof *arg->mode);
+		if (!arg->mode) die("malloc");
+		strcpy (arg->mode, cmd->mode);
+	}
+
+	if (!arg->sel.v && cmd->defaddr) {
+		addr = chartostr (cmd->defaddr);
+
+		sel = getaddr (addr, &pos, buf, err);
+		if (sel == NULL || sel == ERR)
+			goto fail;
+
+		vec_copy (arg->sel, *sel);
+
+		free_vector (*sel);
+		free (sel);
+	}
+
+	return (cmd->func (st, buf, arg, err));
+
+fail:
+	return (FAIL);
 }
 
 void
@@ -57,6 +82,18 @@ sighandle (int signo) {
 		siglongjmp (jbuf, 1);
 		break;
 	}
+}
+
+int
+cmdchck (const void *a, const void *b)
+{
+	return strcmp (((char *)a), ((Command *)b)->name);
+}
+
+int
+cmdcmp (const void *a, const void *b)
+{
+	return strcmp (((Command *)a)->name, ((Command *)b)->name);
 }
 
 #if 0
@@ -98,10 +135,7 @@ int
 cmdeval (State *st, Buffer *buf, Arg *arg, char *err)
 {
 	int ret = FAIL;
-	size_t pos = 0;
 	Command *cmd;
-	Selection *sel;
-	String *addr;
 
 	act.sa_handler = sighandle;
 
@@ -115,36 +149,12 @@ cmdeval (State *st, Buffer *buf, Arg *arg, char *err)
 	cmd = bsearch (arg->name, st->cmds.v, st->cmds.c,
 			sizeof *st->cmds.v, &cmdchck);
 
-	if (!cmd) {
-		strcpy (err, "unknown command");
-		ret = FAIL;
-		goto finally;
-	}
-
-	if (cmd->mode) {
-		arg->mode = malloc (strlen (cmd->mode) * sizeof *arg->mode);
-		if (!arg->mode) die("malloc");
-		strcpy (arg->mode, cmd->mode);
-	}
-	if (!arg->sel.v) {
-		addr = chartostr (cmd->defaddr);
-		sel = getaddr (addr, &pos, buf, err);
-		if (sel == NULL || sel == ERR)
-			goto finally;
-
-		vec_copy (arg->sel, *sel);
-		free_vector (*sel);
-		free (sel);
-	}
-
-
-	if (cmd->func (st, buf, arg, err) == FAIL)
-		goto finally;
-
-	ret = SUCC;
+	if (runcmd (st, buf, cmd, arg, err) == SUCC)
+		ret = SUCC;
 
 finally:
 	cleanup (buf, arg);
-	return ret;
+	return (ret);
 
 }
+
