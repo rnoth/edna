@@ -10,7 +10,6 @@ DEBUG   ?= yes
 SRC  != find . -maxdepth 1 -name '*.c'
 OBJ  := ${SRC:.c=.o}
 TEST != find ./tests -name '*.c' | sed s/.c$$//
-LIB  := str.a vector.a set.a
 TARG := edna
 VERS := 0.1
 
