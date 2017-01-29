@@ -51,7 +51,7 @@ runcmd (State *st, Buffer *buf, Command *cmd, Arg *arg, char *err)
 	}
 
 	if (cmd->mode) {
-		arg->mode = malloc (strlen (cmd->mode) * sizeof *arg->mode);
+		arg->mode = malloc (strlen (cmd->mode) + 1 * sizeof *arg->mode);
 		if (!arg->mode) die("malloc");
 		strcpy (arg->mode, cmd->mode);
 	}
@@ -63,6 +63,7 @@ runcmd (State *st, Buffer *buf, Command *cmd, Arg *arg, char *err)
 		if (sel == NULL || sel == ERR)
 			goto fail;
 
+		make_vector (arg->sel);
 		vec_copy (arg->sel, *sel);
 
 		free_vector (*sel);
