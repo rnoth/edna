@@ -4,11 +4,11 @@
 int
 main (int argc, char** argv)
 {
-	char err[80];
-	void *var;
-	String *s;
-	State *st;
-	Buffer *buf;
+	char	 err[80];
+	void	*var;
+	String	*s;
+	State	*st;
+	Buffer	*buf;
 
 	/* init stuff */
 	st   = makestate ();
@@ -22,6 +22,7 @@ main (int argc, char** argv)
 
 	/* main execution */
 	if (FAIL == checkoutbuf (buf, st, 0)) goto exit;
+
 	for (;;) {
 
 		if (FAIL == buf->mode->prompt (st, buf))	  goto finally;
@@ -37,6 +38,7 @@ main (int argc, char** argv)
 	/* end main */
 
 exit:
+	freebuf		(buf);
 	freestate	(st);
 	freestring	(s);
 
