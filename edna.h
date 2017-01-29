@@ -38,7 +38,7 @@ struct Buffer {
 
 struct Line {
 	size_t	len;
-	char*	str;
+	String*	str;
 	Line*	next;
 	Line*	prev;
 };
@@ -48,7 +48,7 @@ struct Mode {
 	int	(*init)	   ();
 	int	(*prompt)  ();
 	int	(*input)   ();
-	int	(*parse)   (String *, /*@out@*/void *, Buffer *, char *);
+	int	(*parse)   ();
 	int	(*eval)    ();
 	int	(*error)   ();
 };
@@ -61,9 +61,11 @@ struct State {
 
 /* buffer.c */
 extern int	addbuf		(State *, Buffer *);
+extern int	addline		(Buffer *, Line *, size_t);
 extern int	checkoutbuf	(Buffer *, State *, size_t);
-extern Buffer*	makebuf		(/*@null@*/ char *);
+extern Buffer*	makebuf		(char *);
 extern void	freebuf		(Buffer *);
+extern void	setcurline	(Buffer *, Line *);
 extern int	rmbuf		(State *, size_t);
 extern int	returnbuf	(Buffer *, State *);
 
@@ -95,16 +97,14 @@ extern void	inshandle	(int);
 extern size_t	getlineno	(const Line *);
 extern Line*	getnext		(const Line *);
 extern Line*	getprev		(const Line *);
+extern void	freelines	(Line *, Line *);
+extern void	linklines	(Line *, Line*);
 extern Line*	makeline	(void);
-extern Line*	putline		(Line *, char *, size_t);
-extern Line*	walk		(Line *, int, char *);
+extern int	changeline	(Line *, String *);
+extern Line*	walk		(Line *, int);
 
 /* mode.c */
 extern int	setmode		(State *, Buffer *, char *);
-
-/* region.c */
-extern void	freelines	(Line *, Line *);
-extern void	linklines	(Line *, Line*);
 
 /* util.c */
 extern void	chomp		(String);
