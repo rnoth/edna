@@ -4,6 +4,22 @@
 #include "addr.h"
 #include "str.h"
 
+const Operator arithops[] = {
+	addr_plus,
+	NULL
+};
+
+const Evaluator nums[] = {
+	addr_num,
+	NULL
+};
+
+const Evaluator numsyms[] = {
+	addr_dot,
+	addr_dollar,
+	NULL
+};
+
 /*
  * FIXME: lots of duplicated code in here
  */
@@ -30,6 +46,7 @@ tryarith (String *s, size_t *pos)
 	ret->op = arithops[j];
 	strncpy (ret->str->v, symbols[OP_ARITH] + i, len);
 	ret->str->b = len + 1;
+	ret->tok = OP_ARITH;
 
 	*pos += len;
 
@@ -49,9 +66,10 @@ trynum (String *s, size_t *pos)
 	if (!ret->str->c) { /* no numbers */
 		freenode (ret);
 		ret = NULL;
-	} else
+	} else {
 		ret->ev = addr_num;
-
+		ret->tok = NUM_LITERAL;
+	}
 	return (ret);
 
 }
@@ -63,10 +81,8 @@ trysym (String *s, size_t *pos)
 	size_t i, j, len;
 
 	for (i = j = 0; symbols[NUM_SYMBOL] + i; i += len + 1, ++j) {
-
 		len = strlen (symbols[NUM_SYMBOL] + i);
-
-		if (!strncmp (s->v, symbols[NUM_SYMBOL] + i, len))
+		if (!strncmp (s->v + *pos, symbols[NUM_SYMBOL] + i, len))
 			break;
 	}
 
@@ -76,6 +92,7 @@ trysym (String *s, size_t *pos)
 	ret = makenode ();
 
 	ret->ev = numsyms[j];
+	ret->tok = NUM_SYMBOL;
 	/* TODO: put this in its own function */
 	strncpy (ret->str->v, symbols[NUM_SYMBOL] + i, len);
 	ret->str->b = len + 1;
