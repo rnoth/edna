@@ -55,6 +55,8 @@ checkoutbuf (Buffer *dest, State *st, size_t which)
 
 	src = st->buffers.v[which];
 	memcpy (dest, src, sizeof *dest);
+
+	free (src);
 	vec_remove (st->buffers, which);
 
 	dest->mode = st->modes.v;
@@ -79,14 +81,14 @@ makebuf (char *filename)
 	
 	if (!(buf = calloc (1, sizeof *buf)))
 		die ("calloc");
-	if (!(buf->filename = calloc (LINESIZE, sizeof *buf->filename)))
-		die ("calloc");
-
 	if (filename) {
+		if (!(buf->filename = calloc (LINESIZE, sizeof *buf->filename)))
+			die ("calloc");
+
 		strcpy (buf->filename, filename);
 	}
 	
-	return buf;
+	return (buf);
 }
 
 void
