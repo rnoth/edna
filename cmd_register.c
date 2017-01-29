@@ -4,10 +4,8 @@
 #include "edna.h"
 #include "cmd.h"
 
-extern int	delete		(State *, Buffer *, Arg *, char *);
-
 int
-delete (State *st, Buffer *buf, Arg *arg, char *error)
+cmd_delete (State *st, Buffer *buf, Arg *arg, char *error)
 {
 	Line **targ, *tmp;
 
@@ -24,7 +22,7 @@ delete (State *st, Buffer *buf, Arg *arg, char *error)
 	if (!tmp)
 		tmp = makeline ();
 
-	freelines(*targ, (*targ)->next);
+	freelines (*targ, (*targ)->next);
 
 	buf->curline = tmp;
 	buf->lineno  = getlineno (tmp);
