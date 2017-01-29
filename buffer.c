@@ -99,7 +99,13 @@ setcurline (Buffer *buf, Line *li)
 int
 returnbuf (Buffer *src, State *st)
 {
-	vec_insert (st->buffers, 0, src);
+	Buffer *tmp;
+
+	tmp = makebuf (NULL);
+
+	memcpy (tmp, src, sizeof *tmp);
+	vec_append (st->buffers, tmp);
+	memset (tmp, 0, sizeof *tmp);
 	return SUCC;
 }
 
