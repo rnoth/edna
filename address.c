@@ -23,22 +23,6 @@ const Lexer lexers[] = {
 	NULL
 };
 
-const Operator arithops[] = {
-	addr_plus,
-	NULL
-};
-
-const Evaluator nums[] = {
-	addr_num,
-	NULL
-};
-
-const Evaluator numsyms[] = {
-	addr_dot,
-	addr_dollar,
-	NULL
-};
-
 const Rule ruleset[] = {
 	VALUE | NUMBER,
 	VALUE | LINE,
@@ -55,7 +39,7 @@ getaddr (String *s, size_t *pos, Buffer *buf, char *err)
 
 	tree = parseaddr (s, pos, err);
 	sel  = evaltree (tree, buf, err);
-	ret  = resolveset (sel, buf->len, buf, err);
+	ret  = resolveset (sel, SETLEN, buf, err);
 	freetree (tree);
 	return (ret);
 }
@@ -72,7 +56,7 @@ evaltree (Node *cur, Buffer *buf, char *err)
 	} else if (ruleset[cur->tok] & OPERATOR) {
 		return ((cur->op) (cur->left, cur->right, buf, err));
 	} else
-		strcpy (err, "unknown token (this is not your fault)");
+		strcpy (err, "evaltree(): unknown token");
 		return NULL;
 }
 
@@ -91,7 +75,6 @@ next (String *s, size_t *pos)
 		if (!tmp)
 			continue;
 		ret = tmp;
-		ret->tok = i;
 		break;
 	}
 
@@ -116,38 +99,41 @@ parseaddr (String *s, size_t *pos, char *err)
 				goto fail;
 			}
 
-			cur = new;
 			continue;
 
 		} else if (ruleset[new->tok] & OPERATOR) {
+			if (ruleset[cur->tok] & VALUE) {
+				addnode (new, cur);
+				cur = new;
+				continue;
+			}
+			for (;;) {
+				if (cur->tok >= new->tok) {
+					if (SUCC == addnode (cur, new)) {
+						cur = new;
+						break;
+					}
+				} else {
+					if (SUCC == addnode (new, cur)) {
+						cur = new;
+						break;
+					}
+				}
 
-			if (cur->tok >= new->tok) { /* precedence */
-				if (addnode (cur, new)) {
+				if (cur->up == NULL) {
+					addnode (new, cur);
 					cur = new;
-					continue;
-				} else if (extendbranch_r (cur, new)) {
-					cur = new;
-					continue;
-				} else {
-					strcpy (err, "parsing error (this is not your fault)");
-					goto fail;
+					break;
 				}
-			} else { /* cur->tok < new->tok */
-				if (addnode (new, cur)) {
-					cur = new;
-					continue;
-				} else {
-					strcpy (err, "parsing error (this is not your fault)");
-					goto fail;
-				}
+				cur = cur->up;
 			}
 		}
 	}
 
-	return getroot (cur);
+	return (getroot (cur));
 
 fail:
 	cur = getroot (cur);
 	freetree (cur);
-	return NULL;
+	return (NULL);
 }
