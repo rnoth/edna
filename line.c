@@ -57,7 +57,7 @@ freelines (Line *start, Line *stop)
 	next = cur->next;
 	do {
 		tmp = (next ? next->next : NULL);
-		free (cur->str);
+		freestring (cur->str);
 		free (cur);
 		cur = next;
 		next = tmp;
