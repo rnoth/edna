@@ -9,50 +9,41 @@
 Selection *
 resolveset (Set A, size_t len, Buffer *buf, char *error)
 {
+	void *tmp;
+	VECTOR (size_t, *stack);
 	Selection *ret = NULL;
-	Set B;
-	size_t bit, off, *t, h;
+	size_t i;
 
-	if (!(ret = calloc (1, sizeof *ret))) die ("calloc");
+	ret = calloc (1, sizeof *ret);
+	if (!ret) die ("calloc");
 
-	if (!A)
-		return ret;
+	if (!A) return (ret);
 
 	make_vector (*ret);
-	if (!(t = calloc (len, sizeof *t))) die ("calloc");
 
-	off = 0;
-	for (h = 0, B = A; (unsigned)(B - A) < len; ) {
-		subset b;
+	stack = set2vec (A, len);
+	if (!stack->c)
+		goto invalid;
 
-		/* note: not only is this incorrect, it doesn't belong here */
-		while (*B) {	/* convert bitset to stack of values */
-			b = *B & -*B;	/* isolate rightmost bit */
-
-			for (bit=off; b; ++bit) /* count trailing zeros */
-				b >>= 1;
-
-			*t++ = bit;	/* push onto stack */
-			++h;
-
-			*B ^= BIT (bit - off - 1); /* remove original value of b */
-		}
-
-		while (h && h --> 0) {	/* convert stack to stack of lines */
-			Line *tmp;
-			tmp = walk (buf->top, *--t, error);
-			if (!tmp) {
-				free (t - h);
-				free (ret);
-				return (NULL);
-			}
-			vec_append (*ret, tmp);
-		}
-		++B;
-		off += sizeof *B;
+	for (i = 0; i < stack->c; ++i) {
+		tmp = walk (buf->top, stack->v[i]);
+		if (!tmp)
+			goto invalid;
+		vec_append (*ret, tmp);
 	}
 
-	free (t);
+	free (A);
+	free_vector (*stack);
+	free (stack);
 
-	return ret;
+	return (ret);
+
+invalid:
+	strcpy (error, "invalid line address");
+	free_vector (*ret);
+	free (ret);
+	free_vector (*stack);
+	free (stack);
+
+	return (NULL);
 }
