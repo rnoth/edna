@@ -29,22 +29,24 @@ insparse (String *s, void *v, Buffer *buf, char *err)
 int
 insline (State *st, Buffer *buf, String *str, char *err)
 {
-	Line *tmp, *new;
+	Line *new;
 
-	if (buf->curline == buf->top) {
-		new = makeline();
-		linklines (new, buf->top);
-		buf->curline = new;
+	new = makeline ();
+
+	if (FAIL == changeline (new, str)) {
+		strcpy (err, "insline(): changeline() failed. memory errors?");
+		goto fail;
 	}
 
-	if (!(tmp = putline (buf->curline, str->v, str->c))) {
-		strcpy (err, "insertion failed");
-		return (FAIL);
+	if (FAIL == addline (buf, new, buf->lineno)) {
+		strcpy (err, "insline(): addline() failed. buffer inconsistency?");
+		goto fail;
 	}
 
-	buf->curline = tmp;
-
-	++buf->lineno;
-	++buf->len;
+	setcurline (buf, new);
 	return (SUCC);
+
+fail:
+	freelines (new, NULL);
+	return (FAIL);
 }
