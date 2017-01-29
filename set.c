@@ -1,16 +1,65 @@
 #include <limits.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "set.h"
 #include "util.h"
+#include "vector.h"
+
+Set
+cloneset (Set A, size_t len)
+{
+	return (memcpy (makeset (len), A, len * sizeof *A));
+}
+
+size_t
+offset (uint32_t i)
+{
+	size_t ret = 0;
+
+	if (i == 0)
+		return (0);
+
+	do {
+		++ret;
+	} while (i >>= 1);
+
+	return (ret);
+}
 
 Set
 makeset (size_t len)
 {
 	Set A;
 	A = calloc (len, sizeof *A);
-	return A;
+	if (!A) die ("calloc");
+	return (A);
+}
+
+void *
+set2vec (Set A, size_t len)
+{
+	Set B;
+	subset b;
+	size_t i, j, t[8];
+	VECTOR (size_t, *ret);
+
+	ret = calloc (1, sizeof *ret);
+	if (!ret) die ("calloc");
+	make_vector (*ret);
+	B = cloneset (A, len);
+
+	for (i = 0; i < len; ++i) {
+		for (j = 0; B[i]; ++j) {
+			b = B[i] & -B[i];
+			t[j] = offset (b);
+			B[i] ^= b;
+		}
+		while (j)
+			vec_append (*ret, t[--j]);
+	}
+	return (ret);
 }
 
 Set
