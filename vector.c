@@ -35,8 +35,8 @@ _vec_copy (Vector *dest, const Vector *src)
 		if (!_expand_vec (dest))
 			return (FAIL);
 
-	memcpy ((char *)dest->v,
-		(char *)src->v,
+	memcpy ((Vector *)dest->v,
+		(Vector *)src->v,
 		src->z * src->c);
 
 	dest->c = src->c;
@@ -72,12 +72,12 @@ _vec_insert (Vector *inst, size_t loc, const void *data)
 		loc = inst->c;
 
 	else if (loc < inst->c)
-		memmove ((char *)inst->v + loc + 1,
-			 (char *)inst->v + loc,
-				 inst->c - loc);
+		memmove ((char *)inst->v + (loc + 1) * inst->z,
+			 (char *)inst->v + loc * inst->z,
+			 (inst->c - loc) * inst->z);
 
-	memcpy ((char *)inst->v + loc, data, inst->z);
-	inst->c += 1;
+	memcpy ((char *)inst->v + loc * inst->z, data, inst->z);
+	++inst->c;
 	return (SUCC);
 
 }
@@ -88,13 +88,13 @@ _vec_remove (Vector *inst, size_t loc)
 	if (loc > inst->c)
 		return (SUCC); /* should this be an error? */
 
-	if (inst->c && loc)
-		memmove ((char *)inst->v + loc - 1,
-			 (char *)inst->v + loc,
-				 inst->c - loc);
-	else
-		memset ((char *)inst->v + loc, 0, inst->z);
+	memset ((char *)inst->v + loc, 0, inst->z);
 	--inst->c;
+
+	if (loc < inst->c)
+		memmove ((char *)inst->v + (loc - 1) * inst->z,
+			 (char *)inst->v + loc * inst->z,
+			 (inst->c - loc) * inst->z);
 
 	return (SUCC);
 
