@@ -11,13 +11,13 @@ resolveset (Set A, size_t len, Buffer *buf, char *error)
 {
 	void *tmp;
 	VECTOR (size_t, *stack);
-	Selection *ret = NULL;
+	Selection *ret;
 	size_t i;
+
+	if (!A) return (NULL);
 
 	ret = calloc (1, sizeof *ret);
 	if (!ret) die ("calloc");
-
-	if (!A) return (ret);
 
 	make_vector (*ret);
 
