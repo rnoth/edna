@@ -7,20 +7,16 @@
 
 #include "edna.h"
 
-static Line*	changeline	(Line *, char *, size_t);
-
-Line *
-changeline (Line *l, char *line, size_t len)
+int
+changeline (Line *l, String *s)
 {
-	if (!l->str)
-		if (!(l->str = malloc (sizeof *l->str * len + 1)))
-			die("malloc");
-	if (l->len && l->len < len)
-		if (!(l->str = realloc (l->str, sizeof *l->str * len + 1)))
-			die("realloc");
-	memcpy (l->str, line, len + 1); /* + 1 for the terminating 0 byte */
-	l->len = len;
-	return l;
+	if (l->str == NULL)
+		l->str = makestring (LINESIZE);
+
+	if (FAIL == copystring (l->str, s))
+		return (FAIL);
+
+	return (SUCC);
 }
 
 size_t
@@ -51,51 +47,63 @@ getprev (const Line *li)
 	return (li->prev);
 }
 
+void
+freelines (Line *start, Line *stop)
+{
+	Line *cur, *next, *prev, *tmp;
+
+	prev = start->prev;
+	cur = start;
+	next = cur->next;
+	do {
+		tmp = (next ? next->next : NULL);
+		free (cur->str);
+		free (cur);
+		cur = next;
+		next = tmp;
+	} while (cur && cur != stop);
+
+	/* line around freed region */
+	linklines (prev, stop);
+
+	return;
+}
+
+void
+linklines(Line *left, Line *right)
+{
+	if (left)
+		left->next = right;
+	if (right)
+		right->prev = left;
+	return;
+}
+
 Line*
 makeline ()
 {
 	Line* new;
+
 	if (!(new = calloc (1, sizeof *new)))
 		die("calloc");
-	return new;
-}
 
-Line*
-putline (Line *cur, char *line, size_t len)
-{
-	Line *new;
-
-	/* only call makeline() when buffer isn't already empty */
-	new = cur->str ? makeline() : cur;
-
-	if (!changeline (new, line, len)) {
-		free (new);
-		return NULL;
-	}
-
-	if (new != cur)	{	/* don't make a infinite loop */
-		linklines (new, cur->next);
-		linklines (cur, new);
-	}
-	return new;
+	return (new);
 }
 
 Line *
-walk (Line *cur, int offset, char *error)
+walk (Line *cur, int offset)
 {
 	Line *li = cur;
 	if (0 > offset) {
-		for (; li; li = li->prev)
+		for (; li; li = getprev(li))
 			if (!++offset)
-				return li;
-		strcpy (error, "start of file");
+				return (li);
 		return (NULL);
 	} else if (0 < offset) {
-		for (; li; li = li->next)
+		for (; li; li = getnext(li))
 			if (!--offset)
-				return li;
-		strcpy (error, "end of file");
+				return (li);
 		return (NULL);
-	}
-	return (cur); /* offset == 0 */
+	} else /* offset == 0 */
+		return (cur);
 }
