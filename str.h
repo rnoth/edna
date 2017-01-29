@@ -19,13 +19,16 @@ struct String {
 /* string.c */
 extern int	appendstring	(String *, char *);
 extern int	appendchar	(String *, char);
+extern int	appendchars	(String *, char *);
 extern void	freestring	(String *);
 extern String*	chartostr	(char *);
 extern int	copystring	(String *, String *);
+extern int	copychars	(String *, const char *);
 extern String*	makestring	(size_t);
 extern int	resizestring	(String *, size_t);
 
 /* str_utf8.c */
-extern char*	get_uchar	(char *);
-extern int	uchar_extent	(unsigned char);
+extern char*	get_uchar	(const char *);
+extern int	uchar_extent	(const unsigned char);
+extern size_t	ustrlen		(const char *);
 #endif
