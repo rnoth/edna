@@ -24,6 +24,8 @@ cleanup (Buffer *buf, Arg *arg)
 	if (sigaction (SIGINT, &old, NULL) == -1)
 		perror ("sigaction");
 	/* free resources */
+	if (arg->name)
+		free (arg->name);
 	if (arg->mode)
 		free (arg->mode);
 	if (arg->cnt) {
