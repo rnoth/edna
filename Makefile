@@ -1,6 +1,6 @@
 # Makefile for edna v0.2
 CC ?= cc
-CFLAGS  ?= -std=c89 -fPIC -W -Wall -Wextra -Wpedantic -Werror
+CFLAGS  ?= -std=c99 -fPIC -W -Wall -Wextra -Wpedantic -Werror
 CPPFLAGS?= #-D_POSIX_C_SOURCE=199309L
 LDFLAGS ?= -lc
 SOFLAGS ?= -lc -fPIC -shared -Wl,-rpath=$(shell pwd)
@@ -48,11 +48,6 @@ deps.mk: $(SRC)
 %.o: %.c
 	@echo CC $<
 	@$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
-
-%.a:
-	@echo AR $@
-	@ar $(ARFLAGS) $@ $+ > /dev/null
-	@printf "\e[A\e[2K" # ar has no --silent option
 
 tests/%_test: CFLAGS += -Wl,-rpath=$(shell pwd)
 tests/%_test: tests/%_test.c %.o libedna.so
