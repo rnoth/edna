@@ -135,9 +135,14 @@ parseline (String *s, Buffer *buf, Arg *arg, char *error)
 	pos = 0;
 	/* line address */
 	tmp = getaddr (s, &pos, buf, error);
-	if (tmp == ERR || tmp == NULL)
+	if (tmp == ERR)
 		goto finally;
-	arg->sel = *(Selection *)tmp;
+	if (tmp) {
+		make_vector (arg->sel);
+		vec_copy (arg->sel, *(Selection *)tmp);
+		free_vector (*(Selection *)tmp);
+		free (tmp);
+	}
 
 	/* command name */
 	tmp = getname (s, &pos);
