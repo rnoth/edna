@@ -5,19 +5,44 @@
 #include "edna.h"
 #include "vector.h"
 
-extern int	addbuf		(State *, Buffer *);
-extern int	checkoutbuf	(Buffer *, State *, size_t);
-extern void	freebuf		(Buffer *);
-extern Buffer*	makebuf		(char *);
-extern int	rmbuf		(State *, size_t);
-extern int	returnbuf	(Buffer *, State *);
-
 int
 addbuf (State *st, Buffer *buf)
 {
 	/* TODO: no error handling */
 	vec_append (st->buffers, buf);
 	return SUCC;
+}
+
+int
+addline (Buffer *buf, Line *new, size_t whence)
+{
+	Line *li = NULL;
+
+	if (new == NULL)
+		return (FAIL);
+
+	if (whence > buf->len)
+		return (FAIL);
+
+	if (whence) {
+		li = walk (buf->top, whence);
+		linklines (new, getnext (li));
+		linklines (li, new);
+	} else
+		linklines (new, buf->top);
+
+	if (buf->top == NULL)
+		buf->top = new;
+	else if (getprev(buf->top))
+		buf->top = getprev (buf->top);
+	if (buf->bot == li)
+		buf->bot = new;
+	if (buf->curline == NULL)
+		setcurline (buf, new);
+
+	++buf->len;
+
+	return (SUCC);
 }
 
 int
@@ -56,13 +81,19 @@ makebuf (char *filename)
 		die ("calloc");
 	if (!(buf->filename = calloc (LINESIZE, sizeof *buf->filename)))
 		die ("calloc");
-	buf->curline = buf->top = buf->bot = makeline();
 
 	if (filename) {
 		strcpy (buf->filename, filename);
 	}
 	
 	return buf;
+}
+
+void
+setcurline (Buffer *buf, Line *li)
+{
+	buf->curline = li;
+	buf->lineno = getlineno (li);
 }
 
 int
