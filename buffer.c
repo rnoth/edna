@@ -105,7 +105,7 @@ returnbuf (Buffer *src, State *st)
 
 	memcpy (tmp, src, sizeof *tmp);
 	vec_append (st->buffers, tmp);
-	memset (tmp, 0, sizeof *tmp);
+	memset (src, 0, sizeof *tmp);
 	return SUCC;
 }
 
