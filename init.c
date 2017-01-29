@@ -28,12 +28,12 @@ initst (State *st)
 
 	/* st->commands */
 	make_vector (st->cmds);
-	vec_concat (st->cmds, commands, sizeof commands);
+	vec_concat (st->cmds, commands, LEN (commands));
 	qsort (st->cmds.v, st->cmds.c, sizeof *commands, &cmdcmp);
 
 	/* st->modes */
 	make_vector (st->modes);
-	vec_concat (st->modes, modes, sizeof modes);
+	vec_concat (st->modes, modes, LEN (modes));
 }
 
 State *
