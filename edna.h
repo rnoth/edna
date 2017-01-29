@@ -11,10 +11,10 @@
 typedef unsigned char	byte;
 typedef size_t		linenum;
 
-typedef struct Buffer	 Buffer;
-typedef struct Line	 Line;
-typedef struct Mode	 Mode;
-typedef struct State	 State;
+typedef struct Buffer	Buffer;
+typedef struct Line	Line;
+typedef struct Mode	Mode;
+typedef struct State	State;
 typedef VECTOR_TAG (Line*, Selection) Selection;
 
 #include "cmd.h"
