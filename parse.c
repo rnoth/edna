@@ -59,7 +59,7 @@ getname (const String *s, size_t *pos)
 	} while (*pos < s->b);
 	ret[off] = 0;
 
-	if (!cur) free (cur);
+	free (cur);
 	return (ret);
 }
 
