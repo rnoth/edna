@@ -59,6 +59,7 @@ set2vec (Set A, size_t len)
 		while (j)
 			vec_append (*ret, t[--j]);
 	}
+	freeset (B);
 	return (ret);
 }
 
