@@ -20,6 +20,7 @@ static struct sigaction act, old;
 void
 cleanup (Buffer *buf, Arg *arg)
 {
+	size_t i;
 	/* reset signal handlers */
 	if (sigaction (SIGINT, &old, NULL) == -1)
 		perror ("sigaction");
@@ -28,10 +29,10 @@ cleanup (Buffer *buf, Arg *arg)
 		free (arg->name);
 	if (arg->mode)
 		free (arg->mode);
-	if (arg->cnt) {
-		for (;arg->cnt--;)
-			free (arg->vec[arg->cnt]);
-		free (arg->vec);
+	if (arg->param.c) {
+		for (i = 0;i < arg->param.c; ++i)
+			free (arg->param.v[arg->cnt]);
+		free_vector (arg->param);
 	}
 	free_vector (arg->sel);
 	free (arg);
