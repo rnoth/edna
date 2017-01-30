@@ -14,10 +14,10 @@
 #define LEN(X)		(sizeof X / sizeof *X)
 #define BIT(X)		(1 << (X))
 
-#define die(X) { \
+#define die(X) do { \
 	perror (X); \
 	abort (); \
-};
+} while (0);
 
 #define warn(X) { \
 	perror (X); \
