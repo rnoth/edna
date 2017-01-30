@@ -23,7 +23,7 @@ end:
 
 	freelines (buf->top, NULL);
 	buf->top = buf->bot = buf->curline = NULL;
-	buf->lineno = 0;
+	buf->len = buf->lineno = 0;
 
 	if (arg->param.c)
 		strcpy (buf->filename, arg->param.v[0]);
