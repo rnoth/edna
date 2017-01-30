@@ -44,8 +44,10 @@ cmd_filename (State *st, Buffer *buf, Arg *arg, char *error)
 		warn ("fclose");
 		strcpy (error, "could not close current file");
 		return (FAIL);
-	} else if (arg->param.v[0][0] == '\0')
+	} else if (arg->param.v[0][0] == '\0') {
 		strcpy (error, "invalid filename");
+		return (FAIL);
+	}
 
 	strcpy (buf->filename, arg->param.v[0]);
 
@@ -78,11 +80,17 @@ end:
 int
 cmd_write (State *st, Buffer *buf, Arg *arg, char *error)
 {
-	if (arg->param.c && arg->param.v[0][0])
-		strcpy (buf->filename, arg->vec[0]);
+	if (arg->param.c) {
+		if (arg->param.v[0][0])
+			strcpy (buf->filename, arg->vec[0]);
+		else {
+			strcpy (error, "invalid filename");
+			return (FAIL);
+		}
+	}
 
 	if (writebuf (buf, error) == FAIL)
-		return FAIL;
+		return (FAIL);
 	buf->dirty = 0;
-	return SUCC;
+	return (SUCC);
 }
