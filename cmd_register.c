@@ -22,10 +22,12 @@ cmd_delete (State *st, Buffer *buf, Arg *arg, char *error)
 	if (!tmp)
 		tmp = makeline ();
 
+	setcurline (buf, tmp);
+	if (buf->top == *targ)
+		buf->top = buf->curline;
+
 	freelines (*targ, (*targ)->next);
 
-	buf->curline = tmp;
-	buf->lineno  = getlineno (tmp);
 	return SUCC;
 }
 
