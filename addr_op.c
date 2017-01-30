@@ -7,36 +7,35 @@
 Set
 addr_plus (Node *left, Node *right, Buffer *buf, char *err)
 {
-	Set ret = NULL, pos = NULL;
+	Set ret = NULL, inc = NULL;
 	size_t off;
 
 	if (left)
-		pos = evaltree (left, buf, err);
+		ret = evaltree (left, buf, err);
 
 	else	/* default to current line */
-		pos = addr_dot (left, buf, err);
+		ret = addr_dot (left, buf, err);
 
-	if (!pos)
+	if (!ret)
 		goto fail;
 
 	if (right) {
 
-		ret = evaltree (right, buf, err);
+		inc = evaltree (right, buf, err);
 
-		if (!ret)
+		if (!inc)
 			goto fail;
 
-		off = setrightmost (pos, SETLEN);
+		off = setrightmost (inc, SETLEN);
 
 		if (!setshiftleft (ret, SETLEN, off))
 			goto fail;
 
 	} else { /* default to one */
 
-		ret = makeset (SETLEN);
-		setaddmemb (ret, SETLEN, 1);
+		inc = makeset (SETLEN);
 
-		off = setrightmost (pos, SETLEN);
+		off = 1;
 
 		if (!setshiftleft (ret, SETLEN, off))
 			goto fail;
@@ -48,7 +47,7 @@ addr_plus (Node *left, Node *right, Buffer *buf, char *err)
 fail:
 	strcpy (err, "invalid line address");
 	freeset (ret);
-	freeset (pos);
+	freeset (inc);
 	return NULL;
 	
 }
