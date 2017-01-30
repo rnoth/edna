@@ -155,7 +155,6 @@ int
 setrightmost (Set A, size_t len)
 {
 	Set C = NULL;
-	subset c;
 	size_t i, j;
 
 	for (i = 0; i < len; ++i)
@@ -165,13 +164,9 @@ setrightmost (Set A, size_t len)
 	if (!C)
 		return (0);
 
-	c = *C;
-	j = 0;
-	do {
-		++j;
-	} while (c >>= 1);
+	j = offset (*C);
 
-	j += --i * 32;
+	j += (C - A) * 32;
 
 	return (j);
 }
