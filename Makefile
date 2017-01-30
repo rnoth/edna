@@ -34,7 +34,7 @@ edna: deps.mk $(OBJ) $(LIB)
 	@$(CC) $(LDFLAGS) -o $@ $(OBJ) $(LIB)
 
 libedna.so: deps.mk $(OBJ) $(LIB)
-	@echo CCLD -o $@
+	@echo LD -o $@
 	@$(CC) $(SOFLAGS) -o $@ $(filter-out main.o, $(OBJ)) $(LIB)
 
 test: $(TEST)
