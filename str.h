@@ -28,7 +28,7 @@ extern String*	makestring	(size_t);
 extern int	resizestring	(String *, size_t);
 
 /* str_utf8.c */
-extern char*	get_uchar	(const char *);
+extern int 	get_uchar	(char *, const char *);
 extern int	uchar_extent	(const unsigned char);
 extern size_t	ustrlen		(const char *);
 #endif

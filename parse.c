@@ -20,27 +20,28 @@ static char*	getarg		(const String *, const char *, size_t *);
 char *
 getname (const String *s, size_t *pos)
 {
-	char *cur, *ret;
-	short esc;
-	size_t off, ext;
+	char cur[5], tmp[s->b - *pos], *ret;
+	short esc, ext;
+	size_t off;
 	wchar_t wc;
 
 	if (*pos >= s->b - 1)
 		return (ERR);
 
 	off = esc = ext = 0;
-	ret = malloc (s->b - *pos);
-	if (!ret) die ("malloc");
 
-	do {
-		cur = get_uchar (s->v + *pos);
-		ext = uchar_extent (*cur);
-		cur[ext] = 0;
+	while (*pos < s->b) {
+		ext = get_uchar (cur, s->v + *pos);
+
+		if (ext <= 0) {
+			if (esc)
+				ext = -ext;
+			else
+				break;
+		}
 
 		if (*cur == '\\' && !esc) {
-			esc = 1;
-			free (cur);
-			cur = NULL;
+			esc = 2;
 			continue;
 		}
 
@@ -49,33 +50,45 @@ getname (const String *s, size_t *pos)
 		if (!iswalpha (wc) && !esc)
 			break;
 
-		memcpy (ret + off, cur, ext);
+		memcpy (tmp + off, cur, ext);
 		off += ext;
 
 		*pos += ext;
-		free (cur);
-		cur = NULL;
+		if (esc) --esc;
 
-	} while (*pos < s->b);
-	ret[off] = 0;
+	}
 
-	free (cur);
+	tmp[off] = 0;
+	ret = malloc (off + 1);
+	if (!ret) die ("malloc");
+	memcpy (ret, tmp, off + 1);
+
 	return (ret);
 }
 
 char *
 setdelim (const String *s, size_t *pos)
 {
+	void *tmp;
 	char *ret;
-	int ext;
+	short ext;
 
 	if (*pos >= s->b - 1)
 		return (NULL);
 
-	ret = get_uchar (s->v + *pos);
-	ext = uchar_extent (*ret);
-	ret[ext] = 0;
+	ret = malloc (5);
+	ext = get_uchar (ret, s->v + *pos);
+	if (ext <= 0)
+		ext = -ext;
 	(*pos) += ext;
+
+	tmp = realloc (ret, ext);
+	if (!tmp) {
+		die ("realloc");
+	} else
+		ret = tmp;
+
+	if (!ext) return (NULL);
 
 	return (ret);
 }
@@ -100,7 +113,7 @@ getarg (const String *s, const char *delim, size_t *pos)
 			ext = 1;
 
 		if (s->v[*pos] == '\\' && !esc) {
-			esc = 1;
+			esc = 2;
 			continue;
 		}
 		if (!esc && !strncmp (s->v + *pos, delim, strlen (delim)))
@@ -112,6 +125,7 @@ getarg (const String *s, const char *delim, size_t *pos)
 
 		*pos += ext;
 		off += ext;
+		if (esc) --esc;
 	}
 
 	if (off == 0) {

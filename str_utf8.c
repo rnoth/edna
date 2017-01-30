@@ -6,30 +6,48 @@
 #include "str.h"
 #include "util.h"
 
-char *
-get_uchar (const char *s)
+int
+get_uchar (char *dest, const char *src)
 {
-	char *ret;
+	size_t off, len;
+	char tmp[5];
 	int ext;
 
-	ext = uchar_extent (*s);
+	ext = uchar_extent (*src);
+
 	if (ext == -1)
-		return NULL;
+		len = 1;
+	else
+		len = ext;
 
-	ret = malloc (ext + 1);
-	if (!ret) die ("malloc");
+	memset (tmp, 0, len);
+	memcpy (tmp, src, len);
+	for (off = 0; off < len; ++off) {
+		if (len > 1 && isascii (tmp[off]))
+			goto invalid;
+		else if (((unsigned char)tmp[off]) > 0xF4)
+			goto invalid;
 
-	memcpy (ret, s, ext);
-	ret[ext] = 0;
+		continue;
+	invalid:
+			ext = -ext;
+			tmp[off] = 0;
+			break;
+	}
 
-	return ret;
-		
+	tmp[off] = 0;
+
+	memcpy (dest, tmp, off + 1);
+
+	return (ext);
 }
 
 int
 uchar_extent (const unsigned char ch)
 {
-	if (isascii (ch))
+	if (!ch)
+		return (0);
+	else if (isascii (ch))
 		return (1);
 	else if (ch >= 0xC2 && ch <= 0xDF)
 		return (2);
