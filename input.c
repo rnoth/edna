@@ -9,7 +9,7 @@
 #include "edna.h"
 
 int
-grabline (String *s, char *err)
+grabline (State *st, Buffer *buf, String *s, char *err)
 {
 	int ret = SUCC;
 

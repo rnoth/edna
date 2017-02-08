@@ -45,11 +45,11 @@ struct Line {
 
 struct Mode {
 	char*	name;
-	int	(*init)	   ();
-	int	(*prompt)  ();
-	int	(*input)   ();
-	int	(*eval)    ();
-	int	(*error)   ();
+	int	(*init)	   (State *, Buffer *, String *, char *);
+	int	(*prompt)  (State *, Buffer *, String *, char *);
+	int	(*input)   (State *, Buffer *, String *, char *);
+	int	(*eval)    (State *, Buffer *, String *, char *);
+	int	(*error)   (State *, Buffer *, String *, char *);
 };
 
 struct State {
@@ -69,7 +69,6 @@ extern int	rmbuf		(State *, size_t);
 extern int	returnbuf	(Buffer *, State *);
 
 /* command.c */
-extern int	cmdparse	(String *, void *, Buffer *, char *);
 extern int	cmdeval		(State *, Buffer *, String *, char *);
 
 /* file.c */
@@ -83,14 +82,12 @@ extern State*	makestate	(void);
 extern int	parse_argv	(State *, char *, int, char **);
 
 /* input.c */
-extern int	grabline	(String *, char *);
+extern int	grabline	(State *, Buffer *, String *, char *);
 extern int	readline	(String *, FILE *);
 
 /* insert.c */
-extern int	inserror	(State *, Buffer *, char *);
-extern int	insparse	(String *, void *, Buffer *, char *);
+extern int	inserror	(State *, Buffer *, String *, char *);
 extern int	insline		(State *, Buffer *, String *, char *);
-extern void	inshandle	(int);
 
 /* line.c */
 extern size_t	getlineno	(const Line *);

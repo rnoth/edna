@@ -6,7 +6,7 @@
 #include "edna.h"
 
 int
-inserror (State *st, Buffer *buf, char *err)
+inserror (State *st, Buffer *buf, String *s, char *err)
 {
 	if (feof (buf->file))
 		clearerr (buf->file);

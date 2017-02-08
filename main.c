@@ -24,13 +24,13 @@ main (int argc, char** argv)
 
 	for (;;) {
 
-		if (FAIL == buf->mode->prompt (st, buf))	goto finally;
-		if (FAIL == buf->mode->input (s, err))	  	goto finally;
-		if (FAIL == buf->mode->eval (st, buf, s, err))	goto finally;
+		if (FAIL == buf->mode->prompt (st, buf, s, err)) goto finally;
+		if (FAIL == buf->mode->input  (st, buf, s, err)) goto finally;
+		if (FAIL == buf->mode->eval   (st, buf, s, err)) goto finally;
 		continue;
 
 	finally:
-		if (FAIL == buf->mode->error (st, buf, err))
+		if (FAIL == buf->mode->error (st, buf, s, err))
 			break;
 	}
 	/* end main */

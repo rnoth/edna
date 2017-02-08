@@ -14,12 +14,12 @@
 #  define PROMPT	"%ld:", st->lineno			/* have line numbers in prompt */
 #  define INS_PROMPT	"%ld|", buf->lineno			/* have line number in ins mode */
 #  define PRINT_FMT	"%ld\t%s", buf->lineno,(*arg->sel.v)->str	/* like ed's 'n' */
-#  define ERROR		"%s\n", error				/* like ed's 'H', without the '?' */
+#  define ERROR		"%s\n", err				/* like ed's 'H', without the '?' */
 #endif
 
-extern int cmdprompt (State *, Buffer *);
-extern int cmderror  (State *, Buffer *, char *);
-extern int insprompt (State *, Buffer *);
+extern int cmdprompt (State *, Buffer *, String *, char *);
+extern int cmderror  (State *, Buffer *, String *, char *);
+extern int insprompt (State *, Buffer *, String *, char *);
 extern int print     (State *, Buffer *, Arg *, char *);
 
 static const Mode modes[] = {
@@ -52,7 +52,7 @@ static const Command commands[] = {
 
 /* functions */
 int
-cmdprompt (State *st, Buffer *buf)
+cmdprompt (State *st, Buffer *buf, String *s, char *err)
 {
 	if (printf (PROMPT) < 0) die ("printf");
 	if (fflush (stdout) == EOF) warn ("fflush");
@@ -60,16 +60,16 @@ cmdprompt (State *st, Buffer *buf)
 }
 
 int
-cmderror (State *st, Buffer *buf, char *error)
+cmderror (State *st, Buffer *buf, String *s, char *err)
 {
-	if (!strcmp (error, "quit"))
+	if (!strcmp (err, "quit"))
 		return FAIL;
 	if (printf (ERROR) < 0) die ("printf");
 	if (fflush (stdout) == EOF) warn ("fflush");
 	return SUCC;
 }
 int
-insprompt (State *st, Buffer *buf)
+insprompt (State *st, Buffer *buf, String *s, char *err)
 {
 	if (printf (INS_PROMPT) < 0) die ("printf");
 	if (fflush (stdout) == EOF) warn ("fflush");
