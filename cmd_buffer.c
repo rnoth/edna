@@ -2,7 +2,7 @@
 #include <string.h>
 
 #include "edna.h"
-#include "buf.h"
+#include "buffer.h"
 #include "cmd.h"
 #include "state.h"
 

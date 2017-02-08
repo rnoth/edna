@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #include "edna.h"
-#include "buf.h"
+#include "buffer.h"
 #include "state.h"
 #include "vector.h"
 

@@ -1,6 +1,6 @@
 /* edna -- ed-like text editor */
 #include "edna.h"
-#include "buf.h"
+#include "buffer.h"
 #include "mode.h"
 #include "str.h"
 

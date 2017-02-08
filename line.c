@@ -20,11 +20,11 @@ changeline (Line *l, String *s)
 }
 
 size_t
-getlineno (const Line *targ)
+getlineno (Line *targ)
 {
 	size_t lineno;
 
-	lineno = 1;
+	lineno = 0;
 	while ((targ = getprev(targ)))
 		++lineno;
 
@@ -32,7 +32,7 @@ getlineno (const Line *targ)
 }
 
 Line *
-getnext (const Line *li)
+getnext (Line *li)
 {
 	if (li == NULL)
 		return (NULL);
@@ -40,7 +40,7 @@ getnext (const Line *li)
 }
 
 Line *
-getprev (const Line *li)
+getprev (Line *li)
 {
 	if (li == NULL)
 		return (NULL);

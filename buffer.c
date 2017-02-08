@@ -2,41 +2,124 @@
 #include <string.h>
 
 #include "edna.h"
-#include "buf.h"
+#include "buffer.h"
 #include "line.h"
 #include "util.h"
 #include "vector.h"
 
 int
-addline (Buffer *buf, Line *new, size_t whence)
+addline (Buffer *buf, Line *new)
 {
 	Line *li = NULL;
 
 	if (new == NULL)
-		return (FAIL);
+		return FAIL;
+	
+	li = buftell (buf);
 
-	if (whence > buf->len)
-		return (FAIL);
+	linklines (new, getnext (li));
+	linklines (li, new);
 
-	if (whence) {
-		li = walk (buf->top, whence);
-		linklines (new, getnext (li));
-		linklines (li, new);
-	} else
-		linklines (new, buf->top);
-
-	if (buf->top == NULL)
-		buf->top = new;
-	else if (getprev(buf->top))
-		buf->top = getprev (buf->top);
 	if (buf->bot == li)
 		buf->bot = new;
-	if (buf->curline == NULL)
-		setcurline (buf, new);
 
 	++buf->len;
+	buf->dirty = 1;
 
-	return (SUCC);
+	return SUCC;
+}
+
+int
+rmcurline (Buffer *buf)
+{
+	Line *del;
+
+	if (buf->cur == buf->top)
+		return FAIL;
+
+	del = buf->cur;
+
+	if (bufseek (buf, BUF_CUR, 1) == FAIL)
+		bufseek (buf, BUF_CUR, 1);
+
+	freelines (del, getnext (del));
+	buf->dirty = 1;
+
+	return SUCC;
+}
+
+int
+rmline (Buffer *buf, Line *li)
+{
+	if (li == NULL || li == buf->top)
+		return FAIL;
+	buf->cur = li;
+	buf->pos = getlineno (li);
+
+	if (bufseek (buf, BUF_CUR, 1) == FAIL)
+		bufseek (buf, BUF_CUR, -1);
+
+	freelines (li, getnext (li));
+	buf->dirty = 1;
+
+	return SUCC;	
+}
+
+Line *
+buftell (Buffer *buf)
+{
+	return buf->cur;
+}
+
+int
+bufseek (Buffer *buf, int whence, long off)	
+{	
+	int dir;
+	Line *(*get) (Line *); Line *li;
+
+	if (off > 0 && whence == BUF_END)
+		return FAIL;
+	else if (off < 0 && whence == BUF_SET)
+		return FAIL;
+
+	if (off == 0)
+		return SUCC;
+
+	switch (whence) {
+	 case BUF_SET:
+		 li = buf->top;
+		 break;
+	 case BUF_CUR:
+		 li = buf->cur;
+		 break;
+	 case BUF_END:
+		 li = buf->bot;
+		 break;
+	 default:
+		 return FAIL;
+	}
+
+	if (off > 0) {
+		get = getnext;
+		dir = 1;
+	} else {
+		get = getprev;
+		dir = -1;
+	}
+
+
+	for (;;) {
+		li = get (li);
+		if (li == NULL || li == buf->top)
+			break;
+		buf->cur = li;
+		buf->pos += dir;
+		if (--off == 0)
+			break;
+	} 
+
+	if (off == 0) return SUCC;
+	else return FAIL;
 }
 
 void
@@ -64,11 +147,4 @@ makebuf (char *filename)
 	}
 	
 	return (buf);
-}
-
-void
-setcurline (Buffer *buf, Line *li)
-{
-	buf->curline = li;
-	buf->lineno = getlineno (li);
 }

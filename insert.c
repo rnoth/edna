@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "edna.h"
-#include "buf.h"
+#include "buffer.h"
 #include "line.h"
 #include "mode.h"
 #include "str.h"
@@ -29,17 +29,16 @@ insline (State *st, Buffer *buf, String *str, char *err)
 
 	new = makeline ();
 
-	if (FAIL == changeline (new, str)) {
+	if (changeline (new, str) == FAIL) {
 		strcpy (err, "insline(): changeline() failed. memory errors?");
 		goto fail;
 	}
 
-	if (FAIL == addline (buf, new, buf->lineno)) {
+	if (addline (buf, new) == FAIL) {
 		strcpy (err, "insline(): addline() failed. buffer inconsistency?");
 		goto fail;
 	}
 
-	setcurline (buf, new);
 	return (SUCC);
 
 fail:

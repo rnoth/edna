@@ -2,32 +2,20 @@
 #include <string.h>
 
 #include "edna.h"
-#include "buf.h"
+#include "buffer.h"
 #include "cmd.h"
 
 int
 cmd_delete (State *st, Buffer *buf, Arg *arg, char *error)
 {
-	Line **targ, *tmp;
+	Line *targ;
 
-	targ = arg->sel.v;
+	targ = *arg->sel.v;
 
-	if (!(*targ)->str) {
+	if (rmline (buf, targ) == FAIL) {
 		strcpy (error, "empty selection");
 		return FAIL;
 	}
-
-	buf->dirty = 1;
-
-	tmp = (*targ)->next ? (*targ)->next : (*targ)->prev;
-	if (!tmp)
-		tmp = makeline ();
-
-	setcurline (buf, tmp);
-	if (buf->top == *targ)
-		buf->top = buf->curline;
-
-	freelines (*targ, (*targ)->next);
 
 	return SUCC;
 }

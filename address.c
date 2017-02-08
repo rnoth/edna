@@ -4,7 +4,7 @@
 #include <ctype.h>
 
 #include "edna.h"
-#include "buf.h"
+#include "buffer.h"
 #include "cmd.h"
 #include "addr.h"
 #include "set.h"

@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "edna.h"
-#include "buf.h"
+#include "buffer.h"
 #include "cmd.h"
 #include "util.h"
 
@@ -24,8 +24,8 @@ end:
 	}
 
 	freelines (buf->top, NULL);
-	buf->top = buf->bot = buf->curline = NULL;
-	buf->len = buf->lineno = 0;
+	buf->top = buf->bot = buf->cur = NULL;
+	buf->len = buf->pos = 0;
 
 	if (arg->param.c)
 		strcpy (buf->filename, arg->param.v[0]);

@@ -3,24 +3,25 @@
 #include <string.h>
 
 #include "edna.h"
-#include "buf.h"
+#include "buffer.h"
 #include "cmd.h"
 #include "mode.h"
 
 int
 cmd_insert (State *st, Buffer *buf, Arg *arg, char *error)
 {
-	buf->curline = (*arg->sel.v) + arg->sel.c - 1;
+	buf->cur = (*arg->sel.v) + arg->sel.c - 1;
+	buf->pos = getlineno (buf->cur);
 
 	if (arg->mode) {
 		if (!strcmp (arg->mode, "insert")) {
-			--buf->lineno;
-			buf->curline = getprev (buf->curline);
+			bufseek (buf, BUF_CUR, -1);
 		} else if (!strcmp (arg->mode, "append")) {
 			;
 		} else if (!strcmp (arg->mode, "change")) {
 			if (cmd_delete (st, buf, arg, error) == FAIL)
 				return FAIL;
+			bufseek (buf, BUF_CUR, -1);
 		} else {
 			strcpy (error, "unknown option");
 			return SUCC;

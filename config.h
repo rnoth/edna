@@ -80,13 +80,13 @@ insprompt (State *st, Buffer *buf, String *s, char *err)
 int
 cmd_print (State *st, Buffer *buf, Arg *arg, char *error)
 {
-	if (!buf->curline->str) {
+	if (buf->len == 0) {
 		strcpy (error, "empty buffer");
 		return (FAIL);
 	}
 
 	if (printf (PRINT_FMT) < 0) die ("printf");
-	buf->curline = *arg->sel.v;
-	buf->lineno = getlineno (buf->curline);
+	buf->cur = *arg->sel.v;
+	buf->pos = getlineno (buf->cur);
 	return (SUCC);
 }

@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "edna.h"
-#include "buf.h"
+#include "buffer.h"
 #include "line.h"
 #include "str.h"
 #include "util.h"
@@ -30,19 +30,20 @@ readbuf (Buffer *buf, char *err)
 
 	errno = 0;
 	while (!feof (buf->file)) {
-		if (FAIL == readline (s, buf->file)) {
+		if (readline (s, buf->file) == FAIL) {
 			if (errno) {
 				strncpy (err, strerror (errno), 20);
 				goto finally;
 			} else
 				continue;
 		}
+
 		new = makeline ();
-		if (FAIL == changeline (new, s)) {
+		if (changeline (new, s) == FAIL) {
 			strcpy (err, "readbuf(): changeline() failed. memory errors?");
 			freelines (new, new->next);
 			goto finally;
-		} else if (FAIL == addline (buf, new, buf->len)) {
+		} else if (addline (buf, new) == FAIL) {
 			strcpy (err, "readbuf(): changeline() failed. buffer inconsistency?");
 			freelines (new, new->next);
 			goto finally;
@@ -52,6 +53,7 @@ readbuf (Buffer *buf, char *err)
 
 finally:
 	freestring (s);
+	buf->dirty = 0;
 	return (ret);
 }
 
@@ -61,12 +63,7 @@ writebuf (Buffer *buf, char *error)
 	Line *tmp;
 
 	if (!buf->filename[0]) {
-		strcpy (error, "invalid filename");
-		return FAIL;
-	}
-
-	if (!buf->curline->str) {
-		strcpy (error, "empty buffer");
+		strcpy (error, "no filename");
 		return FAIL;
 	}
 
@@ -79,5 +76,5 @@ writebuf (Buffer *buf, char *error)
 	for (tmp = buf->top; tmp; tmp = getnext(tmp))
 		fputs (tmp->str->v, buf->file);
 
-	return (SUCC);
+	return SUCC;
 }

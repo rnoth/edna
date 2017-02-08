@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "addr.h"
-#include "buf.h"
+#include "buffer.h"
 #include "edna.h"
 #include "set.h"
 

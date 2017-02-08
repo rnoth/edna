@@ -14,9 +14,9 @@ struct Line {
 VECTOR_TAG (Line *, Selection);
 
 /* line.c */
-extern size_t	getlineno	(const Line *);
-extern Line*	getnext		(const Line *);
-extern Line*	getprev		(const Line *);
+extern size_t	getlineno	(Line *);
+extern Line*	getnext		(Line *);
+extern Line*	getprev		(Line *);
 extern void	freelines	(Line *, Line *);
 extern void	linklines	(Line *, Line*);
 extern Line*	makeline	(void);

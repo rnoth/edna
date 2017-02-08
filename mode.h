@@ -1,6 +1,6 @@
 #ifndef _edna_mode_
 #define _edna_mode_
-#include "buf.h"
+#include "buffer.h"
 #include "state.h"
 #include "str.h"
 
