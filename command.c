@@ -84,7 +84,7 @@ runcmd (State *st, Buffer *buf, Command *cmd, Arg *arg, char *err)
 		addr = chartostr (cmd->defaddr);
 
 		sel = getaddr (addr, &pos, buf, err);
-		if (sel == NULL || sel == ERR)
+		if (sel == NULL)
 			goto fail;
 
 		make_vector (arg->sel);
