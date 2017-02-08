@@ -1,31 +1,7 @@
-/* input.c -- functions for getting input */
+/* str-io.c -- string input/outpu routines */
 #include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <string.h>
-#include <ctype.h>
 
-#include "util.h"
-#include "edna.h"
-
-int
-grabline (State *st, Buffer *buf, String *s, char *err)
-{
-	int ret = SUCC;
-
-	errno = 0;
-	if (FAIL == readline (s, stdin)) {
-		if (feof (stdin))
-			strcpy (err, "quit");
-		else
-			strncpy (err, strerror (errno), 20);
-		ret = FAIL;
-		clearerr (stdin);
-	}
-
-	return (ret);
-
-}
+#include "str.h"
 
 int
 readline (String *str, FILE *file)

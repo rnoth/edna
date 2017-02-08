@@ -12,6 +12,25 @@
 
 static int	runcmd (State *, Buffer *, Command *, Arg *, char *err);
 
+int
+grabline (State *st, Buffer *buf, String *s, char *err)
+{
+	int ret = SUCC;
+
+	errno = 0;
+	if (FAIL == readline (s, stdin)) {
+		if (feof (stdin))
+			strcpy (err, "quit");
+		else
+			strncpy (err, strerror (errno), 20);
+		ret = FAIL;
+		clearerr (stdin);
+	}
+
+	return (ret);
+
+}
+
 void
 freearg (Arg *arg)
 {
