@@ -1,3 +1,5 @@
 *.[ao]
 core
 edna
+deps.mk
+*~
