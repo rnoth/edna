@@ -14,22 +14,14 @@ inserror (State *st, Buffer *buf, char *err)
 	return (SUCC);
 }
 
-int
-insparse (String *s, void *v, Buffer *buf, char *err)
-{
-	String **ret;
-
-	ret = (String **)v;
-	if (!strcmp (s->v, ".\n"))
-		return (FAIL);
-	*ret = s;
-	return (SUCC);
-}
 
 int
 insline (State *st, Buffer *buf, String *str, char *err)
 {
 	Line *new;
+
+	if (!strcmp (str->v, ".\n"))
+		return (FAIL);
 
 	new = makeline ();
 
