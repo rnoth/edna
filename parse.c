@@ -1,11 +1,7 @@
 /* parse.c -- functions for processing input */
-#include <stdbool.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <string.h>
-#include <ctype.h>
 #include <wchar.h>
 #include <wctype.h>
 
