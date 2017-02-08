@@ -24,14 +24,10 @@ struct Buffer {
 };
 
 /* buffer.c */
-extern int	addbuf		(State *, Buffer *);
 extern int	addline		(Buffer *, Line *, size_t);
-extern int	checkoutbuf	(Buffer *, State *, size_t);
 extern Buffer*	makebuf		(char *);
 extern void	freebuf		(Buffer *);
 extern void	setcurline	(Buffer *, Line *);
-extern int	rmbuf		(State *, size_t);
-extern int	returnbuf	(Buffer *, State *);
 
 /* file.c */
 extern int	readbuf		(Buffer *, char *);

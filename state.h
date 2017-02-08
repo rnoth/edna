@@ -9,6 +9,12 @@ struct State {
 	VECTOR (Mode,	 modes);
 };
 
+/* state.c */
+extern int	addbuf		(State *, Buffer *);
+extern int	checkoutbuf	(Buffer *, State *, size_t);
+extern int	rmbuf		(State *, size_t);
+extern int	returnbuf	(Buffer *, State *);
+
 /* init.c */
 extern void	freestate	(State *);
 extern void	initst		(State *);
