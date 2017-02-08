@@ -145,8 +145,6 @@ parseline (String *s, Buffer *buf, Arg *arg, char *error)
 	pos = 0;
 	/* line address */
 	tmp = getaddr (s, &pos, buf, error);
-	if (tmp == ERR)
-		goto finally;
 	if (tmp) {
 		make_vector (arg->sel);
 		vec_copy (arg->sel, *(Selection *)tmp);
@@ -156,41 +154,25 @@ parseline (String *s, Buffer *buf, Arg *arg, char *error)
 
 	/* command name */
 	tmp = getname (s, &pos);
-	if (tmp == ERR) {
-		strcpy (error, "parseline(): getname() returned ERR");
-		goto finally;
-	}
 	arg->name = tmp;
 
 	/* delimiter */
 	tmp = setdelim (s, &pos);
-	if (tmp == ERR) {
-		strcpy (error, "parseline(): setdelim() returned ERR");
-		goto finally;
-	}
 	delim = tmp;
 
 	/* argument vector */
 	tmp = getarg (s, delim, &pos);
-	if (tmp == ERR)
-		goto cleanup_delim;
 	if (tmp)
 		make_vector (arg->param);
 	while (tmp) {
 		vec_append (arg->param, tmp);
 		tmp = getarg (s, delim, &pos);
-		if (tmp == ERR) {
-			strcpy (error, "parselin(): getarg() returned ERR");
-			goto cleanup_delim;
-		}
 	}
 
 	ret = SUCC;
 
-cleanup_delim:
 	free (delim);
 
-finally:
 	return (ret);
 
 }
