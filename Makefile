@@ -1,7 +1,6 @@
 # Makefile for edna v0.2
-CC ?= cc
-CFLAGS  ?= -std=c99 -fPIC -W -Wall -Wextra -Wpedantic -Werror
-CPPFLAGS?= #-D_POSIX_C_SOURCE=199309L
+CC	?= cc
+CFLAGS  ?= -std=c99 -fPIC -W -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter
 LDFLAGS ?= -lc
 SOFLAGS ?= -lc -fPIC -shared -Wl,-rpath=$(shell pwd)
 ARFLAGS ?= rcs
@@ -64,11 +63,5 @@ clean:
 lint:
 	mkdir -p /tmp/report
 	scan-build -o /tmp make
-
-# defending against false positives
-addr_%.o: CFLAGS += -Wno-unused-parameter
-cmd_%.o:  CFLAGS += -Wno-unused-parameter
-insert.o: CFLAGS += -Wno-unused-parameter
-init.o: CFLAGS += -Wno-unused-parameter
 
 .PHONY: clean lint test
