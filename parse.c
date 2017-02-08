@@ -25,7 +25,7 @@ getname (const String *s, size_t *pos)
 	wchar_t wc;
 
 	if (*pos >= s->b - 1)
-		return (ERR);
+		return (NULL);
 
 	off = esc = ext = 0;
 
