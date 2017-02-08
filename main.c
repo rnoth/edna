@@ -5,7 +5,6 @@ int
 main (int argc, char** argv)
 {
 	char	 err[80];
-	void	*var;
 	String	*s;
 	State	*st;
 	Buffer	*buf;
@@ -25,10 +24,9 @@ main (int argc, char** argv)
 
 	for (;;) {
 
-		if (FAIL == buf->mode->prompt (st, buf))	  goto finally;
-		if (FAIL == buf->mode->input (s, err))		  goto finally;
-		if (FAIL == buf->mode->parse (s, &var, buf, err)) goto finally;
-		if (FAIL == buf->mode->eval (st, buf, var, err))  goto finally;
+		if (FAIL == buf->mode->prompt (st, buf))	goto finally;
+		if (FAIL == buf->mode->input (s, err))	  	goto finally;
+		if (FAIL == buf->mode->eval (st, buf, s, err))	goto finally;
 		continue;
 
 	finally:

@@ -48,7 +48,6 @@ struct Mode {
 	int	(*init)	   ();
 	int	(*prompt)  ();
 	int	(*input)   ();
-	int	(*parse)   ();
 	int	(*eval)    ();
 	int	(*error)   ();
 };
@@ -71,7 +70,7 @@ extern int	returnbuf	(Buffer *, State *);
 
 /* command.c */
 extern int	cmdparse	(String *, void *, Buffer *, char *);
-extern int	cmdeval		(State *, Buffer *, Arg *, char *);
+extern int	cmdeval		(State *, Buffer *, String *, char *);
 
 /* file.c */
 extern int	readbuf		(Buffer *, char *);
