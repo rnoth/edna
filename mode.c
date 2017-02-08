@@ -1,6 +1,9 @@
 #include <string.h>
 
 #include "edna.h"
+#include "buf.h"
+#include "mode.h"
+#include "state.h"
 
 int
 setmode (State *st, Buffer *buf, char *mode)

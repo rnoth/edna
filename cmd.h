@@ -3,10 +3,8 @@
 #define _edna_cmds_
 
 #include "edna.h"
+#include "line.h"
 #include "vector.h"
-
-typedef struct Arg	Arg;
-typedef struct Command	Command;
 
 struct Arg {
 	Selection  sel;
@@ -26,8 +24,14 @@ struct Command {
 };
 
 /* command.c */
+extern int	grabline	(State *, Buffer *, String *, char *);
 extern int	cmdchck (const void *a, const void *b);
 extern int	cmdcmp (const void *a, const void *b);
+extern int	cmdeval		(State *, Buffer *, String *, char *);
+
+/* insert.c */
+extern int	inserror	(State *, Buffer *, String *, char *);
+extern int	insline		(State *, Buffer *, String *, char *);
 
 /* parse.c */
 extern int	parseline	(String *, Buffer *, Arg *, char *);

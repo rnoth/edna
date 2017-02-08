@@ -3,7 +3,10 @@
 
 #include "edna.h"
 #include "addr.h"
+#include "buf.h"
+#include "line.h"
 #include "set.h"
+#include "util.h"
 #include "vector.h"
 
 Selection *

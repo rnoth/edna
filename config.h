@@ -1,6 +1,7 @@
 /* config.h - configuration for edna(1) */
 #include "edna.h"
 #include "cmd.h"
+#include "mode.h"
 
 /* settings */
 #define PROMPT		"\r\033[K:"

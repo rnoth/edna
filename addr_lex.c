@@ -1,4 +1,5 @@
 /* addr_lex.c -- routines for lexing line addresses */
+#include <string.h>
 #include <ctype.h>
 
 #include "addr.h"

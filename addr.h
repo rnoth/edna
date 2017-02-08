@@ -6,6 +6,7 @@
 
 #include "edna.h"
 #include "set.h"
+#include "str.h"
 
 #define SETLEN (1 + buf->len / (sizeof (subset) * CHAR_BIT))
 
@@ -22,7 +23,6 @@ enum Token {
 };
 
 typedef unsigned int	Rule;
-typedef struct Node	Node;
 typedef enum Token	Token;
 
 /* TODO: merge evaluator and operator, make it take a Set vector */

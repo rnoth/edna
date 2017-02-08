@@ -1,8 +1,10 @@
-/* buffer.c -- buffer routines */
 #include <stdlib.h>
 #include <string.h>
 
 #include "edna.h"
+#include "buf.h"
+#include "line.h"
+#include "util.h"
 #include "vector.h"
 
 int

@@ -4,6 +4,10 @@
 #include <string.h>
 
 #include "edna.h"
+#include "buf.h"
+#include "line.h"
+#include "mode.h"
+#include "str.h"
 
 int
 inserror (State *st, Buffer *buf, String *s, char *err)

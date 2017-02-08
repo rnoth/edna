@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "edna.h"
+#include "buf.h"
 #include "cmd.h"
 
 int

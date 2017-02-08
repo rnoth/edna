@@ -1,11 +1,11 @@
-/* line.c -- low-level line manipulation functions */
 #include <stdio.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <regex.h>
 
 #include "edna.h"
+#include "line.h"
+#include "str.h"
+#include "util.h"
 
 int
 changeline (Line *l, String *s)

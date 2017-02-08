@@ -1,5 +1,6 @@
 /* command.c -- interface for executing commands */
 #define _POSIX_C_SOURCE 199309L
+#include <errno.h>
 #include <setjmp.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -7,8 +8,10 @@
 #undef _POSIX_C_SOURCE
 
 #include "edna.h"
-#include "cmd.h"
 #include "addr.h"
+#include "cmd.h"
+#include "state.h"
+#include "util.h"
 
 static int	runcmd (State *, Buffer *, Command *, Arg *, char *err);
 

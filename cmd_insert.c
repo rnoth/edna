@@ -3,7 +3,9 @@
 #include <string.h>
 
 #include "edna.h"
+#include "buf.h"
 #include "cmd.h"
+#include "mode.h"
 
 int
 cmd_insert (State *st, Buffer *buf, Arg *arg, char *error)

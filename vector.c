@@ -1,6 +1,7 @@
 /* vector.c -- generic vector routines */
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "vector.h"
 

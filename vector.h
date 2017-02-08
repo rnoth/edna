@@ -5,7 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "util.h"
+#ifndef SUCC
+#	define SUCC (1)
+#	define FAIL (0)
+#endif
 
 #define VECSIZ 16
 

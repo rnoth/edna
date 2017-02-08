@@ -1,6 +1,9 @@
 /* addr_op.h -- routines for composing line addresses */
+#include <stdlib.h>
+#include <string.h>
 
 #include "addr.h"
+#include "buf.h"
 #include "edna.h"
 #include "set.h"
 

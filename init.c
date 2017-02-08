@@ -3,8 +3,11 @@
 #include <string.h>
 
 #include "edna.h"
+#include "buf.h"
 #include "cmd.h"
 #include "vector.h"
+#include "util.h"
+
 #include "config.h"
 
 extern void	freestate	(State *);

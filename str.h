@@ -1,10 +1,16 @@
-/* string.h -- generic String methods */
 #ifndef _string_
 #define _string_
+#include <stdio.h>
 
 #ifndef isascii
-#define isascii(C) (!((C) & (1<<7)))
+#	define isascii(C) (!((C) & (1<<7)))
 #endif
+
+#ifndef SUCC
+#	define SUCC (1)
+#	define FAIL (0)
+#endif
+
 
 typedef struct String	String;
 typedef unsigned long	rune;
@@ -26,6 +32,9 @@ extern int	copystring	(String *, String *);
 extern int	copychars	(String *, const char *);
 extern String*	makestring	(size_t);
 extern int	resizestring	(String *, size_t);
+
+/* str-io.c */
+extern int	readline	(String *, FILE *);
 
 /* str_utf8.c */
 extern int 	get_uchar	(char *, const char *);

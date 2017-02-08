@@ -4,10 +4,12 @@
 #include <ctype.h>
 
 #include "edna.h"
+#include "buf.h"
 #include "cmd.h"
 #include "addr.h"
 #include "set.h"
 #include "str.h"
+#include "util.h"
 
 const char *symbols[] = {
 	"1234567890\0",	/* NUM_LITERAL */

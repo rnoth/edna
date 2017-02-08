@@ -4,6 +4,7 @@
 
 #include "edna.h"
 #include "cmd.h"
+#include "util.h"
 
 extern int	cmd_help	(State *, Buffer *, Arg *, char *);
 

@@ -2,6 +2,7 @@
 
 #include "edna.h"
 #include "addr.h"
+#include "buf.h"
 
 Set
 addr_num (Node *nod, Buffer *buf, char *err)

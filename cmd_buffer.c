@@ -2,7 +2,9 @@
 #include <string.h>
 
 #include "edna.h"
+#include "buf.h"
 #include "cmd.h"
+#include "state.h"
 
 int
 cmd_switchbuf (State *st, Buffer *buf, Arg *arg, char *error)
