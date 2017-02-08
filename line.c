@@ -52,20 +52,18 @@ freelines (Line *start, Line *stop)
 {
 	Line *cur, *next, *prev, *tmp;
 
-	prev = start->prev;
+	prev = getprev (start);
 	cur = start;
-	next = cur->next;
-	do {
-		tmp = (next ? next->next : NULL);
+	next = getnext (cur);
+	while (cur && cur != stop) {
+		tmp = getnext (next);
 		freestring (cur->str);
 		free (cur);
 		cur = next;
 		next = tmp;
-	} while (cur && cur != stop);
+	}
 
-	/* line around freed region */
 	linklines (prev, stop);
-
 	return;
 }
 
