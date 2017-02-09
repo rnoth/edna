@@ -14,7 +14,7 @@ main (int argc, char** argv)
 
 	/* init stuff */
 	st   = makestate ();
-	buf  = makebuf (NULL);
+	buf  = makebuf ();
 	s    = makestring (LINESIZE);
 	*err = 0;
 

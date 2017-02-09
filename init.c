@@ -58,20 +58,19 @@ parse_argv (State *st, char *err, int argc, char **argv)
 {
 	Buffer *tmp;
 
-	/* open tmpfile */
-	tmp = makebuf ("/tmp/edna.hup"); /* FIXME */
-	readbuf (tmp, err);
-	addbuf (st, tmp);
-	/* end open */
 
-	/* parse argv */
-	if (argc > 1)
+	if (argc > 1) {
 		do {
-			tmp = makebuf (*(++argv));
+			tmp = makebuf ();
+			initbuf (tmp, *(++argv));
 			readbuf (tmp, err);
 			addbuf (st, tmp);
 		} while (--argc > 1);
-	/* end parse */
+	} else {
+		tmp = makebuf (); /* FIXME */
+		initbuf (tmp, NULL);
+		addbuf (st, tmp);
+	}
 
 	return SUCC;
 }

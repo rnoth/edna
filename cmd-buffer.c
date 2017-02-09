@@ -45,7 +45,8 @@ cmd_openbuf (State *st, Buffer *buf, Arg *arg, char *error)
 
 	i = 0;
 	do {
-		tmp = makebuf (arg->param.v[i]);
+		tmp = makebuf ();
+		initbuf (tmp, arg->param.v[i]);
 		readbuf (tmp, error);
 		addbuf (st, tmp);
 	} while (++i < arg->param.c);
