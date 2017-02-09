@@ -48,7 +48,7 @@ static const Command commands[] = {
 //	{ "s",		subst,		NULL,		".", },
 	{ "w",		cmd_write,	NULL,		NULL, },
 	{ "wq",		cmd_quit,	"write",	".", },
-	{ "Q", 		cmd_quit,	"force",	".", },
+	{ "Q", 		cmd_quit,	"force",	NULL, },
 };
 
 /* functions */
