@@ -29,18 +29,18 @@ addr_plus (Node *left, Node *right, Buffer *buf, char *err)
 		if (inc == NULL)
 			goto fail;
 
-		off = setrightmost (inc);
+		off = setrightmost (inc) - 1;
 
 		if (setshiftleft (ret, off) == NULL)
 			goto fail;
 
-	} else {	/* default to one */
+	} else {
 
 		inc = make_set ();
 
 		off = 1;
 
-		if (!setshiftleft (ret, off))
+		if (setshiftleft (ret, off) == NULL)
 			goto fail;
 
 	}
