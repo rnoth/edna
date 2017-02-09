@@ -7,11 +7,40 @@
 #include "util.h"
 #include "vector.h"
 
-Set
-cloneset (Set A, size_t len)
+Set *
+cloneset (Set *dest)
 {
-	return (memcpy (makeset (len), A, len * sizeof *A));
+	Set *ret;
+
+	ret = make_set ();
+	if (vec_copy (*ret, *dest) == FAIL) {
+		free_set (ret);
+		return NULL;
+	}
+
+	return ret;
 }
+
+void
+free_set (Set *A)
+{
+	free_vector (*A);
+	free (A);
+}
+
+Set *
+make_set (void)
+{
+	Set *ret;
+
+	ret = malloc (sizeof *ret);
+	if (!ret) die ("malloc");
+	
+	make_vector (*ret);
+
+	return ret;
+}
+
 
 size_t
 offset (uint32_t i)
@@ -25,184 +54,176 @@ offset (uint32_t i)
 		++ret;
 	} while (i >>= 1);
 
-	return (ret);
-}
-
-Set
-makeset (size_t len)
-{
-	Set A;
-	A = calloc (len, sizeof *A);
-	if (!A) die ("calloc");
-	return (A);
+	return ret;
 }
 
 void *
-set2vec (Set A, size_t len)
+set2vec (Set *A)
 {
-	Set B;
+	Set *B;
 	subset b;
-	size_t i, j, t[8];
+	size_t i, j, t[32];
 	VECTOR (size_t, *ret);
 
 	ret = calloc (1, sizeof *ret);
 	if (!ret) die ("calloc");
 	make_vector (*ret);
-	B = cloneset (A, len);
+	B = cloneset (A);
 
-	for (i = 0; i < len; ++i) {
-		for (j = 0; B[i]; ++j) {
-			b = B[i] & -B[i];
+	for (i = 0; i < A->c; ++i) {
+		for (j = 0; B->v[i]; ++j) {
+			b = B->v[i] & -B->v[i];
 			t[j] = offset (b);
-			B[i] ^= b;
+			B->v[i] ^= b;
 		}
 		while (j)
 			vec_append (*ret, t[--j]);
 	}
-	freeset (B);
-	return (ret);
+	free_set (B);
+	return ret;
 }
 
-Set
-setaddmemb (Set A, size_t len, size_t memb)
+Set *
+setaddmemb (Set *A, size_t memb)
 {
-	size_t i = sizeof *A * CHAR_BIT;
+	const size_t i = A->z * CHAR_BIT;
 	size_t j;
 
-	for (j = 0; j < len && memb > 0; ++j, memb -= i)
+	for (j = 0; j < A->c; ++j, memb -= i)
 		if (memb <= i) {
-			A[j] |= BIT (memb - 1);
-			return (A);
+			A->v[j] |= BIT (memb);
+			return A;
 		}
 
-	return (A);
+	return A;
 }
 
-Set
-setaddrange (Set A, size_t len, size_t beg, size_t end)
+Set *
+setaddrange (Set *A, size_t beg, size_t end)
 {
 	size_t i, j;
-	unsigned int k;
+	uint32_t k, n, premask, postmask;
 
 	if (beg > end)
-		return (NULL);
+		return NULL;
 
-	if (end > len)
-		return (NULL);
+	if (end > A->c)
+		return NULL;
 
-	for (i = j = 0; i < len && j < len; i += 32, ++j) {
-		if (i + 31 < beg) {
+	for (i = j = 0; i < end; i += 32, ++j) {
+		premask = postmask = 0;
+		if (i + 31U > beg) {
 			k = BIT (beg - i);
-			k -= 1;
-			if (end - i < 32) {
-				j = BIT (i - end);
-				k -= 1;
-				k ^= j;
-			}
-			A[j] |= k;
+			if ( k > 1 )
+				premask = k - 1;
+			n = end - i > 32 ? BIT (31) : BIT (end - i);
+			if ( n < BIT (31))
+				postmask = ~(n - 1);
+
+			A->v[j] = ~(uint32_t)0;
+			A->v[j] ^= premask;
+			A->v[j] ^= postmask;
 		}
-		if (i + 31 > end)
-			break;
 	}
 
-	return (A);
+	return A;
 }
 
-Set
-setcomplement (Set A, size_t len)
+Set *
+setcomplement (Set *A)
 {
-	Set B;
+	Set *B;
 	size_t i;
 
-	B = malloc (sizeof *B * len);
-	if (!B) die ("malloc");
+	B = make_set ();
 
-	for (i = 0; i < len; ++i)
-		B[i] = ~A[i];
+	for (i = 0; i < A->c; ++i)
+		B->v[i] = ~A->v[i];
+
 	return B;
 }
 
-Set
-setdifference (Set A, Set B, size_t len)
+Set *
+setdifference (Set *A, Set *B)
 {
-	Set C;
-	size_t i;
+	Set *C;
+	size_t i, len;
 
-	C = malloc (sizeof *C * len);
-	if (!C) die ("malloc");
+	C = make_set ();
+	len = MIN (A->c, B->c);
 
 	for (i = 0; i < len; ++i)
-		C[i] = A[i] ^ B[i];
-	return C;
-}
-
-Set
-setintersect (Set A, Set B, size_t len)
-{
-	Set C;
-	size_t i;
-
-	C = malloc (sizeof *C * len);
-	if (!C) die ("malloc");
-
-	for (i = 0; i < len; ++i)
-		C[i] = A[i] & B[i];
+		C->v[i] = A->v[i] ^ B->v[i];
 
 	return C;
 }
 
-int
-setrightmost (Set A, size_t len)
+Set *
+setintersect (Set *A, Set *B)
 {
-	Set C = NULL;
+	Set *C;
+	size_t i, len;
+
+	C = make_set ();
+	len = MIN (A->c, B->c);
+
+	for (i = 0; i < len; ++i)
+		C->v[i] = A->v[i] & B->v[i];
+
+	return C;
+}
+
+size_t
+setrightmost (Set *A)
+{
+	Set *C;
 	size_t i, j;
 
-	for (i = 0; i < len; ++i)
-		if (A[i])
-			C = A + i;
+	C = A;
+	for (i = 0; i < A->c; ++i)
+		if (A->v[i])
+			C->v = A->v + i;
 
-	if (!C)
-		return (0);
+	j = offset (*C->v);
 
-	j = offset (*C);
-
-	j += (C - A) * 32;
+	j += (C->v - A->v) * 32;
 
 	return (j);
 }
 
-Set
-setshift (Set A, size_t len, size_t off, int left)
+Set *
+setshift (Set *A, size_t off, int left)
 {
 	doubleset d;
-	Set B;
-	size_t i;
+	Set *B;
+	size_t i, len;
 
-	if (len * 32 < off)
+	if (A->c * 32 < off)
 		return (NULL);
 
-	B = makeset (len);
+	B = make_set ();
 
 	d = 0;
+	len = A->c;
 	for (i = len; i --> 0; d = 0){
 		if (left) {
 			if (i != len - 1)
-				d = A[i+1];
+				d = A->v[i+1];
 			d <<= 32;
-			d |= A[i];
+			d |= A->v[i];
 
 			d <<= off % 32;
-			B[i] = d;
+			B->v[i] = d;
 		} else {
-			d = A[i];
+			d = A->v[i];
 			d <<= 32;
 
 			if (i)
-				d |= A[i - 1];
+				d |= A->v[i - 1];
 
 			d >>= off % 32;
 			d >>= 32;
-			B[i] = d;
+			B->v[i] = d;
 		}
 
 	}
@@ -210,23 +231,23 @@ setshift (Set A, size_t len, size_t off, int left)
 	memset (A, 0, len);
 	memcpy (A + off / 32, B, len - off / 32);
 
-	freeset (B);
+	free_set (B);
 
 	return (A);
 
 }
 
-Set
-setunion (Set A, Set B, size_t len)
+Set *
+setunion (Set *A, Set *B)
 {
-	Set C;
-	size_t i;
+	Set *C;
+	size_t i, len;
 
-	C = malloc (sizeof *C * len);
-	if (!C) die ("malloc");
+	C = make_set();
+	len = MIN (A->c, B->c);
 
 	for (i = 0; i < len; ++i)
-	 	C[i] = A[i] | B[i];
+	 	C->v[i] = A->v[i] | B->v[i];
 
 	return C;
 }

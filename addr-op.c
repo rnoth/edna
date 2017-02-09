@@ -7,10 +7,10 @@
 #include "edna.h"
 #include "set.h"
 
-Set
+Set *
 addr_plus (Node *left, Node *right, Buffer *buf, char *err)
 {
-	Set ret = NULL, inc = NULL;
+	Set *ret = NULL, *inc = NULL;
 	size_t off;
 
 	if (left)
@@ -19,28 +19,28 @@ addr_plus (Node *left, Node *right, Buffer *buf, char *err)
 	else	/* default to current line */
 		ret = addr_dot (left, buf, err);
 
-	if (!ret)
+	if (ret == NULL)
 		goto fail;
 
 	if (right) {
 
 		inc = evaltree (right, buf, err);
 
-		if (!inc)
+		if (inc == NULL)
 			goto fail;
 
-		off = setrightmost (inc, SETLEN);
+		off = setrightmost (inc);
 
-		if (!setshiftleft (ret, SETLEN, off))
+		if (setshiftleft (ret, off) == NULL)
 			goto fail;
 
-	} else { /* default to one */
+	} else {	/* default to one */
 
-		inc = makeset (SETLEN);
+		inc = make_set ();
 
 		off = 1;
 
-		if (!setshiftleft (ret, SETLEN, off))
+		if (!setshiftleft (ret, off))
 			goto fail;
 
 	}
@@ -49,8 +49,8 @@ addr_plus (Node *left, Node *right, Buffer *buf, char *err)
 
 fail:
 	strcpy (err, "invalid line address");
-	freeset (ret);
-	freeset (inc);
+	free_set (ret);
+	free_set (inc);
 	return NULL;
 	
 }

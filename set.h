@@ -3,24 +3,28 @@
 #define _set_
 #include <stdint.h>
 
-#define freeset(A) free (A);
-#define setshiftleft(A, len, off) setshift (A, len, off, 1)
-#define setshiftright(A, len, off) setshift (A, len, off, 0)
+#include "vector.h"
 
-typedef uint64_t  doubleset;
-typedef uint32_t  subset;
-typedef uint32_t *Set;
+#define setshiftleft(A, off) setshift (A, off, 1)
+#define setshiftright(A, off) setshift (A, off, 0)
 
-extern Set	cloneset	(Set A, size_t len);
+typedef uint64_t   doubleset;
+typedef uint32_t   subset;
+typedef struct Set Set;
+
+VECTOR_TAG (subset, Set);
+
+extern Set *	cloneset	(Set *);
+extern void	free_set	(Set *);
+extern Set *	make_set	(void);
 extern size_t	offset		(uint32_t);
-extern Set	makeset		(size_t len);
-extern void*	set2vec		(Set A, size_t len);
-extern Set	setaddmemb	(Set A, size_t len, size_t memb);
-extern Set	setcomplement	(Set A, size_t len);
-extern Set	setdifference	(Set A, Set B, size_t len);
-extern Set	setintersect	(Set A, Set B, size_t len);
-extern Set	setshift	(Set A, size_t len, size_t off, int left);
-extern int	setrightmost	(Set A, size_t len);
-extern Set	setunion	(Set A, Set B, size_t len);
+extern void *	set2vec		(Set *);
+extern Set *	setaddmemb	(Set *, size_t memb);
+extern Set *	setcomplement	(Set *);
+extern Set *	setdifference	(Set *, Set *);
+extern Set *	setintersect	(Set *, Set *);
+extern Set *	setshift	(Set *, size_t, int);
+extern size_t	setrightmost	(Set *);
+extern Set *	setunion	(Set *, Set *);
 
 #endif

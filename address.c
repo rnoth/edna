@@ -35,18 +35,18 @@ const Rule ruleset[] = {
 void *
 getaddr (String *s, size_t *pos, Buffer *buf, char *err)
 {
-	Set sel;
+	Set *sel;
 	Selection *ret;
 	Node *tree;
 
 	tree = parseaddr (s, pos, err);
 	sel  = evaltree (tree, buf, err);
-	ret  = resolveset (sel, SETLEN, buf, err);
+	ret  = resolveset (sel, buf, err);
 	freetree (tree);
 	return (ret);
 }
 
-Set
+Set *
 evaltree (Node *cur, Buffer *buf, char *err)
 {
 	if (!cur)

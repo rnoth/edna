@@ -2,13 +2,9 @@
 #ifndef _edna_addr_
 #define _edna_addr_
 
-#include <limits.h>
-
 #include "edna.h"
 #include "set.h"
 #include "str.h"
-
-#define SETLEN (1 + buf->len / (sizeof (subset) * CHAR_BIT))
 
 #define VALUE		BIT(0)	/* 0-ary operator */
 #define OPERATOR	BIT(1)	/* binary operator */
@@ -26,9 +22,9 @@ typedef unsigned int	Rule;
 typedef enum Token	Token;
 
 /* TODO: merge evaluator and operator, make it take a Set vector */
-typedef Set	(*Evaluator)	(Node *, Buffer *, char *);
+typedef Set *	(*Evaluator)	(Node *, Buffer *, char *);
 typedef Node*	(*Lexer)	(String *, size_t *);
-typedef Set	(*Operator)	(Node *, Node *, Buffer *, char *);
+typedef Set *	(*Operator)	(Node *, Node *, Buffer *, char *);
 
 struct Node {
 	Token  tok;
@@ -45,11 +41,13 @@ struct Node {
  */
 
 /* core */
-extern 	Set		evaltree	(Node *, Buffer *, char *);
+extern 	Set *		evaltree	(Node *, Buffer *, char *);
 extern	void*		getaddr		(String *, size_t *, Buffer *, char *);
 extern	Node*		next		(String *, size_t *);
 extern	Node*		parseaddr	(String *, size_t *, char *);
-extern 	Selection*	resolveset	(Set, size_t, Buffer *, char *);
+
+/* util */
+extern 	Selection*	resolveset	(Set *, Buffer *, char *);
 
 /* lex */
 extern	Node*		trynum		(String *, size_t *);
@@ -65,12 +63,12 @@ extern void		freenode	(Node *);
 extern Node*		makenode	(void);
 
 /* evaluators */
-extern Set		addr_num	(Node *, Buffer *, char *);
-extern Set		addr_dot	(Node *, Buffer *, char *);
-extern Set		addr_dollar	(Node *, Buffer *, char *);
+extern Set *		addr_num	(Node *, Buffer *, char *);
+extern Set *		addr_dot	(Node *, Buffer *, char *);
+extern Set *		addr_dollar	(Node *, Buffer *, char *);
 
 /* operators */
-extern Set		addr_plus	(Node *, Node *, Buffer *, char *);
+extern Set *		addr_plus	(Node *, Node *, Buffer *, char *);
 
 /* tables */
 extern const char*	symbols[];

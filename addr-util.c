@@ -10,7 +10,7 @@
 #include "vector.h"
 
 Selection *
-resolveset (Set A, size_t len, Buffer *buf, char *error)
+resolveset (Set *A, Buffer *buf, char *error)
 {
 	void *tmp;
 	VECTOR (size_t, *stack);
@@ -24,7 +24,7 @@ resolveset (Set A, size_t len, Buffer *buf, char *error)
 
 	make_vector (*ret);
 
-	stack = set2vec (A, len);
+	stack = set2vec (A);
 	if (!stack->c)
 		goto invalid;
 
