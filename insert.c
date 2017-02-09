@@ -12,10 +12,10 @@
 int
 inserror (State *st, Buffer *buf, String *s, char *err)
 {
-	if (feof (buf->file))
-		clearerr (buf->file);
+	if (feof (stdin))
+		clearerr (stdin);
 	setmode (st, buf, "command");
-	return (SUCC);
+	return SUCC;
 }
 
 
@@ -25,7 +25,7 @@ insline (State *st, Buffer *buf, String *str, char *err)
 	Line *new;
 
 	if (!strcmp (str->v, ".\n"))
-		return (FAIL);
+		return FAIL;
 
 	new = makeline ();
 
@@ -39,9 +39,9 @@ insline (State *st, Buffer *buf, String *str, char *err)
 		goto fail;
 	}
 
-	return (SUCC);
+	return SUCC;
 
 fail:
 	freelines (new, NULL);
-	return (FAIL);
+	return FAIL;
 }
