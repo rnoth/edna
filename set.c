@@ -240,7 +240,6 @@ setshift (Set *A, size_t off, int left)
 
 	}
 
-	memset (A, 0, len);
 	memcpy (A + off / 32, B, len - off / 32);
 
 	free_set (B);
