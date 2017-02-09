@@ -8,17 +8,17 @@
 #include "vector.h"
 
 int
-addline (Buffer *buf, Line *new)
+addline(Buffer *buf, Line *new)
 {
 	Line *li = NULL;
 
 	if (new == NULL)
 		return FAIL;
 	
-	li = buftell (buf);
+	li = buftell(buf);
 
-	linklines (new, getnext (li));
-	linklines (li, new);
+	linklines(new, getnext(li));
+	linklines(li, new);
 
 	if (buf->bot == li)
 		buf->bot = new;
@@ -32,53 +32,17 @@ addline (Buffer *buf, Line *new)
 	return SUCC;
 }
 
-int
-rmcurline (Buffer *buf)
-{
-	Line *del;
-
-	if (buf->cur == buf->top)
-		return FAIL;
-
-	del = buf->cur;
-
-	if (bufseek (buf, BUF_CUR, 1) == FAIL)
-		bufseek (buf, BUF_CUR, 1);
-
-	freelines (del, getnext (del));
-	buf->dirty = 1;
-
-	return SUCC;
-}
-
-int
-rmline (Buffer *buf, Line *li)
-{
-	if (li == NULL || li == buf->top)
-		return FAIL;
-	buf->cur = li;
-	buf->pos = getlineno (li);
-
-	if (bufseek (buf, BUF_CUR, 1) == FAIL)
-		bufseek (buf, BUF_CUR, -1);
-
-	freelines (li, getnext (li));
-	buf->dirty = 1;
-
-	return SUCC;	
-}
-
 Line *
-buftell (Buffer *buf)
+buftell(Buffer *buf)
 {
 	return buf->cur;
 }
 
 int
-bufseek (Buffer *buf, int whence, long off)	
+bufseek(Buffer *buf, int whence, long off)	
 {	
 	int dir;
-	Line *(*get) (Line *); Line *li;
+	Line *(*get)(Line *); Line *li;
 
 	if (off > 0 && whence == BUF_END)
 		return FAIL;
@@ -112,7 +76,7 @@ bufseek (Buffer *buf, int whence, long off)
 
 
 	for (;;) {
-		li = get (li);
+		li = get(li);
 		if (li == NULL || li == buf->top)
 			break;
 		buf->cur = li;
@@ -121,41 +85,88 @@ bufseek (Buffer *buf, int whence, long off)
 			break;
 	} 
 
-	if (off == 0) return SUCC;
-	else return FAIL;
+	if (off == 0) 	return SUCC;
+	else 		return FAIL;
 }
 
 void
-freebuf (Buffer *buf)
+freebuf(Buffer *buf)
 {
-	freelines (buf->top, NULL);
+	freelines(buf->top, NULL);
 	if (buf->file)
-		fclose (buf->file);
-	free (buf->filename);
-	free (buf);
-}
-
-Buffer *
-makebuf (void)
-{
-	Buffer *buf;
-	
-	if (!(buf = calloc (1, sizeof *buf)))
-		die ("calloc");
-	return (buf);
+		fclose(buf->file);
+	free(buf->filename);
+	free(buf);
 }
 
 int
-initbuf (Buffer *buf, char *filename)
+initbuf(Buffer *buf, char *filename)
 {
 	if (filename) {
-		if (!(buf->filename = calloc (LINESIZE, sizeof *buf->filename)))
-			die ("calloc");
+		if (!(buf->filename = calloc(LINESIZE, sizeof *buf->filename)))
+			die("calloc");
 
-		strcpy (buf->filename, filename);
+		strcpy(buf->filename, filename);
 	}
 	
 	buf->cur = buf->top = buf->bot = makeline();
 
 	return SUCC;
+}
+
+void
+killbuf(Buffer *buf)
+{
+	freelines(buf->top, NULL);
+	if (fclose(buf->file) == EOF)
+		perror ("fclose");
+	free (buf->filename);
+	memset (buf, 0, sizeof *buf);
+	return;
+}
+
+Buffer *
+makebuf(void)
+{
+	Buffer *buf;
+	
+	if (!(buf = calloc(1, sizeof *buf)))
+		die("calloc");
+	return buf;
+}
+
+int
+rmcurline(Buffer *buf)
+{
+	Line *del;
+
+	if (buf->cur == buf->top)
+		return FAIL;
+
+	del = buf->cur;
+
+	if (bufseek(buf, BUF_CUR, 1) == FAIL)
+		bufseek(buf, BUF_CUR, 1);
+
+	freelines(del, getnext(del));
+	buf->dirty = 1;
+
+	return SUCC;
+}
+
+int
+rmline(Buffer *buf, Line *li)
+{
+	if (li == NULL || li == buf->top)
+		return FAIL;
+	buf->cur = li;
+	buf->pos = getlineno(li);
+
+	if (bufseek(buf, BUF_CUR, 1) == FAIL)
+		bufseek(buf, BUF_CUR, -1);
+
+	freelines(li, getnext(li));
+	buf->dirty = 1;
+
+	return SUCC;	
 }
