@@ -12,11 +12,11 @@
 
 #define VECSIZ 16
 
-#define vec_append(inst, item)		_vec_append ((Vector *)&(inst), &(item))
-#define vec_concat(inst, data, len)	_vec_concat ((Vector *)&(inst), data, len * sizeof *data)
-#define vec_copy(dest, src)		_vec_copy   ((Vector *)&(dest), (Vector *)&(src))
-#define vec_insert(inst, loc, item)	_vec_insert ((Vector *)&(inst), loc, &(item))
-#define vec_remove(inst, loc)		_vec_remove ((Vector *)&(inst), loc)
+#define vec_append(inst, item)		_vec_append ((_Vector *)&(inst), &(item))
+#define vec_concat(inst, data, len)	_vec_concat ((_Vector *)&(inst), data, len * sizeof *data)
+#define vec_copy(dest, src)		_vec_copy   ((_Vector *)&(dest), (Vector *)&(src))
+#define vec_insert(inst, loc, item)	_vec_insert ((_Vector *)&(inst), loc, &(item))
+#define vec_remove(inst, loc)		_vec_remove ((_Vector *)&(inst), loc)
 
 typedef struct Vector Vector;
 
@@ -26,7 +26,7 @@ extern int _vec_copy (Vector *, const Vector *);
 extern int _vec_insert (Vector *, size_t, const void *);
 extern int _vec_remove (Vector *, size_t);
 
-struct Vector {
+struct _Vector {
 	void *v;
 	size_t c;
 	size_t m;
