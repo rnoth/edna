@@ -40,7 +40,7 @@ returnbuf (Buffer *src, State *st)
 {
 	Buffer *tmp;
 
-	tmp = makebuf (NULL);
+	tmp = makebuf ();
 
 	memcpy (tmp, src, sizeof *tmp);
 	vec_append (st->buffers, tmp);
