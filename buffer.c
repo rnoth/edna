@@ -26,6 +26,9 @@ addline (Buffer *buf, Line *new)
 	++buf->len;
 	buf->dirty = 1;
 
+	++buf->pos;
+	buf->cur = new;
+
 	return SUCC;
 }
 
