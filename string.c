@@ -83,6 +83,7 @@ copystring (String *dest, String *src)
 void
 freestring (String *str)
 {
+	if (str == NULL) return;
 	free (str->v);
 	free (str);
 }
