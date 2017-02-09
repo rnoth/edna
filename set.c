@@ -44,14 +44,15 @@ free_set (Set *A)
 Set *
 make_set (void)
 {
+#define SETSIZ 8
 	Set *ret;
 
 	ret = malloc (sizeof *ret);
 	if (!ret) die ("malloc");
 	
-	ret->v = calloc (16, sizeof *ret->v);
+	ret->v = calloc (SETSIZ, sizeof *ret->v);
 	if (!ret->v) die ("calloc");
-	ret->c = 16;
+	ret->c = SETSIZ;
 
 	return ret;
 }
@@ -210,13 +211,13 @@ setshift (Set *A, size_t off, int left)
 	size_t i, len;
 
 	if (A->c * 32 < off)
-		return (NULL);
+		expandset (A);
 
 	B = make_set ();
 
 	d = 0;
 	len = A->c;
-	for (i = len; i --> 0; d = 0){
+	for (i = len; i --> 0; d = 0) {
 		if (left) {
 			if (i != len - 1)
 				d = A->v[i+1];
