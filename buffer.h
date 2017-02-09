@@ -34,8 +34,9 @@ struct Buffer {
 extern int	addline		(Buffer *, Line *);	
 extern Line*	buftell		(Buffer *);
 extern int	bufseek		(Buffer *, int, long);
-extern Buffer*	makebuf		(char *);
+extern Buffer*	makebuf		(void);
 extern void	freebuf		(Buffer *);
+extern int	initbuf		(Buffer *, char *);
 extern int	rmcurline	(Buffer *);
 extern int	rmline		(Buffer *, Line *);
 
