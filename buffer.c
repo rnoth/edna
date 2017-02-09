@@ -133,12 +133,18 @@ freebuf (Buffer *buf)
 }
 
 Buffer *
-makebuf (char *filename)
+makebuf (void)
 {
 	Buffer *buf;
 	
 	if (!(buf = calloc (1, sizeof *buf)))
 		die ("calloc");
+	return (buf);
+}
+
+int
+initbuf (Buffer *buf, char *filename)
+{
 	if (filename) {
 		if (!(buf->filename = calloc (LINESIZE, sizeof *buf->filename)))
 			die ("calloc");
@@ -146,5 +152,7 @@ makebuf (char *filename)
 		strcpy (buf->filename, filename);
 	}
 	
-	return (buf);
+	buf->cur = buf->top = buf->bot = makeline();
+
+	return SUCC;
 }
