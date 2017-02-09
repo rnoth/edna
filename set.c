@@ -8,23 +8,36 @@
 #include "vector.h"
 
 Set *
-cloneset (Set *dest)
+cloneset (Set *src)
 {
 	Set *ret;
 
 	ret = make_set ();
-	if (vec_copy (*ret, *dest) == FAIL) {
-		free_set (ret);
-		return NULL;
-	}
+	memcpy (ret->v, src->v, src->c);
 
 	return ret;
+}
+
+int
+expandset (Set *A)
+{
+	size_t c;
+	void *tmp;
+
+	c = A->c;
+	tmp = realloc (A->v, A->c * 2);
+	if (tmp == NULL) die ("realloc");
+
+	A->v = tmp;
+	memset (A->v + c, 0, c);
+
+	return SUCC;
 }
 
 void
 free_set (Set *A)
 {
-	free_vector (*A);
+	free (A->v);
 	free (A);
 }
 
@@ -36,7 +49,9 @@ make_set (void)
 	ret = malloc (sizeof *ret);
 	if (!ret) die ("malloc");
 	
-	make_vector (*ret);
+	ret->v = calloc (16, sizeof *ret->v);
+	if (!ret->v) die ("calloc");
+	ret->c = 16;
 
 	return ret;
 }
@@ -86,14 +101,10 @@ set2vec (Set *A)
 Set *
 setaddmemb (Set *A, size_t memb)
 {
-	const size_t i = A->z * CHAR_BIT;
-	size_t j;
+	if (memb / 32 > A->c)
+		expandset (A);
 
-	for (j = 0; j < A->c; ++j, memb -= i)
-		if (memb <= i) {
-			A->v[j] |= BIT (memb);
-			return A;
-		}
+	A->v[memb / 32] |= BIT (memb % 32);
 
 	return A;
 }
@@ -108,7 +119,7 @@ setaddrange (Set *A, size_t beg, size_t end)
 		return NULL;
 
 	if (end > A->c)
-		return NULL;
+		expandset (A);
 
 	for (i = j = 0; i < end; i += 32, ++j) {
 		premask = postmask = 0;

@@ -12,7 +12,10 @@ typedef uint64_t   doubleset;
 typedef uint32_t   subset;
 typedef struct Set Set;
 
-VECTOR_TAG (subset, Set);
+struct Set {
+	size_t c;
+	subset *v;
+};
 
 extern Set *	cloneset	(Set *);
 extern void	free_set	(Set *);
