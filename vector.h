@@ -50,7 +50,7 @@ struct Vector {
 	}
 
 /* note: the side effects con be removed if we're willing to add TYPE as arg */
-#define make_vector(INST) { /* beware: side effects */	\
+#define make_vector(INST) { 				\
 	(INST).c = 0;					\
 	(INST).z = sizeof *((INST).v);			\
 	(INST).v = calloc (VECSIZ, sizeof *((INST).v));	\
@@ -64,4 +64,15 @@ struct Vector {
 	(INST).m = 0;					\
 }
 
+/* example: mapf (dest, src, sqrt(src.c[i])) */
+#define mapf(dest, src, fun) 			\
+	for (size_t i = 0; i < src.c; ++i)	\
+		vec_append (dest, fun);
+#define filterf(dest, src, fun)				\
+	for (size_t i = 0; i < src.c; ++i)		\
+		if (fun)				\
+			vec_append (dest, src.v[i])
+#define reducef(dest, src, fun)			\
+	for (size_t i = 0; i < src.c; ++i)	\
+		dest = fun;
 #endif
