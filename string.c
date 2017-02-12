@@ -88,6 +88,12 @@ copystring (String *dest, String *src)
 	return dest;
 }
 
+bool
+eol(const String *s, size_t pos)
+{
+	return pos >= s->b;
+}
+
 void
 freestring (String *str)
 {

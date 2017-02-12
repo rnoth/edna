@@ -1,6 +1,7 @@
 #ifndef _string_
 #define _string_
 #include <stdio.h>
+#include <stdbool.h>
 
 #ifndef isascii
 #	define isascii(C) (!((C) & (1<<7)))
@@ -10,7 +11,6 @@
 #	define SUCC (1)
 #	define FAIL (0)
 #endif
-
 
 typedef struct String	String;
 typedef unsigned long	rune;
@@ -26,6 +26,7 @@ struct String {
 extern int	appendstring	(String *, char *);
 extern int	appendchar	(String *, char);
 extern int	appendchars	(String *, char *);
+extern bool	eol		(const String *, size_t);
 extern void	freestring	(String *);
 extern String*	chartostr	(char *);
 extern String*	clonechars	(char *);
