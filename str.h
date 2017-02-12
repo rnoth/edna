@@ -32,7 +32,7 @@ extern String*	chartostr	(char *);
 extern String*	clonechars	(char *);
 extern String*	copystring	(String *, String *);
 extern String*	copychars	(String *, const char *);
-extern String*	makestring	(size_t);
+extern String*	makestring	(void);
 extern int	resizestring	(String *, size_t);
 extern char*	strtochar	(String *);
 

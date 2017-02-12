@@ -47,11 +47,9 @@ chartostr (char *src)
 {
 	String *ret;
 
-	ret = makestring (strlen (src) + 1);
+	ret = makestring ();
+	appendchars(ret, src);
 
-	strcpy (ret->v, src);
-	ret->b = strlen (src) + 1;
-	ret->c = ustrlen (src);
 	return ret;
 }
 
@@ -59,7 +57,7 @@ String *
 clonechars(char *src)
 {
 	String *ret;
-	ret = makestring(80);
+	ret = makestring();
 	return copychars(ret, src);
 }
 
@@ -91,7 +89,7 @@ copystring (String *dest, String *src)
 bool
 eol(const String *s, size_t pos)
 {
-	return pos >= s->b;
+	return pos >= s->b - 1;
 }
 
 void
@@ -103,16 +101,14 @@ freestring (String *str)
 }
 
 String *
-makestring (size_t len)
+makestring ()
 {
 	String *ret;
 
-	if (!(ret = calloc (1, sizeof *ret)))
-		die ("calloc");
-	if (!(ret->v = calloc (len, sizeof *ret->v)))
-		die ("calloc");
+	if (!(ret = calloc (1, sizeof *ret))) die ("calloc");
+	if (!(ret->v = calloc (80, 1))) die ("calloc");
 
-	ret->m = len;
+	ret->m = 80;
 	ret->b = 1;
 
 	return ret;

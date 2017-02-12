@@ -29,7 +29,7 @@ readbuf(Buffer *buf, char *err)
 		return FAIL;
 	}
 
-	s = makestring(LINESIZE);
+	s = makestring();
 
 	errno = 0;
 	while (feof(buf->file) == 0) {

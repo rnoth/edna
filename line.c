@@ -11,7 +11,7 @@ int
 changeline (Line *l, String *s)
 {
 	if (l->str == NULL)
-		l->str = makestring (LINESIZE);
+		l->str = makestring ();
 
 	if (FAIL == copystring (l->str, s))
 		return (FAIL);

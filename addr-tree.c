@@ -57,6 +57,6 @@ makenode (void)
 	ret = calloc (1, sizeof *ret);
 	if (!ret)
 		die ("calloc");
-	ret->str = makestring (LINESIZE);
+	ret->str = makestring ();
 	return (ret);
 }
