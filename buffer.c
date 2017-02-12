@@ -32,6 +32,39 @@ addline(Buffer *buf, Line *new)
 	return SUCC;
 }
 
+int
+bufopen(Buffer *buf, char *mode)
+{
+	char *fn;
+
+	if (buf->name == NULL)
+		return FAIL;
+
+	fn = strtochar(buf->name);
+	if (buf->file)
+		buf->file = freopen(fn, mode, buf->file);
+	else
+		buf->file = fopen(fn, mode);
+	if (buf->file == NULL) {
+		perror("freopen");
+		return FAIL;
+	}
+
+	return SUCC;
+}
+
+int
+bufname(Buffer *buf, char *name)
+{
+	if (name == NULL)
+		return FAIL;
+	if (*name == '\0')
+		return FAIL;
+	freestring(buf->name);
+	buf->name = chartostr(name);
+	return SUCC;
+}
+
 Line *
 buftell(Buffer *buf)
 {
@@ -95,19 +128,15 @@ freebuf(Buffer *buf)
 	freelines(buf->top, NULL);
 	if (buf->file)
 		fclose(buf->file);
-	free(buf->filename);
+	freestring(buf->name);
 	free(buf);
 }
 
 int
-initbuf(Buffer *buf, char *filename)
+initbuf(Buffer *buf, char *fn)
 {
-	if (filename) {
-		if (!(buf->filename = calloc(LINESIZE, sizeof *buf->filename)))
-			die("calloc");
-
-		strcpy(buf->filename, filename);
-	}
+	if (fn)
+		setfilename (buf, fn);
 	
 	buf->cur = buf->top = buf->bot = makeline();
 
@@ -118,10 +147,9 @@ void
 killbuf(Buffer *buf)
 {
 	freelines(buf->top, NULL);
-	if (fclose(buf->file) == EOF)
-		perror ("fclose");
-	free (buf->filename);
-	memset (buf, 0, sizeof *buf);
+	if (buf->file && (fclose(buf->file) == EOF)) perror ("fclose");
+	freestring(buf->name);
+	memset(buf, 0, sizeof *buf);
 	return;
 }
 
@@ -169,4 +197,16 @@ rmline(Buffer *buf, Line *li)
 	buf->dirty = 1;
 
 	return SUCC;	
+}
+
+int
+setfilename(Buffer *buf, char *fn)
+{
+	if (fn == NULL)
+		return FAIL;
+	if (buf->name)
+		copychars(buf->name, fn);
+	else
+		buf->name = clonechars(fn);
+	return !!buf->name;
 }
