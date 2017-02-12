@@ -1,4 +1,5 @@
 /* parse.c -- functions for processing input */
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,42 +15,49 @@
 
 static char*	getname		(const String *, size_t *);
 static char*	setdelim	(const String *, size_t *);
-static char*	getarg		(const String *, const char *, size_t *);
+static char*	getarg		(const String *, size_t *, char *);
+
+bool
+alphacheck(const char *cur, void *_)
+{
+	wchar_t wc;
+	mbtowc(&wc, cur, 4);
+	return iswalpha(wc);
+}
+
+bool
+delimcheck(const char *cur, void *_delim)
+{
+	char *delim;
+	delim = _delim;
+	return !!strcmp(cur, delim);
+}
 
 char *
-getname (const String *s, size_t *pos)
+getseq(const String *s, size_t *pos,
+		bool (*check)(const char *, void *),
+		void *context)
 {
 	char cur[5], tmp[s->b - *pos], *ret;
 	short esc, ext;
 	size_t off;
-	wchar_t wc;
 
 	if (*pos >= s->b - 1)
-		return (NULL);
+		return NULL;
 
 	off = esc = ext = 0;
-
-	while (*pos < s->b) {
-		ext = get_uchar (cur, s->v + *pos);
-
-		if (ext <= 0) {
-			if (esc)
-				ext = -ext;
-			else
-				break;
-		}
+	while (*pos < s->b - 1) {
+		ext = get_uchar(cur, s->v + *pos);
 
 		if (*cur == '\\' && !esc) {
 			esc = 2;
 			continue;
 		}
 
-		mbtowc (&wc, cur, ext);
-
-		if (!iswalpha (wc) && !esc)
+		if (esc || !check(cur, context))
 			break;
 
-		memcpy (tmp + off, cur, ext);
+		memcpy(tmp + off, cur, ext);
 		off += ext;
 
 		*pos += ext;
@@ -58,82 +66,42 @@ getname (const String *s, size_t *pos)
 	}
 
 	tmp[off] = 0;
-	ret = malloc (off + 1);
-	if (!ret) die ("malloc");
-	memcpy (ret, tmp, off + 1);
+	ret = malloc(off + 1);
+	if (!ret) die("malloc");
+	memcpy(ret, tmp, off + 1);
 
-	return (ret);
+	return ret;
 }
 
 char *
-setdelim (const String *s, size_t *pos)
+getname(const String *s, size_t *pos)
 {
-	void *tmp;
+
+	return getseq(s, pos, alphacheck, NULL);
+}
+
+char *
+getarg(const String *s, size_t *pos, char *delim)
+{
+	return getseq(s, pos, delimcheck, delim);
+}
+
+char *
+setdelim(const String *s, size_t *pos)
+{
 	char *ret;
 	short ext;
 
 	if (*pos >= s->b - 1)
-		return (NULL);
+		return NULL;
 
-	ret = malloc (5);
-	ext = get_uchar (ret, s->v + *pos);
-	if (ext <= 0)
-		ext = -ext;
+	ret = malloc(5);
+	ext = get_uchar(ret, s->v + *pos);
 	(*pos) += ext;
 
-	tmp = realloc (ret, ext);
-	if (!tmp) {
-		die ("realloc");
-	} else
-		ret = tmp;
+	if (!ext) return NULL;
 
-	if (!ext) return (NULL);
-
-	return (ret);
-}
-
-char *
-getarg (const String *s, const char *delim, size_t *pos)
-{
-	char *ret;
-	size_t off;
-	int ext, esc;
-
-	if (*pos >= s->b)
-		return (NULL);
-
-	ret = malloc (s->b - *pos + 1);
-	if (!ret) die ("malloc");
-
-	off = esc = ext = 0;
-	while (*pos < s->b - 1) {
-		ext = uchar_extent (s->v[*pos]);
-		if (ext == -1)
-			ext = 1;
-
-		if (s->v[*pos] == '\\' && !esc) {
-			esc = 2;
-			continue;
-		}
-		if (!esc && !strncmp (s->v + *pos, delim, strlen (delim)))
-			break;
-		else if (s->v[*pos] == '\n')
-			break;
-
-		memcpy (ret + off, s->v + *pos, ext);
-
-		*pos += ext;
-		off += ext;
-		if (esc) --esc;
-	}
-
-	if (off == 0) {
-		free (ret);
-		return (NULL);
-	}
-	*pos += ext;
-	ret[off] = 0; /* terminate */
-	return (ret);
+	return ret;
 }
 
 int
@@ -147,35 +115,40 @@ parseline (String *s, Buffer *buf, Arg *arg, char *error)
 	ret = FAIL;
 	pos = 0;
 	/* line address */
-	tmp = getaddr (s, &pos, buf, error);
+	tmp = getaddr(s, &pos, buf, error);
 	if (tmp) {
-		make_vector (arg->sel);
-		vec_copy (arg->sel, *(Selection *)tmp);
-		free_vector (*(Selection *)tmp);
+		make_vector(arg->sel);
+		vec_copy(arg->sel, *(Selection *)tmp);
+		free_vector(*(Selection *)tmp);
 		free (tmp);
 	}
 
 	/* command name */
-	tmp = getname (s, &pos);
+	tmp = getname(s, &pos);
+	if (!tmp)
+		goto finally;
 	arg->name = tmp;
 
 	/* delimiter */
-	tmp = setdelim (s, &pos);
+	tmp = setdelim(s, &pos);
+	if (!tmp)
+		goto finally;
 	delim = tmp;
 
 	/* argument vector */
-	tmp = getarg (s, delim, &pos);
-	if (tmp)
-		make_vector (arg->param);
-	while (tmp) {
-		vec_append (arg->param, tmp);
-		tmp = getarg (s, delim, &pos);
-	}
+	make_vector(arg->param);
+	do {
+		tmp = getarg(s, &pos, delim);
+		if (!tmp)
+			break;
+		vec_append(arg->param, tmp);
+	} while (tmp);
 
+
+	free(delim);
+
+finally:
 	ret = SUCC;
-
-	free (delim);
-
-	return (ret);
+	return ret;
 
 }
