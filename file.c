@@ -14,23 +14,26 @@ extern int readbuf	(Buffer *, char *);
 extern int writebuf	(Buffer *, char *);
 
 int
-readbuf (Buffer *buf, char *err)
+readbuf(Buffer *buf, char *err)
 {
 	int ret = FAIL;
 	String *s;
 	Line *new;
 
-	buf->file = fopen (buf->filename, "r+");
-	if (!buf->file ) {
-		warn ("fopen");
-		return (FAIL);
+	errno = 0;
+	if (bufopen(buf, "r") == FAIL) {
+		if (errno)
+			strncpy(err, strerror(errno), 80);
+		else
+			strcpy(err, "invalid filename");
+		return FAIL;
 	}
 
-	s = makestring (LINESIZE);
+	s = makestring(LINESIZE);
 
 	errno = 0;
-	while (!feof (buf->file)) {
-		if (readline (s, buf->file) == FAIL) {
+	while (feof(buf->file) == 0) {
+		if (readline(s, buf->file) == FAIL) {
 			if (errno) {
 				strncpy (err, strerror (errno), 20);
 				goto finally;
@@ -62,17 +65,18 @@ writebuf (Buffer *buf, char *error)
 {
 	Line *tmp;
 
-	if (!buf->filename[0]) {
-		strcpy (error, "no filename");
+	errno = 0;
+	if (bufopen(buf, "w+") == FAIL) {
+		if (errno) {
+			strcpy (error, "fopen: ");
+			strcpy (error + strlen (error), strerror (errno));
+		} else {
+			strcpy (error, "invalid filename");
+		}
 		return FAIL;
 	}
-
-	if (!(buf->file = freopen (buf->filename, "w+", buf->file))) {
-		strcpy (error, "fopen: ");
-		strcpy (error + strlen (error), strerror (errno));
-		return FAIL;
-	}
-
+		
+	/* FIXME */
 	for (tmp = buf->top; tmp; tmp = getnext(tmp))
 		fputs (tmp->str->v, buf->file);
 

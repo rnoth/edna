@@ -5,55 +5,47 @@
 #include "edna.h"
 #include "buffer.h"
 #include "cmd.h"
+#include "mode.h"
 #include "util.h"
 
 int
-cmd_edit (State *st, Buffer *buf, Arg *arg, char *error)
+cmd_edit(State *st, Buffer *buf, Arg *arg, char *error)
 {
+	char *fn;
 	if (arg->mode && !strcmp (arg->mode, "force"))
-		goto end;
+		goto force;
 	if (buf->dirty) {
 		strcpy (error, "buffer has unsved changes");
 		return FAIL;
 	}
 
-end:
-	if (EOF == fclose (buf->file)) {
-		warn ("fclose");
-		return FAIL;
-	}
+force:
+	if (arg->param.c) fn = arg->param.v[0];
+	else	fn = strtochar(buf->name);
 
-	freelines (buf->top, NULL);
-	buf->top = buf->bot = buf->cur = NULL;
-	buf->len = buf->pos = 0;
-
-	if (arg->param.c)
-		strcpy (buf->filename, arg->param.v[0]);
-
-	readbuf (buf, error);
-	return (SUCC);
+	killbuf(buf);
+	initbuf(buf, fn);
+	readbuf(buf, error);
+	setmode(st, buf, "command");
+	return SUCC;
 }
 
 int
-cmd_filename (State *st, Buffer *buf, Arg *arg, char *error)
+cmd_filename(State *st, Buffer *buf, Arg *arg, char *error)
 {
+	char *fn;
 	if (!arg->param.c) {
-		if (0 > printf ("%s\n", buf->filename)) die ("printf");
-		return (SUCC);
+		fn = strtochar(buf->name);
+		if (printf("%s\n", fn) < 0) die ("printf");
+		return SUCC;
 	}
 
-	if (buf->file && fclose (buf->file) == EOF) {
-		warn ("fclose");
-		strcpy (error, "could not close current file");
-		return (FAIL);
-	} else if (arg->param.v[0][0] == '\0') {
-		strcpy (error, "invalid filename");
-		return (FAIL);
+	if (bufname(buf, arg->param.v[0]) == FAIL) {
+		strcpy(error, "invalid filename");
+		return FAIL;
 	}
 
-	strcpy (buf->filename, arg->param.v[0]);
-
-	return (SUCC);
+	return SUCC;
 }
 
 int
@@ -66,33 +58,31 @@ cmd_quit (State *st, Buffer *buf, Arg *arg, char *error)
 			if (cmd_write (st, buf, arg, error) == FAIL)
 				return FAIL;
 		strcpy (error, "unknown option");
-		return (FAIL);
+		return FAIL;
 	}
 
 	if (buf->dirty) {
 		strcpy (error, "buffer has unsaved changes");
-		return (FAIL);
+		return FAIL;
 	}
 
 end:
 	strcpy (error, "quit");
-	return (FAIL);
+	return FAIL;
 }	
 
 int
 cmd_write (State *st, Buffer *buf, Arg *arg, char *error)
 {
 	if (arg->param.c) {
-		if (arg->param.v[0][0])
-			strcpy (buf->filename, arg->vec[0]);
-		else {
+		if (bufname(buf, arg->param.v[0]) == FAIL) {
 			strcpy (error, "invalid filename");
-			return (FAIL);
+			return FAIL;
 		}
 	}
 
 	if (writebuf (buf, error) == FAIL)
-		return (FAIL);
+		return FAIL;
 	buf->dirty = 0;
-	return (SUCC);
+	return SUCC;
 }
