@@ -136,5 +136,5 @@ strtochar(String *str)
 	if (ret == NULL) die("malloc");
 	memcpy(ret, str->v, str->b);
 
-	return ret;	
+	return ret;
 }
