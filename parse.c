@@ -42,8 +42,7 @@ getseq(const String *s, size_t *pos,
 	short esc, ext;
 	size_t off;
 
-	if (*pos >= s->b - 1)
-		return NULL;
+	if (eol(s, *pos)) return NULL;
 
 	off = esc = ext = 0;
 	while (*pos < s->b - 1) {
@@ -90,16 +89,11 @@ char *
 setdelim(const String *s, size_t *pos)
 {
 	char *ret;
-	short ext;
 
-	if (*pos >= s->b - 1)
-		return NULL;
+	if (eol(s, *pos)) return NULL;
 
 	ret = malloc(5);
-	ext = get_uchar(ret, s->v + *pos);
-	(*pos) += ext;
-
-	if (!ext) return NULL;
+	(*pos) += get_uchar(ret, s->v + *pos);
 
 	return ret;
 }
