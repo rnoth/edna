@@ -13,35 +13,34 @@ main (int argc, char** argv)
 	Buffer	*buf;
 
 	/* init stuff */
-	st   = makestate ();
-	buf  = makebuf ();
-	s    = makestring (LINESIZE);
+	st   = makestate();
+	buf  = makebuf();
+	s    = makestring(LINESIZE);
 	*err = 0;
 
-	initst  (st);
-	if (FAIL == parse_argv (st, err, argc, argv)) goto exit;
+	initst(st);
+	if (parse_argv (st, err, argc, argv) == FAIL) goto exit;
 	/* end init */
 
 	/* main execution */
-	if (FAIL == checkoutbuf (buf, st, 0)) goto exit;
+	if (checkoutbuf (buf, st, 0) == FAIL) goto exit;
 
 	for (;;) {
 
-		if (FAIL == buf->mode->prompt (st, buf, s, err)) goto finally;
-		if (FAIL == buf->mode->input  (st, buf, s, err)) goto finally;
-		if (FAIL == buf->mode->eval   (st, buf, s, err)) goto finally;
+		if (buf->mode->prompt(st, buf, s, err) == FAIL) goto finally;
+		if (buf->mode->input (st, buf, s, err) == FAIL) goto finally;
+		if (buf->mode->eval  (st, buf, s, err) == FAIL) goto finally;
 		continue;
 
 	finally:
-		if (FAIL == buf->mode->error (st, buf, s, err))
-			break;
+		if (buf->mode->error(st, buf, s, err) == FAIL) break;
 	}
 	/* end main */
 
 exit:
-	freebuf		(buf);
-	freestate	(st);
-	freestring	(s);
+	freebuf(buf);
+	freestate(st);
+	freestring(s);
 
 	return (0);
 }
