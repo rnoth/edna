@@ -77,7 +77,7 @@ writebuf (Buffer *buf, char *error)
 	}
 		
 	/* FIXME */
-	for (tmp = buf->top; tmp; tmp = getnext(tmp))
+	for (tmp = getnext(buf->top); tmp; tmp = getnext(tmp))
 		fputs (tmp->str->v, buf->file);
 
 	return SUCC;
