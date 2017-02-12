@@ -28,10 +28,12 @@ extern int	appendchar	(String *, char);
 extern int	appendchars	(String *, char *);
 extern void	freestring	(String *);
 extern String*	chartostr	(char *);
-extern int	copystring	(String *, String *);
-extern int	copychars	(String *, const char *);
+extern String*	clonechars	(char *);
+extern String*	copystring	(String *, String *);
+extern String*	copychars	(String *, const char *);
 extern String*	makestring	(size_t);
 extern int	resizestring	(String *, size_t);
+extern char*	strtochar	(String *);
 
 /* str-io.c */
 extern int	readline	(String *, FILE *);

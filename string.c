@@ -50,34 +50,42 @@ chartostr (char *src)
 	ret = makestring (strlen (src) + 1);
 
 	strcpy (ret->v, src);
-	ret->b = strlen (src);
-	ret->c = strlen (src); /* TODO: not utf-8 aware */
+	ret->b = strlen (src) + 1;
+	ret->c = ustrlen (src);
 	return ret;
 }
 
-int
+String *
+clonechars(char *src)
+{
+	String *ret;
+	ret = makestring(80);
+	return copychars(ret, src);
+}
+
+String *
 copychars (String *dest, const char *src)
 {
 	if (dest->m < strlen (src))
 		if (resizestring (dest, dest->m * 2) == FAIL)
-			return (FAIL);
+			return NULL;
 
 	strcpy (dest->v, src);
 	dest->b = strlen (src) + 1;
 	dest->c = ustrlen (src);
-	return (SUCC);
+	return dest;
 }
 
-int
+String *
 copystring (String *dest, String *src)
 {
 	if (dest->m < src->c)
-		if (FAIL == resizestring (dest, src->m))
-			return (FAIL);
+		if (resizestring (dest, src->m) == FAIL)
+			return NULL;
 	memset (dest->v, 0, dest->m);
 	memcpy (dest->v, src->v, src->c);
 	dest->c = src->c;
-	return (SUCC);
+	return dest;
 }
 
 void
@@ -105,15 +113,28 @@ makestring (size_t len)
 }
 
 int
-resizestring (String *str, size_t len)
+resizestring(String *str, size_t len)
 {
 	char *tmp;
 
-	if (!(tmp = realloc (str->v, len))) {
-		warn ("realloc");
+	if (!(tmp = realloc(str->v, len))) {
+		warn("realloc");
 		return 0;
 	}
 	str->v = tmp;
 	str->m = len;
 	return 1;
+}
+
+char *
+strtochar(String *str)
+{
+	char *ret;
+
+	if (str == NULL) return NULL;
+	ret = malloc (str->b);
+	if (ret == NULL) die("malloc");
+	memcpy(ret, str->v, str->b);
+
+	return ret;	
 }
