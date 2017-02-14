@@ -21,7 +21,6 @@ cmd_insert (State *st, Buffer *buf, Arg *arg, char *error)
 		} else if (!strcmp (arg->mode, "change")) {
 			if (cmd_delete (st, buf, arg, error) == FAIL)
 				return FAIL;
-			bufseek (buf, BUF_CUR, -1);
 		} else {
 			strcpy (error, "unknown option");
 			return SUCC;
