@@ -106,16 +106,20 @@ bufopen(Buffer buf, char *mode)
 	_buffer *_buf = buf.v;
 	char *fn;
 
-	if (_buf->name == NULL)
-		return FAIL;
+	if (_buf->name == NULL) return FAIL;
 
 	fn = strtochar(_buf->name);
 
-	if (_buf->file) _buf->file = freopen(fn, mode, _buf->file);
-	else _buf->file = fopen(fn, mode);
+	if (!fn || !*fn) {
+		free(fn);
+		return FAIL;
+	}
+
+	if (_buf->file) fclose(_buf->file);
+	_buf->file = fopen(fn, mode);
 
 	if (_buf->file == NULL) {
-		perror("freopen");
+		perror("fopen");
 		return FAIL;
 	}
 
