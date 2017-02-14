@@ -78,7 +78,7 @@ void *
 set2vec (Set *A)
 {
 	Set *B;
-	subset b;
+	uint32_t b;
 	size_t i, j, t[32];
 	VECTOR (size_t, *ret);
 
@@ -205,44 +205,32 @@ setrightmost (Set *A)
 }
 
 Set *
-setshift (Set *A, size_t off, int left)
+setshiftright(Set *A, size_t off)
 {
-	doubleset d;
-	Set *B;
+	uint64_t d;
 	size_t i, len;
+	Set *B;
 
-	if (A->c * 32 < off)
-		expandset(A);
+	if (A->c * 32 < off) expandset(A);
 
-	B = make_set ();
+	B = make_set();
 
 	d = 0;
 	len = A->c;
-	for (i = len; i --> 0; d = 0) {
-		if (left) {
-			d = A->v[i];
-			d <<= 32;
-			if (i != len - 1)
-				d |= A->v[i + i];
+	for (i = 0; i < len; ++i) {
+		d = 0;
+		if (i + 1 < len) d = A->v[i+1];
+		d <<= 32;
+		d |= A->v[i];
 
-			d <<= off % 32;
-			if (d >> 32) {
-				if (i == len - 1)
-					expandset(B);
-				B->v[i + 1] = d >> 32;
+		d <<= off % 32;
+		B->v[i] |= d;
+		if (d >> 32) {
+		       	if (i == len - 1) {
+				expandset(B);
+				len += 1;
 			}
-
-		} else {
-		/* note: does not work */
-			d = A->v[i];
-			d <<= 32;
-
-			if (i != len - 1)
-				d |= A->v[i+1];
-
-			d >>= off % 32;
-			d >>= 32;
-			B->v[i] = d;
+			B->v[i+1] = d >> 32;
 		}
 
 	}

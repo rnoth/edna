@@ -31,7 +31,7 @@ addr_plus(Node *left, Node *right, Buffer buf, char *err)
 
 		off = setrightmost(inc) - 1;
 
-		if (setshiftleft(ret, off) == NULL)
+		if (setshiftright(ret, off) == NULL)
 			goto fail;
 
 	} else {
@@ -40,7 +40,7 @@ addr_plus(Node *left, Node *right, Buffer buf, char *err)
 
 		off = 1;
 
-		if (setshiftleft(ret, off) == NULL)
+		if (setshiftright(ret, off) == NULL)
 			goto fail;
 
 	}

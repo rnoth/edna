@@ -5,16 +5,11 @@
 
 #include "vector.h"
 
-#define setshiftleft(A, off) setshift (A, off, 1)
-#define setshiftright(A, off) setshift (A, off, 0)
-
-typedef uint64_t   doubleset;
-typedef uint32_t   subset;
 typedef struct Set Set;
 
 struct Set {
 	size_t c;
-	subset *v;
+	uint32_t *v;
 };
 
 extern Set *	cloneset	(Set *);
@@ -26,7 +21,7 @@ extern Set *	setaddmemb	(Set *, size_t memb);
 extern Set *	setcomplement	(Set *);
 extern Set *	setdifference	(Set *, Set *);
 extern Set *	setintersect	(Set *, Set *);
-extern Set *	setshift	(Set *, size_t, int);
+extern Set *	setshiftright	(Set *, size_t);
 extern size_t	setrightmost	(Set *);
 extern Set *	setunion	(Set *, Set *);
 
