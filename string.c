@@ -1,11 +1,8 @@
-#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "util.h"
 #include "str.h"
-
-/* TODO: use FAIL and SUCC instead of 0 and 1 */
 
 #if 0
 int
@@ -17,61 +14,15 @@ appendstring (String *dest, String *src)
 }
 #endif
 		
-int
-appendchar (String *dest, char src)
+void
+chomp(String *s)
 {
-	if (dest->b + 1 >= dest->m)
-		if (resizestring (dest, dest->m * 2) == FAIL)
-			return (FAIL);
-	dest->v[dest->b - 1] = src;
-	dest->v[dest->b] = 0;
-	++dest->c;
-	++dest->b;
-	return (SUCC);
-}
+	if (s->v[s->b - 2] == '\n') {
+		s->v[s->b - 2] = 0;
 
-int
-appendchars (String *dest, char *src)
-{
-	if (dest->b + strlen (src) > dest->m)
-		if (resizestring (dest, dest->m * 2))
-			return (FAIL);
-	strcat (dest->v, src);
-	dest->b += strlen (src);
-	dest->c += ustrlen (src);
-	return (SUCC);
-}
-
-String *
-chartostr (char *src)
-{
-	String *ret;
-
-	ret = makestring ();
-	appendchars(ret, src);
-
-	return ret;
-}
-
-String *
-clonechars(char *src)
-{
-	String *ret;
-	ret = makestring();
-	return copychars(ret, src);
-}
-
-String *
-copychars (String *dest, const char *src)
-{
-	if (dest->m < strlen (src))
-		if (resizestring (dest, dest->m * 2) == FAIL)
-			return NULL;
-
-	strcpy (dest->v, src);
-	dest->b = strlen (src) + 1;
-	dest->c = ustrlen (src);
-	return dest;
+		--s->b;
+		--s->c;
+	}
 }
 
 String *
@@ -128,15 +79,3 @@ resizestring(String *str, size_t len)
 	return 1;
 }
 
-char *
-strtochar(String *str)
-{
-	char *ret;
-
-	if (str == NULL) return NULL;
-	ret = malloc (str->b);
-	if (ret == NULL) die("malloc");
-	memcpy(ret, str->v, str->b);
-
-	return ret;
-}
