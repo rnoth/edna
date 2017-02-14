@@ -283,6 +283,7 @@ killbuf(Buffer buf)
 	freelines(_buf->top, NULL);
 	if (_buf->file && (fclose(_buf->file) == EOF)) perror ("fclose");
 	freestring(_buf->name);
+	memset(_buf, 0, sizeof *_buf);
 
 	return;
 }
