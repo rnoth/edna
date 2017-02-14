@@ -39,10 +39,11 @@ getaddr (String *s, size_t *pos, Buffer *buf, char *err)
 	Selection *ret;
 	Node *tree;
 
-	tree = parseaddr (s, pos, err);
-	sel  = evaltree (tree, buf, err);
-	ret  = resolveset (sel, buf, err);
-	freetree (tree);
+	tree = parseaddr(s, pos, err);
+	sel  = evaltree(tree, buf, err);
+	ret  = resolveset(sel, buf, err);
+	freetree(tree);
+	free_set(sel);
 	return (ret);
 }
 
