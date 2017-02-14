@@ -35,7 +35,6 @@ resolveset (Set *A, Buffer *buf, char *error)
 		vec_append (*ret, tmp);
 	}
 
-	free (A);
 	free_vector (*stack);
 	free (stack);
 
