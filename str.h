@@ -29,6 +29,7 @@ extern int	appendchars	(String *, char *);
 extern bool	eol		(const String *, size_t);
 extern void	freestring	(String *);
 extern String*	chartostr	(char *);
+extern void	chomp		(String *);
 extern String*	clonechars	(char *);
 extern String*	copystring	(String *, String *);
 extern String*	copychars	(String *, const char *);
