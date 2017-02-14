@@ -37,6 +37,7 @@ expandset (Set *A)
 void
 free_set (Set *A)
 {
+	if (!A) return;
 	free (A->v);
 	free (A);
 }
@@ -211,7 +212,7 @@ setshift (Set *A, size_t off, int left)
 	size_t i, len;
 
 	if (A->c * 32 < off)
-		expandset (A);
+		expandset(A);
 
 	B = make_set ();
 
@@ -219,19 +220,25 @@ setshift (Set *A, size_t off, int left)
 	len = A->c;
 	for (i = len; i --> 0; d = 0) {
 		if (left) {
-			if (i != len - 1)
-				d = A->v[i+1];
+			d = A->v[i];
 			d <<= 32;
-			d |= A->v[i];
+			if (i != len - 1)
+				d |= A->v[i + i];
 
 			d <<= off % 32;
-			B->v[i] = d;
+			if (d >> 32) {
+				if (i == len - 1)
+					expandset(B);
+				B->v[i + 1] = d >> 32;
+			}
+
 		} else {
+		/* note: does not work */
 			d = A->v[i];
 			d <<= 32;
 
-			if (i)
-				d |= A->v[i - 1];
+			if (i != len - 1)
+				d |= A->v[i+1];
 
 			d >>= off % 32;
 			d >>= 32;
