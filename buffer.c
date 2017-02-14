@@ -258,8 +258,8 @@ int
 initbuf(Buffer buf, char *fn)
 {
 	_buffer *_buf = buf.v;
-	if (fn)
-		setfilename (buf, fn);
+
+	if (fn) setfilename (buf, fn);
 	
 	_buf->cur = _buf->top = _buf->bot = makeline();
 	_buf->len = 1;
