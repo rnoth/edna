@@ -40,6 +40,21 @@ chartostr (char *src)
 	return ret;
 }
 
+void
+chomp(char *s)
+{
+	char *t, *nl;
+
+	nl = NULL;
+	for (t = s; *t; ++t)
+		if (*t == '\n')
+			nl = t;
+
+	if (nl) *nl = 0;
+
+	return;
+}
+
 String *
 clonechars(char *src)
 {

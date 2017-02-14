@@ -10,11 +10,6 @@
 
 #include "config.h"
 
-extern void	freestate	(State *);
-extern void	initst		(State *);
-extern State*	makestate	(void);
-extern int	parse_argv	(State *, char *, int, char **);
-
 void
 freestate (State *st)
 {
@@ -29,47 +24,53 @@ freestate (State *st)
 }
 
 void
-initst (State *st)
+initst(State *st)
 {
+	size_t i;
 	/* st->buffers */
-	make_vector (st->buffers);
+	make_vector(st->buffers);
 
 	/* st->commands */
-	make_vector (st->cmds);
-	vec_concat (st->cmds, commands, LEN (commands));
-	qsort (st->cmds.v, st->cmds.c, sizeof *commands, &cmdcmp);
+	make_vector(st->cmds);
+	for (i = 0; commands[i].name; ++i)
+		;
+	vec_concat(st->cmds, commands, i);
 
 	/* st->modes */
-	make_vector (st->modes);
-	vec_concat (st->modes, modes, LEN (modes));
+	make_vector(st->modes);
+	for (i = 0; modes[i].name; ++i)
+		;
+	vec_concat(st->modes, modes, i);
+
+	setmode(st, "command");
 }
 
 State *
 makestate (void)
 {
 	State *st;
-	if (!(st = calloc (1, sizeof *st)))
-		die ("calloc");
+	if (!(st = calloc (1, sizeof *st))) die ("calloc");
 	return st;
 }
 
 int
-parse_argv (State *st, char *err, int argc, char **argv)
+parse_argv (State *st, char **argv, char *err)
 {
-	Buffer *tmp;
+	Buffer tmp;
 
 
-	if (argc > 1) {
-		do {
-			tmp = makebuf ();
-			initbuf (tmp, *(++argv));
-			readbuf (tmp, err);
-			addbuf (st, tmp);
-		} while (--argc > 1);
+	if (*++argv) {
+		while (*argv++) {
+			tmp = makebuf();
+			initbuf(tmp, *argv);
+			readbuf(tmp, err);
+			bufclean(tmp);
+			addbuf(st, tmp);
+		}
 	} else {
-		tmp = makebuf (); /* FIXME */
-		initbuf (tmp, NULL);
-		addbuf (st, tmp);
+		tmp = makebuf();
+		initbuf(tmp, NULL);
+		addbuf(st, tmp);
 	}
 
 	return SUCC;

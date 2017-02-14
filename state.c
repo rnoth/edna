@@ -5,52 +5,59 @@
 #include "state.h"
 #include "vector.h"
 
+static Mode *findmode(State *, char *);
 
 int
-addbuf (State *st, Buffer *buf)
+addbuf(State *st, Buffer buf)
 {
-	/* TODO: no error handling */
-	vec_append (st->buffers, buf);
+	vec_append(st->buffers, buf);
 	return SUCC;
 }
 
 
 int
-checkoutbuf (Buffer *dest, State *st, size_t which)
+checkoutbuf(Buffer dest, State *st, size_t which)
 {
-	Buffer *src;
+	Buffer src;
 
 	if (which >= st->buffers.c)
 		return FAIL;
 
 	src = st->buffers.v[which];
-	memcpy (dest, src, sizeof *dest);
+	copybuf(dest, src);
 
-	free (src);
-	vec_remove (st->buffers, which);
-
-	dest->mode = st->modes.v;
+	vec_remove(st->buffers, which);
 
 	return SUCC;
 }
 
+Mode *
+findmode(State *st, char *mode)
+{
+	size_t i = 0;
+	for (; i < st->modes.c; ++i)
+		if (!strcmp(st->modes.v[i].name, mode))
+			return st->modes.v + i;
+	return NULL;
+}
 
 int
-returnbuf (Buffer *src, State *st)
+returnbuf(State *st, Buffer src)
 {
-	Buffer *tmp;
+	Buffer tmp;
 
-	tmp = makebuf ();
-
-	memcpy (tmp, src, sizeof *tmp);
+	tmp = clonebuf(src);
 	vec_append (st->buffers, tmp);
-	memset (src, 0, sizeof *tmp);
+	
 	return SUCC;
 }
 
 int
-rmbuf (State *st, size_t which)
+setmode(State *st, char *name)
 {
-	vec_remove (st->buffers, which);
+	Mode *m;
+
+	m = findmode(st, name);
+	st->mode = m;
 	return SUCC;
 }

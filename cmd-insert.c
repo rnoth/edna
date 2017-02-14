@@ -5,13 +5,11 @@
 #include "edna.h"
 #include "buffer.h"
 #include "cmd.h"
-#include "mode.h"
 
 int
-cmd_insert (State *st, Buffer *buf, Arg *arg, char *error)
+cmd_insert (State *st, Buffer buf, Arg *arg, char *error)
 {
-	buf->cur = (*arg->sel.v) + arg->sel.c - 1;
-	buf->pos = getlineno (buf->cur);
+	bufseekline(buf, arg->sel.v[0]);
 
 	if (arg->mode) {
 		if (!strcmp (arg->mode, "insert")) {
@@ -27,6 +25,6 @@ cmd_insert (State *st, Buffer *buf, Arg *arg, char *error)
 		}
 	}
 
-	setmode (st, buf, "insert");
+	setmode (st, "insert");
 	return SUCC;
 }

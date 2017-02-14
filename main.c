@@ -1,7 +1,6 @@
 /* edna -- ed-like text editor */
 #include "edna.h"
 #include "buffer.h"
-#include "mode.h"
 #include "str.h"
 
 int
@@ -10,7 +9,7 @@ main (int argc, char** argv)
 	char	 err[80];
 	String	*s;
 	State	*st;
-	Buffer	*buf;
+	Buffer	 buf;
 
 	/* init stuff */
 	st   = makestate();
@@ -19,7 +18,7 @@ main (int argc, char** argv)
 	*err = 0;
 
 	initst(st);
-	if (parse_argv (st, err, argc, argv) == FAIL) goto exit;
+	if (parse_argv (st, argv, err) == FAIL) goto exit;
 	/* end init */
 
 	/* main execution */
@@ -27,13 +26,13 @@ main (int argc, char** argv)
 
 	for (;;) {
 
-		if (buf->mode->prompt(st, buf, s, err) == FAIL) goto finally;
-		if (buf->mode->input (st, buf, s, err) == FAIL) goto finally;
-		if (buf->mode->eval  (st, buf, s, err) == FAIL) goto finally;
+		if (st->mode->prompt(st, buf, s, err) == FAIL) goto finally;
+		if (st->mode->input (st, buf, s, err) == FAIL) goto finally;
+		if (st->mode->eval  (st, buf, s, err) == FAIL) goto finally;
 		continue;
 
 	finally:
-		if (buf->mode->error(st, buf, s, err) == FAIL) break;
+		if (st->mode->error(st, buf, s, err) == FAIL) break;
 	}
 	/* end main */
 

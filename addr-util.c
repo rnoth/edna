@@ -10,7 +10,7 @@
 #include "vector.h"
 
 Selection *
-resolveset (Set *A, Buffer *buf, char *error)
+resolveset (Set *A, Buffer buf, char *error)
 {
 	void *tmp;
 	VECTOR (size_t, *stack);
@@ -29,7 +29,7 @@ resolveset (Set *A, Buffer *buf, char *error)
 		goto invalid;
 
 	for (i = 0; i < stack->c; ++i) {
-		tmp = walk (buf->top, stack->v[i]);
+		tmp = bufprobe(buf, stack->v[i] - 1);
 		if (!tmp)
 			goto invalid;
 		vec_append (*ret, tmp);

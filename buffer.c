@@ -7,9 +7,28 @@
 #include "util.h"
 #include "vector.h"
 
+typedef struct _buffer _buffer;
+struct _buffer {
+	/* file info */
+	int	dirty;
+	FILE	*file;
+	String	*name;
+
+	/* line info */
+	size_t	len;
+	size_t	pos;
+	Line	*top;
+	Line	*bot;
+	Line	*cur;
+
+	/* misc. info */
+	Mode	*mode;
+};
+
 int
-addline(Buffer *buf, Line *new)
+addline(Buffer buf, Line *new)
 {
+	_buffer *_buf = buf.v;
 	Line *li = NULL;
 
 	if (new == NULL)
@@ -20,32 +39,82 @@ addline(Buffer *buf, Line *new)
 	linklines(new, getnext(li));
 	linklines(li, new);
 
-	if (buf->bot == li)
-		buf->bot = new;
+	if (_buf->bot == li)
+		_buf->bot = new;
 
-	++buf->len;
-	buf->dirty = 1;
+	++_buf->len;
+	_buf->dirty = 1;
 
-	++buf->pos;
-	buf->cur = new;
+	++_buf->pos;
+	_buf->cur = new;
+
+	return SUCC;
+}
+
+void
+bufclean(Buffer buf)
+{
+	_buffer *_buf = buf.v;
+
+	_buf->dirty = 0;
+}
+
+char *
+bufgetname(Buffer buf)
+{
+	_buffer *_buf = buf.v;
+
+	return strtochar(_buf->name);
+}
+
+size_t
+bufgetpos(Buffer buf)
+{
+	_buffer *_buf = buf.v;
+
+	return _buf->pos;
+}
+
+size_t
+buflen(Buffer buf)
+{
+	_buffer *_buf = buf.v;
+
+	return _buf->len;
+}
+
+int
+bufname(Buffer buf, char *name)
+{
+	_buffer *_buf = buf.v;
+
+	if (name == NULL)
+		return FAIL;
+	if (*name == '\0')
+		return FAIL;
+
+	freestring(_buf->name);
+	_buf->name = chartostr(name);
+	chompstr(_buf->name);
 
 	return SUCC;
 }
 
 int
-bufopen(Buffer *buf, char *mode)
+bufopen(Buffer buf, char *mode)
 {
+	_buffer *_buf = buf.v;
 	char *fn;
 
-	if (buf->name == NULL)
+	if (_buf->name == NULL)
 		return FAIL;
 
-	fn = strtochar(buf->name);
-	if (buf->file)
-		buf->file = freopen(fn, mode, buf->file);
-	else
-		buf->file = fopen(fn, mode);
-	if (buf->file == NULL) {
+	fn = strtochar(_buf->name);
+
+	if (_buf->file) _buf->file = freopen(fn, mode, _buf->file);
+	else _buf->file = fopen(fn, mode);
+
+	if (_buf->file == NULL) {
 		perror("freopen");
 		return FAIL;
 	}
@@ -53,28 +122,21 @@ bufopen(Buffer *buf, char *mode)
 	return SUCC;
 }
 
-int
-bufname(Buffer *buf, char *name)
-{
-	if (name == NULL)
-		return FAIL;
-	if (*name == '\0')
-		return FAIL;
-	freestring(buf->name);
-	buf->name = chartostr(name);
-	return SUCC;
-}
-
 Line *
-buftell(Buffer *buf)
+bufprobe(Buffer buf, size_t off)
 {
-	return buf->cur;
+	_buffer *_buf = buf.v;
+
+	if (off > _buf->len) return NULL;
+
+	return walk(_buf->top, off);
 }
 
 int
-bufseek(Buffer *buf, int whence, long off)	
+bufseek(Buffer buf, int whence, long off)	
 {	
 	int dir;
+	_buffer *_buf = buf.v;
 	Line *(*get)(Line *); Line *li;
 
 	if (off > 0 && whence == BUF_END)
@@ -87,13 +149,13 @@ bufseek(Buffer *buf, int whence, long off)
 
 	switch (whence) {
 	 case BUF_SET:
-		 li = buf->top;
+		 li = _buf->top;
 		 break;
 	 case BUF_CUR:
-		 li = buf->cur;
+		 li = _buf->cur;
 		 break;
 	 case BUF_END:
-		 li = buf->bot;
+		 li = _buf->bot;
 		 break;
 	 default:
 		 return FAIL;
@@ -110,103 +172,179 @@ bufseek(Buffer *buf, int whence, long off)
 
 	for (;;) {
 		li = get(li);
-		if (li == NULL || li == buf->top)
-			break;
-		buf->cur = li;
-		buf->pos += dir;
-		if (--off == 0)
-			break;
+		if (li == NULL) break;
+		_buf->cur = li;
+		_buf->pos += dir;
+		if (--off == 0) break;
 	} 
 
 	if (off == 0) 	return SUCC;
 	else 		return FAIL;
 }
 
-void
-freebuf(Buffer *buf)
-{
-	freelines(buf->top, NULL);
-	if (buf->file)
-		fclose(buf->file);
-	freestring(buf->name);
-	free(buf);
-}
-
 int
-initbuf(Buffer *buf, char *fn)
+bufseekline(Buffer buf, Line *li)
 {
-	if (fn)
-		setfilename (buf, fn);
-	
-	buf->cur = buf->top = buf->bot = makeline();
+	_buffer *_buf = buf.v;
+	size_t off;
+	Line *tmp;
+
+	off = 0;
+	for (tmp = _buf->top; tmp && tmp != li; tmp = getnext(tmp))
+		++off;
+	if (!tmp) return FAIL;
+
+	_buf->pos = off;
+	_buf->cur = tmp;
 
 	return SUCC;
 }
 
-void
-killbuf(Buffer *buf)
+Line *
+buftell(Buffer buf)
 {
-	freelines(buf->top, NULL);
-	if (buf->file && (fclose(buf->file) == EOF)) perror ("fclose");
-	freestring(buf->name);
-	memset(buf, 0, sizeof *buf);
+	_buffer *_buf = buf.v;
+	return _buf->cur;
+}
+
+Buffer
+clonebuf(Buffer src)
+{
+	Buffer ret;
+	_buffer *_src, *_ret;
+
+	_src = src.v;
+
+	ret = makebuf();
+	_ret = ret.v;
+
+	memcpy(_ret, _src, sizeof *_ret);
+
+	return ret;
+}
+
+void
+copybuf(Buffer dest, Buffer src)
+{
+	memcpy(dest.v, src.v, sizeof(_buffer));
+}
+
+void
+freebuf(Buffer buf)
+{
+	_buffer *_buf = buf.v;
+
+	freelines(_buf->top, NULL);
+	if (_buf->file)
+		fclose(_buf->file);
+	freestring(_buf->name);
+	free(_buf);
+
 	return;
 }
 
-Buffer *
-makebuf(void)
+FILE *
+getfile(Buffer buf)
 {
-	Buffer *buf;
-	
-	if (!(buf = calloc(1, sizeof *buf)))
-		die("calloc");
-	return buf;
+	_buffer *_buf = buf.v;
+	return _buf->file;
 }
 
 int
-rmcurline(Buffer *buf)
+initbuf(Buffer buf, char *fn)
 {
+	_buffer *_buf = buf.v;
+	if (fn)
+		setfilename (buf, fn);
+	
+	_buf->cur = _buf->top = _buf->bot = makeline();
+	_buf->len = 1;
+
+	return SUCC;
+}
+
+bool
+isdirty(Buffer buf)
+{
+	_buffer *_buf = buf.v;
+
+	return _buf->dirty;
+}
+
+void
+killbuf(Buffer buf)
+{
+	_buffer *_buf = buf.v;
+
+	freelines(_buf->top, NULL);
+	if (_buf->file && (fclose(_buf->file) == EOF)) perror ("fclose");
+	freestring(_buf->name);
+
+	return;
+}
+
+Buffer
+makebuf(void)
+{
+	Buffer ret;
+	_buffer *_ret;
+	
+	if (!(_ret = calloc(1, sizeof *_ret))) die("calloc");
+
+	ret.v = _ret;
+
+	return ret;
+}
+
+int
+rmcurline(Buffer buf)
+{
+	_buffer *_buf = buf.v;
 	Line *del;
 
-	if (buf->cur == buf->top)
-		return FAIL;
+	if (_buf->cur == _buf->top) return FAIL;
 
-	del = buf->cur;
+	del = _buf->cur;
 
 	if (bufseek(buf, BUF_CUR, 1) == FAIL)
 		bufseek(buf, BUF_CUR, 1);
 
 	freelines(del, getnext(del));
-	buf->dirty = 1;
+	_buf->dirty = 1;
+	--_buf->len;
 
 	return SUCC;
 }
 
 int
-rmline(Buffer *buf, Line *li)
+rmline(Buffer buf, Line *li)
 {
-	if (li == NULL || li == buf->top)
-		return FAIL;
-	buf->cur = li;
-	buf->pos = getlineno(li);
+	_buffer *_buf = buf.v;
+
+	if (li == NULL || li == _buf->top) return FAIL;
+
+	bufseekline(buf, li);
 
 	if (bufseek(buf, BUF_CUR, 1) == FAIL)
 		bufseek(buf, BUF_CUR, -1);
 
 	freelines(li, getnext(li));
-	buf->dirty = 1;
+	_buf->dirty = 1;
+	--_buf->len;
 
 	return SUCC;	
 }
 
 int
-setfilename(Buffer *buf, char *fn)
+setfilename(Buffer buf, char *fn)
 {
-	if (fn == NULL)
-		return FAIL;
-	if (buf->name)
-		copychars(buf->name, fn);
+	_buffer *_buf = buf.v;
+
+	if (fn == NULL) return FAIL;
+
+	if (_buf->name)
+		copychars(_buf->name, fn);
 	else
-		buf->name = clonechars(fn);
-	return !!buf->name;
+		_buf->name = clonechars(fn);
+	return !!_buf->name;
 }

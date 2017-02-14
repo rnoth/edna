@@ -33,7 +33,7 @@ const Rule ruleset[] = {
 };
 
 void *
-getaddr (String *s, size_t *pos, Buffer *buf, char *err)
+getaddr (String *s, size_t *pos, Buffer buf, char *err)
 {
 	Set *sel;
 	Selection *ret;
@@ -48,7 +48,7 @@ getaddr (String *s, size_t *pos, Buffer *buf, char *err)
 }
 
 Set *
-evaltree (Node *cur, Buffer *buf, char *err)
+evaltree (Node *cur, Buffer buf, char *err)
 {
 	if (!cur)
 		return NULL;

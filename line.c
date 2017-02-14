@@ -93,12 +93,12 @@ walk (Line *cur, int offset)
 {
 	Line *li = cur;
 	if (0 > offset) {
-		for (; li; li = getprev(li))
+		for (; (li = getprev(li));)
 			if (!++offset)
 				return (li);
 		return (NULL);
 	} else if (0 < offset) {
-		for (; li; li = getnext(li))
+		for (; (li = getnext(li));)
 			if (!--offset)
 				return (li);
 		return (NULL);

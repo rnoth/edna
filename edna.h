@@ -1,10 +1,11 @@
 #ifndef _edna_
 #define _edna_
 
-#define LINESIZE (80) /* FIXME: remove */
+#define TYPE(t) typedef struct t { void *v; } t
+
+TYPE(Buffer);
 
 typedef struct Arg	Arg;
-typedef struct Buffer	Buffer;
 typedef struct Command	Command;
 typedef struct Mode	Mode;
 typedef struct Node	Node;

@@ -7,25 +7,23 @@
 #include "state.h"
 
 int
-cmd_switchbuf (State *st, Buffer *buf, Arg *arg, char *error)
+cmd_switchbuf(State *st, Buffer buf, Arg *arg, char *error)
 {
 	if (!arg->mode) {
-		strcpy (error, "no option specified");
-		return (FAIL);
+		strcpy(error, "no option specified");
+		return FAIL;
 
-	} else if (!strcmp (arg->mode, "next")) {
-		returnbuf (buf, st);
-		checkoutbuf (buf, st, 0);
+	} else if (!strcmp(arg->mode, "next")) {
+		returnbuf(st, buf);
+		checkoutbuf(buf, st, 0);
 
-		return (SUCC);
+		return SUCC;
 
-	} else if (!strcmp (arg->mode, "prev")) {
-		returnbuf (buf, st);
-		checkoutbuf (buf, st, (st->buffers.c != 1)
-					? st->buffers.c - 2
-					: 0 );
+	} else if (!strcmp(arg->mode, "prev")) {
+		returnbuf(st, buf);
+		checkoutbuf(buf, st, (st->buffers.c != 1) ? st->buffers.c - 2 : 0 );
 
-		return (SUCC);
+		return SUCC;
 	}
 
 	strcpy (error, "unknown option");
@@ -33,22 +31,23 @@ cmd_switchbuf (State *st, Buffer *buf, Arg *arg, char *error)
 }
 
 int
-cmd_openbuf (State *st, Buffer *buf, Arg *arg, char *error)
+cmd_openbuf(State *st, Buffer buf, Arg *arg, char *error)
 {
-	Buffer *tmp;
+	Buffer tmp;
 	size_t i;
 
 	if (!arg->param.c) {
-		strcpy (error, "no filenames provided");
+		strcpy(error, "no filenames provided");
 		return FAIL;
 	}
 
 	i = 0;
 	do {
-		tmp = makebuf ();
-		initbuf (tmp, arg->param.v[i]);
-		readbuf (tmp, error);
-		addbuf (st, tmp);
+		tmp = makebuf();
+		initbuf(tmp, arg->param.v[i]);
+		readbuf(tmp, error);
+		bufclean(buf);
+		addbuf(st, tmp);
 	} while (++i < arg->param.c);
 
 	return SUCC;

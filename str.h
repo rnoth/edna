@@ -24,17 +24,20 @@ struct String {
 
 /* string.c */
 extern int	appendstring	(String *, char *);
-extern int	appendchar	(String *, char);
-extern int	appendchars	(String *, char *);
 extern bool	eol		(const String *, size_t);
 extern void	freestring	(String *);
 extern String*	chartostr	(char *);
-extern void	chomp		(String *);
-extern String*	clonechars	(char *);
+extern void	chompstr	(String *);
 extern String*	copystring	(String *, String *);
-extern String*	copychars	(String *, const char *);
 extern String*	makestring	(void);
 extern int	resizestring	(String *, size_t);
+
+/* str-char.c */
+extern int	appendchar	(String *, char);
+extern int	appendchars	(String *, char *);
+extern void	chomp		(char *);
+extern String*	clonechars	(char *);
+extern String*	copychars	(String *, const char *);
 extern char*	strtochar	(String *);
 
 /* str-io.c */

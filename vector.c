@@ -11,26 +11,26 @@
 static int _expand_vec (Vector *);
 
 int
-_vec_append (Vector *inst, const void *data)
+_vec_append(Vector *inst, const void *data)
 {
-	return _vec_insert (inst, inst->c, data);
+	return _vec_insert(inst, inst->c, data);
 }
 
 int
-_vec_concat (Vector *inst, const void *data, size_t len)
+_vec_concat(Vector *inst, const void *data, size_t len)
 {
-	if ((inst->c * inst->z + len) > inst->m * inst->z)
-		if (!_expand_vec (inst))
-			return (FAIL);
+	while ((inst->c + len) * inst->z > inst->m * inst->z)
+		if (_expand_vec(inst) == FAIL)
+			return FAIL;
 
-	memmove (inst->v, data, len);
-	inst->c += len / inst->z;
+	memcpy(inst->v, data, len * inst->z);
+	inst->c += len;
 
-	return (SUCC);
+	return SUCC;
 }
 
 int
-_vec_copy (Vector *dest, const Vector *src)
+_vec_copy(Vector *dest, const Vector *src)
 {
 	if (dest->m < src->c)
 		if (!_expand_vec (dest))
@@ -42,11 +42,11 @@ _vec_copy (Vector *dest, const Vector *src)
 
 	dest->c = src->c;
 
-	return (SUCC);
+	return SUCC;
 }
 
 int
-_expand_vec (Vector *inst)
+_expand_vec(Vector *inst)
 {
 	void *tmp;
 

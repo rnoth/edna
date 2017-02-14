@@ -15,7 +15,7 @@ appendstring (String *dest, String *src)
 #endif
 		
 void
-chomp(String *s)
+chompstr(String *s)
 {
 	if (s->v[s->b - 2] == '\n') {
 		s->v[s->b - 2] = 0;

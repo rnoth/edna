@@ -10,15 +10,18 @@
 #include "str.h"
 #include "util.h"
 
-extern int readbuf	(Buffer *, char *);
-extern int writebuf	(Buffer *, char *);
+extern int readbuf	(Buffer, char *);
+extern int writebuf	(Buffer, char *);
+
+/* FIXME: could these functions be redesigned to not depend on buffer's internals? */
 
 int
-readbuf(Buffer *buf, char *err)
+readbuf(Buffer buf, char *err)
 {
 	int ret = FAIL;
 	String *s;
 	Line *new;
+	FILE *f;
 
 	errno = 0;
 	if (bufopen(buf, "r") == FAIL) {
@@ -30,10 +33,11 @@ readbuf(Buffer *buf, char *err)
 	}
 
 	s = makestring();
+	f = getfile(buf);
 
 	errno = 0;
-	while (feof(buf->file) == 0) {
-		if (readline(s, buf->file) == FAIL) {
+	while (feof(f) == 0) {
+		if (readline(s, f) == FAIL) {
 			if (errno) {
 				strncpy (err, strerror (errno), 20);
 				goto finally;
@@ -52,17 +56,17 @@ readbuf(Buffer *buf, char *err)
 			goto finally;
 		}
 	}
-	clearerr (buf->file);
+	clearerr (f);
 
 finally:
 	freestring (s);
-	buf->dirty = 0;
 	return (ret);
 }
 
 int
-writebuf (Buffer *buf, char *error)
+writebuf (Buffer buf, char *error)
 {
+	FILE *f;
 	Line *tmp;
 
 	errno = 0;
@@ -76,9 +80,9 @@ writebuf (Buffer *buf, char *error)
 		return FAIL;
 	}
 		
-	/* FIXME */
-	for (tmp = getnext(buf->top); tmp; tmp = getnext(tmp))
-		fputs (tmp->str->v, buf->file);
+	f = getfile(buf);
+	for (tmp = bufprobe(buf, 1); tmp; tmp = getnext(tmp))
+		fputs (tmp->str->v, f);
 
 	return SUCC;
 }
