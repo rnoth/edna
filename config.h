@@ -1,6 +1,7 @@
 #ifndef _edna_config_
 #define _edna_config_
 #include "edna.h"
+#include "buffer.h"
 #include "cmd.h"
 #include "state.h"
 
@@ -11,12 +12,10 @@
 #define ERROR		"?\n"
 
 /* advanced examples */
-#if 0
-# define PROMPT	"%ld:", st->lineno			/* have line numbers in prompt */
-# define INS_PROMPT	"%ld|", buf->lineno			/* have line number in ins mode */
-# define PRINT_FMT	"%ld\t%s", buf->lineno,(*arg->sel.v)->str	/* like ed's 'n' */
-# define ERROR		"%s\n", err				/* like ed's 'H', without the '?' */
-#endif
+//#define PROMPT	"%ld:", bufgetpos(buf)			/* have line numbers in prompt */
+//#define INS_PROMPT	"%ld|", bufgetpos(buf)			/* have line number in ins mode */
+//#define PRINT_FMT	"%ld\t%s", bufgetpos(buf),(*arg->sel.v)->str	/* like ed's 'n' */
+//#define ERROR		"%s\n", err				/* like ed's 'H', without the '?' */
 
 extern const Mode modes[];
 extern const Command commands[];
