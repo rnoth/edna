@@ -28,7 +28,7 @@ vector.a: vector.o
 set.a: set.o
 
 # recipes
-edna: deps.mk $(OBJ) $(LIB)
+edna: deps.mk config.h $(OBJ) $(LIB)
 	@echo LD -o $@
 	@$(CC) $(LDFLAGS) -o $@ $(OBJ) $(LIB)
 
@@ -42,6 +42,10 @@ test: $(TEST)
 deps.mk: $(SRC)
 	@echo "Making deps.mk"
 	@$(CC) -M $(SRC) > deps.mk
+
+config.h:
+	@echo "Making config.h"
+	@cp config.def.h config.h
 
 %.o: %.c
 	@echo CC $<
