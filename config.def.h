@@ -14,7 +14,8 @@
 /* advanced examples */
 //#define PROMPT	"%ld:", bufgetpos(buf)			/* have line numbers in prompt */
 //#define INS_PROMPT	"%ld|", bufgetpos(buf)			/* have line number in ins mode */
-//#define PRINT_FMT	"%ld\t%s", bufgetpos(buf),(*arg->sel.v)->str	/* like ed's 'n' */
+//#define PRINT_FMT	"%ld|%s", bufgetpos(buf),\
+//					(*arg->sel.v)->str->v	/* like ed's 'n' */
 //#define ERROR		"%s\n", err				/* like ed's 'H', without the '?' */
 
 extern const Mode modes[];
