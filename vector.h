@@ -51,7 +51,7 @@ struct Vector {
 
 #define make_vector(INST) do { 				\
 	Vector *inst;					\
-	inst = &(INST);					\
+	inst = (Vector *) &(INST);			\
 	inst->c = 0;					\
 	inst->z = sizeof *((INST).v);			\
 	inst->v = calloc(VECSIZ, sizeof *((INST).v));	\
@@ -61,6 +61,7 @@ struct Vector {
 
 #define free_vector(INST) do {		\
 	Vector *inst;			\
+	inst = (Vector *)&(INST);	\
 	free(inst->v);			\
 	memset(inst, 0, sizeof *inst);	\
 } while (0)
