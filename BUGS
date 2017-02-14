@@ -1,3 +1,0 @@
-if you open a buffer, switch to it, then try to switch back, you get a null buffer
-if you edit a new file, edna only reads the first line.
-if you try to 'w'rite a file, it fails inexplicably
