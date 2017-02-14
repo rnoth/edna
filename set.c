@@ -90,7 +90,7 @@ set2vec (Set *A)
 	for (i = 0; i < A->c; ++i) {
 		for (j = 0; B->v[i]; ++j) {
 			b = B->v[i] & -B->v[i];
-			t[j] = offset (b) * (i + 1);
+			t[j] = offset (b) + i * 32;
 			B->v[i] ^= b;
 		}
 		while (j)
