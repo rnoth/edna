@@ -24,13 +24,7 @@ readbuf(Buffer buf, char *err)
 	FILE *f;
 
 	errno = 0;
-	if (bufopen(buf, "r") == FAIL) {
-		if (errno)
-			strncpy(err, strerror(errno), 80);
-		else
-			strcpy(err, "invalid filename");
-		return FAIL;
-	}
+	if (bufopen(buf, "r") == FAIL) return FAIL;
 
 	s = makestring();
 	f = getfile(buf);
@@ -64,21 +58,13 @@ finally:
 }
 
 int
-writebuf (Buffer buf, char *error)
+writebuf (Buffer buf, char *err)
 {
 	FILE *f;
 	Line *tmp;
 
 	errno = 0;
-	if (bufopen(buf, "w+") == FAIL) {
-		if (errno) {
-			strcpy (error, "fopen: ");
-			strcpy (error + strlen (error), strerror (errno));
-		} else {
-			strcpy (error, "invalid filename");
-		}
-		return FAIL;
-	}
+	if (bufopen(buf, "w+") == FAIL) return FAIL;
 		
 	f = getfile(buf);
 	for (tmp = bufprobe(buf, 1); tmp; tmp = getnext(tmp))
