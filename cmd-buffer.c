@@ -6,6 +6,42 @@
 #include "cmd.h"
 #include "state.h"
 
+#include "util.h"
+
+static void listbuf_helper(Buffer, char);
+
+void
+listbuf_helper(Buffer buf, char prefix)
+{
+	bool dirty;
+	char *fn, *mod="";
+	size_t len, pos;
+
+	fn = bufgetname(buf);
+	len = bufgetlen(buf);
+	pos = bufgetpos(buf);
+	dirty = isdirty(buf);
+
+	if (!fn) fn = "";
+	if (dirty) mod = " [modified]";
+	if (printf("%c \"%s\"%s, line %ld of %ld\n", prefix, fn, mod, pos, len - 1) < 0)
+		die("printf");
+}
+
+
+int
+cmd_listbuf(State *st, Buffer buf, Arg *arg, char *error)
+{
+	size_t i;
+
+	for (i = 0; i < st->buffers.c; ++i)
+		listbuf_helper(st->buffers.v[i], ' ');
+
+	listbuf_helper(buf, '*');
+
+	return SUCC;
+}
+
 int
 cmd_openbuf(State *st, Buffer buf, Arg *arg, char *error)
 {
@@ -20,9 +56,10 @@ cmd_openbuf(State *st, Buffer buf, Arg *arg, char *error)
 	i = 0;
 	do {
 		tmp = makebuf();
+		chomp(arg->param.v[i]);
 		initbuf(tmp, arg->param.v[i]);
 		readbuf(tmp, error);
-		bufclean(buf);
+		bufclean(tmp);
 		addbuf(st, tmp);
 	} while (++i < arg->param.c);
 

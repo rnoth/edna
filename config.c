@@ -11,6 +11,7 @@ const Command commands[] = {
        /* name,		func,		mode		defaddr */
 	{ "",		cmd_print,	NULL,		".+1", },
 	{ "a",		cmd_insert,	"append",	".", },
+	{ "b",		cmd_listbuf,	NULL,		NULL },
 	{ "c",		cmd_insert,	"change",	".", },
 	{ "d",		cmd_delete,	NULL,		".", },
 	{ "e",		cmd_edit,	NULL,		NULL, },
@@ -25,7 +26,7 @@ const Command commands[] = {
 	{ "q",		cmd_quit,	NULL,		NULL, },
 //	{ "s",		subst,		NULL,		".", },
 	{ "w",		cmd_write,	NULL,		NULL, },
-	{ "wq",		cmd_quit,	"write",	".", },
+	{ "wq",		cmd_quit,	"write",	NULL, },
 	{ "Q", 		cmd_quit,	"force",	NULL, },
 	{ NULL },
 };
