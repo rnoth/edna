@@ -88,10 +88,8 @@ bufname(Buffer buf, char *name)
 {
 	_buffer *_buf = buf.v;
 
-	if (name == NULL)
-		return FAIL;
-	if (*name == '\0')
-		return FAIL;
+	if (name == NULL) return FAIL;
+	if (*name == '\0') return FAIL;
 
 	freestring(_buf->name);
 	_buf->name = chartostr(name);
