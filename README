@@ -1,71 +1,85 @@
 edna is a work in progress text editor inspired by the UNIX standard, ed.
 
-(note: this document is correct as of commit 75306f4 ("more consistent memory
- management") if this is not the lastest commit, edna may have diverged from
- what is described here)
-
-at the moment edna is quite featureful, but not yet at odds with ed(1) itself.
+at the moment edna has some features, but not quite at odds with ed(1) itself.
 edna has all of ed's line insertion commands
 
-	- `a' will advance a one line and enter insert mode
-	- `i' will enter insert mode
-	- `c' will change the current line and leave you in insert mode
+	- `a' will enter insert mode, appending lines after the current
+	- `i' will enter insert mode, inserting lines before the current
+	- `c' will delete the current line, and insert lines in place of the
+	      deleted
 (note that edna uses a single period on a line by itself to exit insert mode)
 
-among those commands are also:
-	- `d' to unlink and free and single line
+e.g.
+
+% edna
+:i
+int main() {
+	return 0;
+}
+.
+:
+
+---
+
+among the commands are also:
+	- `d' to delete the current line
 	- `h' to explain the last error
 	- `p' to print the current line
-	- `s' to preform a basic regexp search/replace on the current line
 
 there is also support for multiple buffers:
 	- `o' opens a delimitted list of files in new buffers
-	- `next' focuses the next buffer, failing on the last
-	- `prev' focuses the previous buffer, failing on the first
+	- `b' lists the all the opened buffers
+	- `next' focuses the next buffer
+	- `prev' focuses the previous buffer
 
 finally:
-	- `f' to print/change the default filename
-	- `w' to write the contents of the file back out
-	- `e' to re-open the current file
+	- `f' to print or change the default filename
+	- `w' to write the contents of the buffer
+	- `e' to re-open the current file, or edit a new file
 	- `q' to free the buffer and exit successfully
-		- `q' has two variations -- `wq' and `Q', as in ed.
 
-furthermore, edna has support for basic line-addressing. `1p' prints the first
-line, `-2a' appends from two lines back, +d deletes the next line, etc.
+`q' has two variations
+	- `wq' to a write and quit
+	- `Q' to quit unconditionally
 
-if edna is given a list of files as it's arguments, they are read into the
-buffer, and written back out on `w' and `wq' commands
+ if edna is given a list of files as it's arguments, they are read into memory
+as buffers, and written back out on `w' and `wq' commands
 
-edna has a ``config.h'' header file, which allows configuring three options, at
-the moment:
+edna has a ``config.h'' header file, which allows configuring a few options:
 	- the `PROMPT' macro is expanded and printed before a command is read
 	  from stdin. it defaults to ':', but it is fed into printf(3),
-	  allowing great flexibility. the ``"%ld:" st->lineno'' prompt is quite
+	  allowing some flexibility. the ``"%ld:", bufgetpos(buf)'' prompt is quite
 	  handy, for instance
+	- the `INS_PROMPT' macro is expand and printed before a line is read
+	  from stdin when in insert mode.
 	- the `ERROR' macro is expanded and printed when a command fails in
 	  some way. following ed(1), edna defaults to the inscrutable "?\n",
 	  but you may find ``"%s\n" error'' more helpful. don't forget the
 	  newline!
-	- the `commands' array is bsearch(3)'d when a command is read from
-	  stdin. it has a three fields: `name', a string handle to
-	  identify the command both to the user and edna, `func' a pointer to
-	  function to be executed, and `mode', a string which allows extra
-	  context to be given to the function.
 
-hacking guide:
-	- the text document is represented as a doubly linked list, with
-	  text functions manipulating this object
-	- commands are representing as an array, qsort(3)'d and indexed by
-	  bsearch(3)
+ config.c primarily contains the arrays for commands and modes, to prevent them
+from being re-defined everytime config.h is included
+	- the `commands' array is indexed when a command is read from
+	  stdin. it has a four fields:
+		- `name', a string handle to identify the command both to the
+		  user and edna
+		- `func' a pointer to function to be executed,
+		- `mode', a string which allows extra context to be given to
+		  the function.
+		- `defaddr', the default line address of the command
+	- the `modes' array is indexed when a command tries the change the
+	  mode, it has six fields:
+		- `name', the name of the mode
+		- `init', currently unused
+		- `prompt', executed first
+		- `input', executed second
+		- `parse, executed last
+	  if any of these commands return failure, the sixth member is called:
+		- `error', the error handler
 
-known issues:
-	- most functions don't sanity check their arguments, meaning any errors
-	  will cascade and compound on each other (this has gotten better,
-	  however)
-	- doesn't detect and properly react to eof on stdin (^D)
+	at the moment, there are two modes, `command', and `insert'.
 
 planned features:
-	- explicit UTF-8 support
 	- regex support
 	- registers
 	- line marks
