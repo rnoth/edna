@@ -76,7 +76,7 @@ bufgetpos(Buffer buf)
 }
 
 size_t
-buflen(Buffer buf)
+bufgetlen(Buffer buf)
 {
 	_buffer *_buf = buf.v;
 

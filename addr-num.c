@@ -19,5 +19,5 @@ addr_dot (Node *nod, Buffer buf, char *err)
 Set *
 addr_dollar (Node *nod, Buffer buf, char *err)
 {
-	return setaddmemb (make_set(), buflen(buf));
+	return setaddmemb (make_set(), bufgetlen(buf));
 }
