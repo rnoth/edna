@@ -8,12 +8,12 @@
 
 #include "edna.h"
 
-static char*	getname		(const String *, size_t *);
-static char*	setdelim	(const String *, size_t *);
-static char*	getarg		(const String *, size_t *, char *);
+static char*	getname		(String const *, size_t *);
+static char*	setdelim	(String const *, size_t *);
+static char*	getarg		(String const *, size_t *, char *);
 
 bool
-alphacheck(const char *cur, void *_)
+alphacheck(char const *cur, void *_)
 {
 	wchar_t wc;
 	mbtowc(&wc, cur, 4);
@@ -21,7 +21,7 @@ alphacheck(const char *cur, void *_)
 }
 
 bool
-delimcheck(const char *cur, void *_delim)
+delimcheck(char const *cur, void *_delim)
 {
 	char *delim;
 	delim = _delim;
@@ -30,7 +30,7 @@ delimcheck(const char *cur, void *_delim)
 
 char *
 getseq(const String *s, size_t *pos,
-		bool (*check)(const char *, void *),
+		bool (*check)(char const *, void *),
 		void *context)
 {
 	char cur[5], tmp[s->b - *pos], *ret;
@@ -40,7 +40,7 @@ getseq(const String *s, size_t *pos,
 	if (eol(s, *pos)) return NULL;
 
 	off = esc = ext = 0;
-	while (*pos < s->b - 1) {
+	while (!eol(s, *pos)) {
 		ext = get_uchar(cur, s->v + *pos);
 
 		if (*cur == '\\' && !esc) {

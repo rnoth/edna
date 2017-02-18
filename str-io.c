@@ -1,32 +1,29 @@
 /* str-io.c -- string input/outpu routines */
 #include <stdio.h>
-
 #include "str.h"
+#include "util.h"
 
-int
-readline (String *str, FILE *file)
+#define CHUNK 20
+
+bool
+readline(String *str, FILE *file)
 {
-#	define CHUNK 20
 	char ch, buf[5];
-	int i, ext, ret = SUCC;
+	int i, ext, ret = true;
 
-	copychars (str, "");
+	copychars(str, "");
 	for (;;) {
 		i = 0;
-		clearerr (file);
+		clearerr(file);
 
-		if (!fread (&ch, 1, 1, file))
-			goto fail;
-
+		if (!fread (&ch, 1, 1, file)) goto fail;
 		buf[i++] = ch;
 
 		if (isascii(ch)) {
-			appendchar (str, ch);
-			if (ch == '\n')
-				break;
-			continue;
+			appendchar(str, ch);
+			if (ch == '\n') break;
+			else continue;
 		}
-
 
 		/* multibyte character */
 		ext = uchar_extent (ch);
@@ -37,18 +34,14 @@ readline (String *str, FILE *file)
 		}
 
 		buf[i] = 0;
-		appendchars (str, buf);
+		appendchars(str, buf);
 
 		continue;
 
 	fail:
 
-		if (!feof(file))
-			perror ("fread");
+		if (!feof(file)) die("fread");
+	}
 
-		ret = FAIL;
-		break;
-		}
-
-	return (ret);
+	return ret;
 }

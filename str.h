@@ -4,16 +4,10 @@
 #include <stdbool.h>
 
 #ifndef isascii
-#	define isascii(C) (!((C) & (1<<7)))
-#endif
-
-#ifndef SUCC
-#	define SUCC (1)
-#	define FAIL (0)
+# define isascii(C) (!((C) & (1<<7)))
 #endif
 
 typedef struct String	String;
-typedef unsigned long	rune;
 
 struct String {
 	size_t c; /* characters */
@@ -23,25 +17,27 @@ struct String {
 };
 
 /* string.c */
-extern int	appendstring	(String *, char *);
-extern bool	eol		(const String *, size_t);
+extern bool	appendstring	(String *, char const *);
+extern bool	expandstring	(String *);
 extern void	freestring	(String *);
-extern String*	chartostr	(char *);
-extern void	chompstr	(String *);
-extern String*	copystring	(String *, String *);
-extern String*	makestring	(void);
-extern int	resizestring	(String *, size_t);
+extern bool 	copystring	(String *, String const *);
+extern String *	makestring	(void);
 
 /* str-char.c */
-extern int	appendchar	(String *, char);
-extern int	appendchars	(String *, char *);
-extern void	chomp		(char *);
-extern String*	clonechars	(char *);
-extern String*	copychars	(String *, const char *);
-extern char*	strtochar	(String *);
+extern bool	appendchar	(String *, char const);
+extern bool	appendchars	(String *, char const *);
+extern String *	chartostr	(char const *);
+extern String *	clonechars	(char const *);
+extern String *	copychars	(String *, char const *);
+extern char *	strtochar	(String const *);
 
 /* str-io.c */
-extern int	readline	(String *, FILE *);
+extern bool	readline	(String *, FILE *);
+extern void	chomp		(char *);
+
+/* str-misc.c */
+extern void	chompstr	(String *);
+extern bool	eol		(String const *, size_t);
 
 /* str_utf8.c */
 extern int 	get_uchar	(char *, const char *);

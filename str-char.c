@@ -4,37 +4,44 @@
 #include "str.h"
 #include "util.h"
 
-int
-appendchar (String *dest, char src)
+bool
+appendchar(String *dest, char const src)
 {
 	if (dest->b + 1 >= dest->m)
-		if (resizestring (dest, dest->m * 2) == FAIL)
-			return (FAIL);
+		if (!expandstring (dest))
+			return false;
+
 	dest->v[dest->b - 1] = src;
 	dest->v[dest->b] = 0;
 	++dest->c;
 	++dest->b;
-	return (SUCC);
+
+	return true;
 }
 
-int
-appendchars (String *dest, char *src)
+bool
+appendchars(String *dest, char const *src)
 {
-	if (dest->b + strlen (src) > dest->m)
-		if (resizestring (dest, dest->m * 2))
-			return (FAIL);
-	strcat (dest->v, src);
-	dest->b += strlen (src);
-	dest->c += ustrlen (src);
-	return (SUCC);
+	size_t len;
+	len = strlen(src); 
+
+	if (dest->m < dest->b + len)
+		if (expandstring(dest))
+			return false;
+
+	strcat(dest->v, src);
+	dest->b += strlen(src);
+	dest->c += ustrlen(src);
+
+	return true;
 }
 
 String *
-chartostr (char *src)
+chartostr(char const *src)
 {
 	String *ret;
 
-	ret = makestring ();
+	ret = makestring();
 	appendchars(ret, src);
 
 	return ret;
@@ -46,9 +53,7 @@ chomp(char *s)
 	char *t, *nl;
 
 	nl = NULL;
-	for (t = s; *t; ++t)
-		if (*t == '\n')
-			nl = t;
+	for (t = s; *t; ++t) if (*t == '\n') nl = t;
 
 	if (nl) *nl = 0;
 
@@ -56,7 +61,7 @@ chomp(char *s)
 }
 
 String *
-clonechars(char *src)
+clonechars(char const *src)
 {
 	String *ret;
 	ret = makestring();
@@ -64,10 +69,10 @@ clonechars(char *src)
 }
 
 String *
-copychars (String *dest, const char *src)
+copychars(String *dest, char const *src)
 {
 	if (dest->m < strlen (src))
-		if (resizestring (dest, dest->m * 2) == FAIL)
+		if (expandstring (dest) == FAIL)
 			return NULL;
 
 	strcpy (dest->v, src);
@@ -77,13 +82,15 @@ copychars (String *dest, const char *src)
 }
 
 char *
-strtochar(String *str)
+strtochar(String const *str)
 {
 	char *ret;
 
-	if (str == NULL) return NULL;
+	if (!str) return NULL;
+
 	ret = malloc (str->b);
-	if (ret == NULL) die("malloc");
+	if (!ret) die("malloc");
+
 	memcpy(ret, str->v, str->b);
 
 	return ret;

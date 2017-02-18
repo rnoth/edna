@@ -7,32 +7,29 @@
 #include "util.h"
 
 int
-get_uchar(char *dest, const char *src)
+get_uchar(char *dest, char const *src)
 {
 	size_t off, len;
-	char tmp[5];
+	unsigned char tmp[5];
 	int ext;
 
 	ext = uchar_extent(*src);
 
-	if (ext == -1)
-		len = 1;
-	else
-		len = ext;
+	if (ext == -1) len = 1;
+	else len = ext;
 
 	memset(tmp, 0, len);
 	memcpy(tmp, src, len);
-	for (off = 0; off < len; ++off) {
-		if (len > 1 && isascii(tmp[off]))
-			goto invalid;
-		else if (((unsigned char)tmp[off]) > 0xF4)
-			goto invalid;
 
+	for (off = 0; off < len; ++off) {
+		if (isascii(tmp[off])) goto ascii;
+		else if (tmp[off] > 0xF4) goto binary;
 		continue;
-	invalid:
-			//ext = -ext;
-			tmp[off] = 0;
-			break;
+
+	ascii:
+	binary:
+		if (off == 0) ++off;
+		break;
 	}
 
 	tmp[off] = 0;
@@ -43,7 +40,7 @@ get_uchar(char *dest, const char *src)
 }
 
 int
-uchar_extent(const unsigned char ch)
+uchar_extent(unsigned char const ch)
 {
 	if (!ch)
 		return 0;
@@ -56,16 +53,15 @@ uchar_extent(const unsigned char ch)
 	else if (ch >= 0xF0 && ch <= 0xF4)
 		return 4;
 	else
-		return -1; /* error */
+		return -1;
 } 
 
 size_t
-ustrlen(const char *s)
+ustrlen(char const *s)
 {
 	size_t ret = 0;
 
-	while (*s && ++ret)
-		s += uchar_extent(*s);
+	while (*s && ++ret) s += uchar_extent(*s);
 
 	return ret;
 }
