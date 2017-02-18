@@ -3,4 +3,5 @@ core
 edna
 deps.mk
 config.h
+!examples/*
 *~
