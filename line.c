@@ -3,9 +3,6 @@
 #include <string.h>
 
 #include "edna.h"
-#include "line.h"
-#include "str.h"
-#include "util.h"
 
 int
 changeline (Line *l, String *s)

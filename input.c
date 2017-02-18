@@ -1,9 +1,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-
 #include "edna.h"
-#include "str.h"
 
 int
 grabline(State *st, Buffer buf, String *s, char *err)

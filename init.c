@@ -3,11 +3,6 @@
 #include <string.h>
 
 #include "edna.h"
-#include "buffer.h"
-#include "cmd.h"
-#include "vector.h"
-#include "util.h"
-
 #include "config.h"
 
 void

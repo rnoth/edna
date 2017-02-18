@@ -8,11 +8,6 @@
 #undef _POSIX_C_SOURCE
 
 #include "edna.h"
-#include "addr.h"
-#include "cmd.h"
-#include "state.h"
-#include "util.h"
-
 #include "config.h"
 
 static int	runcmd	(State *, Buffer, Command *, Arg *, char *err);

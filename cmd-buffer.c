@@ -1,12 +1,6 @@
 /* cmd_buffer.c -- buffer manipulation commands */
 #include <string.h>
-
 #include "edna.h"
-#include "buffer.h"
-#include "cmd.h"
-#include "state.h"
-
-#include "util.h"
 
 static void listbuf_helper(Buffer, char);
 

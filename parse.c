@@ -7,11 +7,6 @@
 #include <wctype.h>
 
 #include "edna.h"
-#include "addr.h"
-#include "cmd.h"
-#include "line.h"
-#include "str.h"
-#include "util.h"
 
 static char*	getname		(const String *, size_t *);
 static char*	setdelim	(const String *, size_t *);

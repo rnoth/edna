@@ -1,8 +1,5 @@
 #include <stdlib.h>
-
 #include "edna.h"
-#include "addr.h"
-#include "buffer.h"
 
 Set *
 addr_num (Node *nod, Buffer buf, char *err)

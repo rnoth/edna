@@ -1,11 +1,7 @@
-/* addr_op.h -- routines for composing line addresses */
 #include <stdlib.h>
 #include <string.h>
 
-#include "addr.h"
-#include "buffer.h"
 #include "edna.h"
-#include "set.h"
 
 Set *
 addr_plus(Node *left, Node *right, Buffer buf, char *err)

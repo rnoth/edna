@@ -1,11 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-
 #include "edna.h"
-#include "buffer.h"
-#include "line.h"
-#include "util.h"
-#include "vector.h"
 
 typedef struct _buffer _buffer;
 struct _buffer {

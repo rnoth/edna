@@ -1,9 +1,6 @@
-/* addr_lex.c -- routines for lexing line addresses */
 #include <string.h>
 #include <ctype.h>
-
-#include "addr.h"
-#include "str.h"
+#include "edna.h"
 
 const Operator arithops[] = {
 	addr_plus,

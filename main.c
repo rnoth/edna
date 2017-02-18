@@ -1,7 +1,5 @@
 /* edna -- ed-like text editor */
 #include "edna.h"
-#include "buffer.h"
-#include "str.h"
 
 int
 main (int argc, char** argv)

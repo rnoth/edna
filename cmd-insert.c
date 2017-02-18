@@ -1,10 +1,6 @@
-/* cmd_insert.c -- line insertion commands */
 #include <stdlib.h>
 #include <string.h>
-
 #include "edna.h"
-#include "buffer.h"
-#include "cmd.h"
 
 int
 cmd_insert (State *st, Buffer buf, Arg *arg, char *error)

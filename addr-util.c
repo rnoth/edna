@@ -2,12 +2,6 @@
 #include <limits.h>
 
 #include "edna.h"
-#include "addr.h"
-#include "buffer.h"
-#include "line.h"
-#include "set.h"
-#include "util.h"
-#include "vector.h"
 
 Selection *
 resolveset (Set *A, Buffer buf, char *error)

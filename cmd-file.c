@@ -1,11 +1,6 @@
-/* cmd_file.c -- file manipulation commands */
 #include <stdio.h>
 #include <string.h>
-
 #include "edna.h"
-#include "buffer.h"
-#include "cmd.h"
-#include "util.h"
 
 int
 cmd_edit(State *st, Buffer buf, Arg *arg, char *error)

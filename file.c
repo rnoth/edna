@@ -5,10 +5,6 @@
 #include <string.h>
 
 #include "edna.h"
-#include "buffer.h"
-#include "line.h"
-#include "str.h"
-#include "util.h"
 
 extern int readbuf	(Buffer, char *);
 extern int writebuf	(Buffer, char *);

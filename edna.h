@@ -13,4 +13,13 @@ typedef struct Line	Line;
 typedef struct State	State;
 typedef struct Selection Selection;
 
+#include "addr.h"
+#include "buffer.h"
+#include "cmd.h"
+#include "set.h"
+#include "state.h"
+#include "str.h"
+#include "vector.h"
+#include "util.h"
+
 #endif

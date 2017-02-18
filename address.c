@@ -1,15 +1,7 @@
-/* address.c -- line address parsing methods */
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
 #include "edna.h"
-#include "buffer.h"
-#include "cmd.h"
-#include "addr.h"
-#include "set.h"
-#include "str.h"
-#include "util.h"
 
 const char *symbols[] = {
 	"1234567890\0",	/* NUM_LITERAL */
@@ -50,8 +42,7 @@ getaddr (String *s, size_t *pos, Buffer buf, char *err)
 Set *
 evaltree (Node *cur, Buffer buf, char *err)
 {
-	if (!cur)
-		return NULL;
+	if (!cur) return NULL;
 
 	if (ruleset[cur->tok] & VALUE) {
 		return ((cur->ev) (cur, buf, err));
@@ -69,8 +60,7 @@ next (String *s, size_t *pos)
 	size_t i, j;
 	Node *tmp, *ret = NULL;
 
-	if (*pos >= s->b)
-		return NULL;
+	if (eol(s, *pos)) return NULL;
 
 	i =j = 0;
 	for (; i < IDENT_LEN; ++i) {

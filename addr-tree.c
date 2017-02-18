@@ -1,10 +1,5 @@
-/* tree.c -- routines for manipulating syntax nodes */
 #include <stdlib.h>
-
-#include "addr.h"
-#include "edna.h" /* FIXME: only needed for LINESIZE, which is deprecated */
-#include "str.h"
-#include "util.h"
+#include "edna.h"
 
 int
 addnode (Node *mother, Node *child)

@@ -1,11 +1,7 @@
-/* cmd_print.c -- printing commands */
 #include <stdio.h>
 #include <string.h>
 
 #include "edna.h"
-#include "buffer.h"
-#include "cmd.h"
-#include "util.h"
 
 #include "config.h"
 

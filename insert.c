@@ -4,11 +4,6 @@
 #include <string.h>
 
 #include "edna.h"
-#include "buffer.h"
-#include "line.h"
-#include "str.h"
-#include "util.h"
-
 #include "config.h"
 
 int

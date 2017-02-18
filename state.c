@@ -1,9 +1,6 @@
 #include <stdio.h>
 
 #include "edna.h"
-#include "buffer.h"
-#include "state.h"
-#include "vector.h"
 
 static Mode *findmode(State *, char *);
 
