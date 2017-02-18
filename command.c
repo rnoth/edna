@@ -10,7 +10,7 @@
 #include "edna.h"
 #include "config.h"
 
-static int	runcmd	(State *, Buffer, Command *, Arg *, char *err);
+static int	runcmd	(State *, Buffer *, Command *, Arg *, char *err);
 static Command *findcmd	(State *, char *);
 
 Command *
@@ -51,7 +51,7 @@ makearg(void)
 }
 
 int
-cmderror (State *st, Buffer buf, String *s, char *err)
+cmderror (State *st, Buffer *buf, String *s, char *err)
 {
 	if (!strcmp (err, "quit"))
 		return FAIL;
@@ -61,7 +61,7 @@ cmderror (State *st, Buffer buf, String *s, char *err)
 }
 
 int
-cmdeval(State *st, Buffer buf, String *s, char *err)
+cmdeval(State *st, Buffer *buf, String *s, char *err)
 {
 	int ret;
 	Arg *arg;
@@ -88,7 +88,7 @@ finally:
 }
 
 int
-cmdprompt (State *st, Buffer buf, String *s, char *err)
+cmdprompt (State *st, Buffer *buf, String *s, char *err)
 {
 	if (printf (PROMPT) < 0) die ("printf");
 	if (fflush (stdout) == EOF) warn ("fflush");
@@ -96,7 +96,7 @@ cmdprompt (State *st, Buffer buf, String *s, char *err)
 }
 
 int
-runcmd(State *st, Buffer buf, Command *cmd, Arg *arg, char *err)
+runcmd(State *st, Buffer *buf, Command *cmd, Arg *arg, char *err)
 {
 	size_t pos = 0;
 	Selection *sel;

@@ -2,10 +2,10 @@
 #include <string.h>
 #include "edna.h"
 
-static void listbuf_helper(Buffer, char);
+static void listbuf_helper(Buffer *, char);
 
 void
-listbuf_helper(Buffer buf, char prefix)
+listbuf_helper(Buffer *buf, char prefix)
 {
 	bool dirty;
 	char *fn, *mod="";
@@ -24,7 +24,7 @@ listbuf_helper(Buffer buf, char prefix)
 
 
 int
-cmd_listbuf(State *st, Buffer buf, Arg *arg, char *error)
+cmd_listbuf(State *st, Buffer *buf, Arg *arg, char *error)
 {
 	size_t i;
 
@@ -37,9 +37,9 @@ cmd_listbuf(State *st, Buffer buf, Arg *arg, char *error)
 }
 
 int
-cmd_openbuf(State *st, Buffer buf, Arg *arg, char *error)
+cmd_openbuf(State *st, Buffer *buf, Arg *arg, char *error)
 {
-	Buffer tmp;
+	Buffer *tmp;
 	size_t i;
 
 	if (!arg->param.c) {
@@ -61,7 +61,7 @@ cmd_openbuf(State *st, Buffer buf, Arg *arg, char *error)
 }
 
 int
-cmd_switchbuf(State *st, Buffer buf, Arg *arg, char *error)
+cmd_switchbuf(State *st, Buffer *buf, Arg *arg, char *error)
 {
 	if (!arg->mode) {
 		strcpy(error, "no option specified");

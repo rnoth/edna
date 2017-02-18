@@ -1,11 +1,10 @@
 #ifndef _edna_
 #define _edna_
-
-#define TYPE(t) typedef struct t { void *v; } t
-
-TYPE(Buffer);
+#include <assert.h>
+#include <stdbool.h>
 
 typedef struct Arg	Arg;
+typedef struct Buffer	Buffer;
 typedef struct Command	Command;
 typedef struct Mode	Mode;
 typedef struct Node	Node;
@@ -14,7 +13,7 @@ typedef struct State	State;
 typedef struct Selection Selection;
 
 #include "addr.h"
-#include "buffer.h"
+#include "buf.h"
 #include "cmd.h"
 #include "set.h"
 #include "state.h"

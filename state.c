@@ -5,7 +5,7 @@
 static Mode *findmode(State *, char *);
 
 int
-addbuf(State *st, Buffer buf)
+addbuf(State *st, Buffer *buf)
 {
 	vec_append(st->buffers, buf);
 	return SUCC;
@@ -13,15 +13,15 @@ addbuf(State *st, Buffer buf)
 
 
 int
-checkoutbuf(Buffer dest, State *st, size_t which)
+checkoutbuf(Buffer *dest, State *st, size_t which)
 {
-	Buffer src;
+	Buffer *src;
 
 	if (which >= st->buffers.c)
 		return FAIL;
 
 	src = st->buffers.v[which];
-	copybuf(dest, src);
+	COPY(dest, src);
 
 	vec_remove(st->buffers, which);
 
@@ -39,9 +39,9 @@ findmode(State *st, char *mode)
 }
 
 int
-returnbuf(State *st, Buffer src)
+returnbuf(State *st, Buffer *src)
 {
-	Buffer tmp;
+	Buffer *tmp;
 
 	tmp = clonebuf(src);
 	vec_append (st->buffers, tmp);

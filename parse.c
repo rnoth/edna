@@ -94,7 +94,7 @@ setdelim(const String *s, size_t *pos)
 }
 
 int
-parseline (String *s, Buffer buf, Arg *arg, char *error)
+parseline (String *s, Buffer *buf, Arg *arg, char *error)
 {
 	int ret;
 	void *tmp;

@@ -4,7 +4,7 @@
 #include "edna.h"
 
 Selection *
-resolveset (Set *A, Buffer buf, char *error)
+resolveset (Set *A, Buffer *buf, char *error)
 {
 	void *tmp;
 	VECTOR (size_t, *stack);

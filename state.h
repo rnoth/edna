@@ -7,25 +7,25 @@
 
 struct Mode {
 	char*	name;
-	int	(*init)	   (State *, Buffer, String *, char *);
-	int	(*prompt)  (State *, Buffer, String *, char *);
-	int	(*input)   (State *, Buffer, String *, char *);
-	int	(*eval)    (State *, Buffer, String *, char *);
-	int	(*error)   (State *, Buffer, String *, char *);
+	int	(*init)	   (State *, Buffer *, String *, char *);
+	int	(*prompt)  (State *, Buffer *, String *, char *);
+	int	(*input)   (State *, Buffer *, String *, char *);
+	int	(*eval)    (State *, Buffer *, String *, char *);
+	int	(*error)   (State *, Buffer *, String *, char *);
 };
 
 struct State {
 	Mode *mode;
 	VECTOR (Command, cmds);
-	VECTOR (Buffer, buffers);
+	VECTOR (Buffer *, buffers);
 	VECTOR (Mode,	 modes);
 };
 
 /* state.c */
-extern int	addbuf		(State *, Buffer);
-extern int	checkoutbuf	(Buffer, State *, size_t);
+extern int	addbuf		(State *, Buffer *);
+extern int	checkoutbuf	(Buffer *, State *, size_t);
 extern int	setmode		(State *, char *);
-extern int	returnbuf	(State *, Buffer);
+extern int	returnbuf	(State *, Buffer *);
 
 /* init.c */
 extern void	freestate	(State *);

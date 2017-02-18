@@ -7,7 +7,7 @@ main (int argc, char** argv)
 	char	 err[80];
 	String	*s;
 	State	*st;
-	Buffer	 buf;
+	Buffer	*buf;
 
 	/* init stuff */
 	st   = makestate();

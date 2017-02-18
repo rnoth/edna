@@ -6,13 +6,8 @@
 
 #include "edna.h"
 
-extern int readbuf	(Buffer, char *);
-extern int writebuf	(Buffer, char *);
-
-/* FIXME: could these functions be redesigned to not depend on buffer's internals? */
-
 int
-readbuf(Buffer buf, char *err)
+readbuf(Buffer *buf, char *err)
 {
 	int ret = FAIL;
 	String *s;
@@ -23,7 +18,7 @@ readbuf(Buffer buf, char *err)
 	if (bufopen(buf, "r") == FAIL) return FAIL;
 
 	s = makestring();
-	f = getfile(buf);
+	f = buf->file;
 
 	errno = 0;
 	while (feof(f) == 0) {
@@ -54,7 +49,7 @@ finally:
 }
 
 int
-writebuf (Buffer buf, char *err)
+writebuf (Buffer *buf, char *err)
 {
 	FILE *f;
 	Line *tmp;
@@ -62,7 +57,7 @@ writebuf (Buffer buf, char *err)
 	errno = 0;
 	if (bufopen(buf, "w+") == FAIL) return FAIL;
 		
-	f = getfile(buf);
+	f = buf->file;
 	for (tmp = bufprobe(buf, 1); tmp; tmp = getnext(tmp))
 		fputs (tmp->str->v, f);
 

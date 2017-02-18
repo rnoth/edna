@@ -51,7 +51,7 @@ makestate (void)
 int
 parse_argv (State *st, char **argv, char *err)
 {
-	Buffer tmp;
+	Buffer *tmp;
 
 
 	if (*++argv) {

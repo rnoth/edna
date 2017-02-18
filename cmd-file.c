@@ -3,7 +3,7 @@
 #include "edna.h"
 
 int
-cmd_edit(State *st, Buffer buf, Arg *arg, char *error)
+cmd_edit(State *st, Buffer *buf, Arg *arg, char *error)
 {
 	char *fn;
 	if (arg->mode && !strcmp (arg->mode, "force"))
@@ -33,7 +33,7 @@ force:
 }
 
 int
-cmd_filename(State *st, Buffer buf, Arg *arg, char *error)
+cmd_filename(State *st, Buffer *buf, Arg *arg, char *error)
 {
 	char *fn;
 	if (!arg->param.c) {
@@ -43,7 +43,7 @@ cmd_filename(State *st, Buffer buf, Arg *arg, char *error)
 		return SUCC;
 	}
 
-	if (bufname(buf, arg->param.v[0]) == FAIL) {
+		if (bufsetname(buf, arg->param.v[0]) == FAIL) {
 		strcpy(error, "invalid filename");
 		return FAIL;
 	}
@@ -52,7 +52,7 @@ cmd_filename(State *st, Buffer buf, Arg *arg, char *error)
 }
 
 int
-cmd_quit (State *st, Buffer buf, Arg *arg, char *error)
+cmd_quit (State *st, Buffer *buf, Arg *arg, char *error)
 {
 	if (arg->mode) {
 		if (!strcmp (arg->mode, "force"))
@@ -76,10 +76,10 @@ end:
 }	
 
 int
-cmd_write (State *st, Buffer buf, Arg *arg, char *error)
+cmd_write (State *st, Buffer *buf, Arg *arg, char *error)
 {
 	if (arg->param.c) {
-		if (bufname(buf, arg->param.v[0]) == FAIL) {
+		if (bufsetname(buf, arg->param.v[0]) == FAIL) {
 			strcpy (error, "invalid filename");
 			return FAIL;
 		}

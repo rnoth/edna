@@ -2,7 +2,7 @@
 #include "edna.h"
 
 int
-cmd_delete (State *st, Buffer buf, Arg *arg, char *error)
+cmd_delete (State *st, Buffer *buf, Arg *arg, char *error)
 {
 	Line *targ;
 

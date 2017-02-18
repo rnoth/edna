@@ -4,7 +4,7 @@
 #include "edna.h"
 
 Set *
-addr_plus(Node *left, Node *right, Buffer buf, char *err)
+addr_plus(Node *left, Node *right, Buffer *buf, char *err)
 {
 	Set *ret = NULL, *inc = NULL;
 	size_t off;

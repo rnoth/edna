@@ -1,9 +1,6 @@
 #ifndef _edna_config_
 #define _edna_config_
 #include "edna.h"
-#include "buffer.h"
-#include "cmd.h"
-#include "state.h"
 
 /* settings */
 
