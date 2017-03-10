@@ -4,23 +4,23 @@
 #include "edna.h"
 
 const char *symbols[] = {
-	"1234567890\0",	/* NUM_LITERAL */
-	".\0"	"$\0",	/* NUM_SYMBOL */
-	"+\0" /*"-\0"*/,/* OP_ARITH */
-	NULL		/* IDENT_LEN */
+	[NUM_LITERAL] = "1234567890\0",
+	[NUM_SYMBOL] =	".\0"	"$\0",
+	[OP_ARITH] = "+\0",
+	NULL
 };
 
 const Lexer lexers[] = {
-	trynum,
-	trysym,
-	tryarith,
+	[NUM_LITERAL] =	trynum,
+	[NUM_SYMBOL] =	trysym,
+	[OP_ARITH] =	tryarith,
 	NULL
 };
 
 const Rule ruleset[] = {
-	VALUE | NUMBER,
-	VALUE | LINE,
-	OPERATOR,
+	[NUM_LITERAL] =	VALUE | NUMBER,
+	[NUM_SYMBOL] =	VALUE | LINE,
+	[OP_ARITH] =	OPERATOR,
 	0
 };
 
