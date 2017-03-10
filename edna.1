@@ -1,0 +1,208 @@
+.Dd Mar 9, 2017
+.Dt EDNA 1
+.Os
+.
+.Sh NAME
+.
+.Nm edna
+.Nd text editor inspired by the UNIX standard, ed
+.
+.Sh SYNOPSYS
+.
+.Nm Ar file
+.
+.Sh DESCRIPTION
+.
+At the moment edna has some features, but not quite at odds with
+.Xr ed 1
+itself.
+.
+There are two modes:
+.Sq command ,
+and
+.Sq insert .
+While starting
+.Nm ,
+the
+.Sq command
+mode is active.
+To insert text, an insersion command have to be entered.
+.
+.Ss Insertion commands
+.
+.
+.Bl -tag -width indent -compact
+.It Ic a
+Enter insert mode, appending lines after the current
+.
+.It Ic i
+Enter insert mode, inserting lines before the current
+.
+.It Ic c
+Delete the current line, and insert lines in place of the deleted
+.El
+.Pp
+To exit insert mode, enter a
+.Dq "."
+alone at the beginning of the line.
+.
+.Ss Edition commands
+.
+.Bl -tag -width indent -compact
+.It Ic d
+Delete the current line.
+.El
+.
+.Ss Printing commands
+.
+.Bl -tag -width indent -compact
+.It Ic p
+Print the current line.
+.
+.It Ic h
+Explain the last error.
+.El
+.Pp
+.
+.Ss Buffer management commands
+.
+.Bl -tag -width indent -compact
+.It Ic o
+Opens a delimitted list of files in new buffers.
+.
+.It Ic b
+Lists the all the opened buffers.
+.
+.It Ic next
+Focus the next buffer.
+.
+.It Ic prev
+Focus the previous buffer.
+.
+.It Ic f
+Print or change the default filename.
+.
+.It Ic w
+Write the contents of the buffer.
+.
+.It Ic e
+Re-open the current file, or edit a new file.
+.
+.It Ic q
+Free the buffer and exit successfully.
+.
+.It Ic wq
+Write and quit.
+.
+.It Ic Q
+Quit unconditionally.
+.El
+.Pp
+If edna is given a list of files as it's arguments, they are read into memory
+as buffers, and written back out on
+.Ic w
+and
+.Ic wq
+commands.
+.
+.Sh FILES
+.
+.Nm
+has a
+.Pa config.h
+header file included at compilation time, which allows configuring a few options:
+.Bl -tag -width indent
+.It Dv PROMPT
+Macro expanded and printed before a command is read from stdin.
+It defaults to
+.Sq ":" ,
+but it is fed into
+.Xr printf 3 ,
+allowing some flexibility.
+the
+.Ql "%ld:", bufgetpos(buf)
+prompt is quite handy, for instance
+.
+.It Dv INS_PROMPT
+Macro expand and printed before a line is read from stdin when in insert mode.
+.
+.It Dv ERROR
+Macro expanded and printed when a command fails in some way.
+Following
+.Xr ed 1 ,
+.Nm
+defaults to
+.Dq Li ?\(rsn ,
+but you may find
+.Dq Li %s\(rsn
+error more helpful.
+.El
+.Pp
+The prompt have to contain the newline.
+.Pp
+.Pa config.c
+Primarily contains the arrays for commands and modes, to prevent them
+from being re-defined everytime.
+.Bl -tag -width indent
+.It Va commands
+Array indexed when a command is read from stdin
+It has a four fields:
+.Bl -tag -width indent -compact
+.
+.It Va name
+A string handle to identify the command both to the user and
+.Nm .
+.
+.It Va func
+A pointer to function to be executed.
+.
+.It Va mode
+A string which allows extra context to be given to the function.
+.
+.It Va defaddr
+the default line address of the command
+.El
+.
+.It Va modes
+Array indexed when a command tries the change the mode, it has six fields:
+.Bl -tag -width indent -compact
+.It Va name
+the name of the mode
+.
+.It Va init
+currently unused
+.
+.It Va prompt
+executed first
+.
+.It Va input
+executed second
+.
+.It Va parse
+Executed last.
+.El
+.Pp
+If any of these commands return failure, the sixth member is called:
+.Bl -tag -width indent
+.It Va error
+The error handler
+.El
+.El
+.
+.Sh EXAMPLE
+.
+Example of
+.Nm
+interactive editing session:
+.Bd -literal -offset indent
+% edna
+:i
+int main() {
+	return 0;
+}
+.
+:
+.Ed
+.Pp
+A configuration example can be found in the source directory at
+.Pa examples/config.h .
