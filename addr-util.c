@@ -4,42 +4,38 @@
 #include "edna.h"
 
 Selection *
-resolveset (Set *A, Buffer *buf, char *error)
+resolveset(Set *A, Buffer *buf, char *error)
 {
-	void *tmp;
-	VECTOR (size_t, *stack);
-	Selection *ret;
 	size_t i;
+	Line *tmp;
+	Selection *ret;
+	Vector(size_t) *stack;
 
-	if (!A) return (NULL);
+	if (!A) return NULL;
 
-	ret = calloc (1, sizeof *ret);
-	if (!ret) die ("calloc");
+	make_vector(ret);
+	if (!ret) die("make_vector");
 
-	make_vector (*ret);
-
-	stack = set2vec (A);
-	if (!stack->c)
-		goto invalid;
+	stack = set2vec(A);
+	if (!stack->c) goto invalid;
 
 	for (i = 0; i < stack->c; ++i) {
 		tmp = bufprobe(buf, stack->v[i] - 1);
-		if (!tmp)
-			goto invalid;
-		vec_append (*ret, tmp);
+		if (!tmp) goto invalid;
+		vec_append(ret, tmp);
 	}
 
-	free_vector (*stack);
-	free (stack);
+	vec_free(stack);
+	free(stack);
 
-	return (ret);
+	return ret;
 
 invalid:
-	strcpy (error, "invalid line address");
-	free_vector (*ret);
-	free (ret);
-	free_vector (*stack);
-	free (stack);
+	strcpy(error, "invalid line address");
+	vec_free(ret);
+	free(ret);
+	vec_free(stack);
+	free(stack);
 
-	return (NULL);
+	return NULL;
 }

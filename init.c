@@ -8,34 +8,32 @@
 void
 freestate (State *st)
 {
-	size_t i;
-
-	for (i = 0; i < st->buffers.c; ++i)
-		freebuf (st->buffers.v[i]);
-	free_vector (st->buffers);
-	free_vector (st->cmds);
-	free_vector (st->modes);
-	free (st);
+	mapv(st->buffers, freebuf(each));
+	vec_free(st->buffers);
+	vec_free(st->cmds);
+	vec_free(st->modes);
+	free(st);
 }
 
 void
 initst(State *st)
 {
 	size_t i;
-	/* st->buffers */
-	make_vector(st->buffers);
 
-	/* st->commands */
+	make_vector(st->buffers);
+	if (!st->buffers) die("make_vector");
+
 	make_vector(st->cmds);
+	if (!st->cmds) die("make_vector");
 	for (i = 0; commands[i].name; ++i)
 		;
-	vec_concat(st->cmds, commands, i);
+	vec_concat(st->cmds, commands, i * sizeof *commands);
 
-	/* st->modes */
 	make_vector(st->modes);
+	if (!st->modes) die("make_vector");
 	for (i = 0; modes[i].name; ++i)
 		;
-	vec_concat(st->modes, modes, i);
+	vec_concat(st->modes, modes, i * sizeof *modes);
 
 	setmode(st, "command");
 }
@@ -44,7 +42,8 @@ State *
 makestate (void)
 {
 	State *st;
-	if (!(st = calloc (1, sizeof *st))) die ("calloc");
+	st = calloc(1, sizeof *st);
+	if (!st) die("calloc");
 	return st;
 }
 
@@ -53,15 +52,12 @@ parse_argv (State *st, char **argv, char *err)
 {
 	Buffer *tmp;
 
-
-	if (*++argv) {
-		while (*argv++) {
-			tmp = makebuf();
-			initbuf(tmp, *argv);
-			readbuf(tmp, err);
-			bufclean(tmp);
-			addbuf(st, tmp);
-		}
+	if (argv[1]) while (*++argv) {
+		tmp = makebuf();
+		initbuf(tmp, *argv);
+		readbuf(tmp, err);
+		bufclean(tmp);
+		addbuf(st, tmp);
 	} else {
 		tmp = makebuf();
 		initbuf(tmp, NULL);

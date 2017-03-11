@@ -7,7 +7,7 @@ static Mode *findmode(State *, char *);
 int
 addbuf(State *st, Buffer *buf)
 {
-	vec_append(st->buffers, buf);
+	vec_append(st->buffers, &buf);
 	return SUCC;
 }
 
@@ -17,13 +17,13 @@ checkoutbuf(Buffer *dest, State *st, size_t which)
 {
 	Buffer *src;
 
-	if (which >= st->buffers.c)
+	if (which >= st->buffers->c)
 		return FAIL;
 
-	src = st->buffers.v[which];
-	COPY(dest, src);
+	src = st->buffers->v[which];
+	memcpy(dest, src, sizeof *dest);
 
-	vec_remove(st->buffers, which);
+	vec_delete(st->buffers, which);
 
 	return SUCC;
 }
@@ -32,9 +32,9 @@ Mode *
 findmode(State *st, char *mode)
 {
 	size_t i = 0;
-	for (; i < st->modes.c; ++i)
-		if (!strcmp(st->modes.v[i].name, mode))
-			return st->modes.v + i;
+	for (; i < st->modes->c; ++i)
+		if (!strcmp(st->modes->v[i].name, mode))
+			return st->modes->v + i;
 	return NULL;
 }
 

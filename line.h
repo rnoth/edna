@@ -1,8 +1,6 @@
 #ifndef _edna_line_
 #define _edna_line_
 #include "edna.h"
-#include "str.h"
-#include "vector.h"
 
 struct Line {
 	size_t	len;
@@ -10,8 +8,6 @@ struct Line {
 	Line*	next;
 	Line*	prev;
 };
-
-VECTOR_TAG (Line *, Selection);
 
 /* line.c */
 extern size_t	getlineno	(Line *);

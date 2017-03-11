@@ -19,10 +19,9 @@ findcmd(State *st, char *name)
 	size_t i;
 
 	if (name == NULL) return NULL;
-
-	for (i = 0; i < st->cmds.c; ++i)
-		if (!strcmp(name, st->cmds.v[i].name)) 
-			return st->cmds.v + i;
+	for (i = 0; i < st->cmds->c; ++i)
+		if (!strcmp(name, st->cmds->v[i].name)) 
+			return st->cmds->v + i;
 	return NULL;
 }
 
@@ -31,8 +30,8 @@ freearg(Arg *arg)
 {
 	size_t i;
 
-	for (i = 0; i < arg->param.c; ++i)
-		free(arg->param.v[i]);
+	for (i = 0; i < arg->param->c; ++i)
+		free(arg->param->v[i]);
 	free_vector(arg->param);
 	if (arg->name) free(arg->name);
 	if (arg->mode) free(arg->mode);
@@ -53,8 +52,7 @@ makearg(void)
 int
 cmderror (State *st, Buffer *buf, String *s, char *err)
 {
-	if (!strcmp (err, "quit"))
-		return FAIL;
+	if (!strcmp (err, "quit")) return FAIL;
 	if (printf (ERROR) < 0) die ("printf");
 	if (fflush (stdout) == EOF) warn ("fflush");
 	return SUCC;
@@ -103,12 +101,12 @@ runcmd(State *st, Buffer *buf, Command *cmd, Arg *arg, char *err)
 	String *addr;
 
 	if (cmd->mode) {
-		arg->mode = malloc(strlen(cmd->mode) + 1 * sizeof *arg->mode);
+		arg->mode = malloc((strlen(cmd->mode) + 1) * sizeof *arg->mode);
 		if (!arg->mode) die("malloc");
 		strcpy(arg->mode, cmd->mode);
 	}
 
-	if (arg->sel.c == 0 && cmd->defaddr) {
+	if (arg->sel->c == 0 && cmd->defaddr) {
 		addr = chartostr(cmd->defaddr);
 
 		sel = getaddr(addr, &pos, buf, err);
@@ -117,9 +115,9 @@ runcmd(State *st, Buffer *buf, Command *cmd, Arg *arg, char *err)
 
 		free_vector(arg->sel);
 		make_vector(arg->sel);
-		vec_copy(arg->sel, *sel);
+		arg->sel = vec_clone(sel);
 
-		free_vector(*sel);
+		free_vector(sel);
 		free(sel);
 	}
 
@@ -128,4 +126,3 @@ runcmd(State *st, Buffer *buf, Command *cmd, Arg *arg, char *err)
 fail:
 	return FAIL;
 }
-

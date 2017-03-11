@@ -5,7 +5,7 @@
 int
 cmd_insert(State *st, Buffer *buf, Arg *arg, char *error)
 {
-	bufseekline(buf, arg->sel.v[0]);
+	bufseekline(buf, arg->sel->v[0]);
 
 	if (arg->mode) {
 		if (!strcmp(arg->mode, "insert")) {

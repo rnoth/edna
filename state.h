@@ -3,7 +3,6 @@
 #include "edna.h"
 
 #include "str.h"
-#include "vector.h"
 
 struct Mode {
 	char*	name;
@@ -16,9 +15,9 @@ struct Mode {
 
 struct State {
 	Mode *mode;
-	VECTOR (Command, cmds);
-	VECTOR (Buffer *, buffers);
-	VECTOR (Mode,	 modes);
+	Vector(Command)	 *cmds;
+	Vector(Buffer *) *buffers;
+	Vector(Mode)	 *modes;
 };
 
 /* state.c */

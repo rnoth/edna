@@ -18,13 +18,13 @@ cmd_help(State *st, Buffer *buf, Arg *arg, char *error)
 int
 cmd_print(State *st, Buffer *buf, Arg *arg, char *error)
 {
-	if (!arg->sel.v[0]->str) {
+	if (!arg->sel->v[0]->str) {
 		strcpy(error, "empty selection");
 		return FAIL;
 	}
 
 	if (printf(PRINT_FMT) < 0) die("printf");
 	if (fflush(stdout) == EOF) die("fflush");
-	bufseekline(buf, *arg->sel.v);
+	bufseekline(buf, *arg->sel->v);
 	return SUCC;
 }

@@ -15,8 +15,8 @@ cmd_edit(State *st, Buffer *buf, Arg *arg, char *error)
 	}
 
 force:
-	if (arg->param.c) {
-		fn = arg->param.v[0];
+	if (arg->param->c) {
+		fn = arg->param->v[0];
 		chomp(fn);
 	} else {
 		fn = bufgetname(buf);
@@ -28,7 +28,7 @@ force:
 	bufclean(buf);
 	setmode(st, "command");
 
-	if (!arg->param.c) free(fn);
+	if (!arg->param->c) free(fn);
 	return SUCC;
 }
 
@@ -36,14 +36,14 @@ int
 cmd_filename(State *st, Buffer *buf, Arg *arg, char *error)
 {
 	char *fn;
-	if (!arg->param.c) {
+	if (!arg->param->c) {
 		fn = bufgetname(buf);
 		if (printf("%s\n", fn) < 0) die ("printf");
 		free(fn);
 		return SUCC;
 	}
 
-		if (bufsetname(buf, arg->param.v[0]) == FAIL) {
+		if (bufsetname(buf, arg->param->v[0]) == FAIL) {
 		strcpy(error, "invalid filename");
 		return FAIL;
 	}
@@ -78,8 +78,8 @@ end:
 int
 cmd_write (State *st, Buffer *buf, Arg *arg, char *error)
 {
-	if (arg->param.c) {
-		if (bufsetname(buf, arg->param.v[0]) == FAIL) {
+	if (arg->param->c) {
+		if (bufsetname(buf, arg->param->v[0]) == FAIL) {
 			strcpy (error, "invalid filename");
 			return FAIL;
 		}

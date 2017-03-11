@@ -3,15 +3,13 @@
 #define _edna_cmds_
 
 #include "edna.h"
-#include "line.h"
-#include "vector.h"
 
 struct Arg {
-	Selection  sel;
+	Selection  *sel;
 	char*	   name;
 	char*	   mode;
 
-	VECTOR (char *, param);
+	Vector(char *) *param;
 };
 
 struct Command {

@@ -1,9 +1,8 @@
 /* set.h -- set operations */
 #ifndef _set_
 #define _set_
+#include <stddef.h>
 #include <stdint.h>
-
-#include "vector.h"
 
 typedef struct Set Set;
 

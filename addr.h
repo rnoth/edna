@@ -3,8 +3,6 @@
 #define _edna_addr_
 
 #include "edna.h"
-#include "set.h"
-#include "str.h"
 
 #define VALUE		BIT(0)	/* 0-ary operator */
 #define OPERATOR	BIT(1)	/* binary operator */
@@ -20,6 +18,7 @@ enum Token {
 
 typedef unsigned int	Rule;
 typedef enum Token	Token;
+typedef struct Symbol	Symbol;
 
 /* TODO: merge evaluator and operator, make it take a Set vector */
 typedef Set *	(*Evaluator)	(Node *, Buffer *, char *);

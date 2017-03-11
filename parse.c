@@ -107,29 +107,27 @@ parseline (String *s, Buffer *buf, Arg *arg, char *error)
 	tmp = getaddr(s, &pos, buf, error);
 	if (tmp) {
 		make_vector(arg->sel);
-		vec_copy(arg->sel, *(Selection *)tmp);
-		free_vector(*(Selection *)tmp);
-		free (tmp);
+		arg->sel = vec_clone(tmp);
+		if (!arg->sel) die("vec_clone");
+		vec_free(tmp);
+		free(tmp);
 	}
 
 	/* command name */
 	tmp = getname(s, &pos);
-	if (!tmp)
-		goto finally;
+	if (!tmp) goto finally;
 	arg->name = tmp;
 
 	/* delimiter */
 	tmp = setdelim(s, &pos);
-	if (!tmp)
-		goto finally;
+	if (!tmp) goto finally;
 	delim = tmp;
 
 	/* argument vector */
 	make_vector(arg->param);
 	do {
 		tmp = getarg(s, &pos, delim);
-		if (!tmp)
-			break;
+		if (!tmp) break;
 		vec_append(arg->param, tmp);
 	} while (tmp);
 

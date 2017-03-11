@@ -9,7 +9,6 @@ clonebuf(Buffer *src)
 	Buffer *ret;
 
 	ret = makebuf();
-
 	memcpy(ret, src, sizeof *ret);
 
 	return ret;
