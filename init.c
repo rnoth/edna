@@ -8,7 +8,7 @@
 void
 freestate (State *st)
 {
-	mapv(st->buffers, freebuf(each));
+	mapv(st->buffers, freebuf(*each));
 	vec_free(st->buffers);
 	vec_free(st->cmds);
 	vec_free(st->modes);
@@ -27,13 +27,13 @@ initst(State *st)
 	if (!st->cmds) die("make_vector");
 	for (i = 0; commands[i].name; ++i)
 		;
-	vec_concat(st->cmds, commands, i * sizeof *commands);
+	vec_concat(st->cmds, commands, i);
 
 	make_vector(st->modes);
 	if (!st->modes) die("make_vector");
 	for (i = 0; modes[i].name; ++i)
 		;
-	vec_concat(st->modes, modes, i * sizeof *modes);
+	vec_concat(st->modes, modes, i);
 
 	setmode(st, "command");
 }
