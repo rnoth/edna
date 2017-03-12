@@ -43,12 +43,18 @@ getseq(const String *s, size_t *pos,
 	while (!eol(s, *pos)) {
 		ext = get_uchar(cur, s->v + *pos);
 
+		if (ext == -1) ext = 1;
+		else if (ext == 0) {
+			*pos += 1;
+			break;
+		}
+
 		if (*cur == '\\' && !esc) {
 			esc = 2;
 			continue;
 		}
 
-		if (esc || !check(cur, context))
+		if (!esc && !check(cur, context))
 			break;
 
 		memcpy(tmp + off, cur, ext);
@@ -106,11 +112,9 @@ parseline (String *s, Buffer *buf, Arg *arg, char *error)
 	/* line address */
 	tmp = getaddr(s, &pos, buf, error);
 	if (tmp) {
-		make_vector(arg->sel);
 		arg->sel = vec_clone(tmp);
 		if (!arg->sel) die("vec_clone");
 		vec_free(tmp);
-		free(tmp);
 	}
 
 	/* command name */
@@ -128,7 +132,7 @@ parseline (String *s, Buffer *buf, Arg *arg, char *error)
 	do {
 		tmp = getarg(s, &pos, delim);
 		if (!tmp) break;
-		vec_append(arg->param, tmp);
+		vec_append(arg->param, &tmp);
 	} while (tmp);
 
 
