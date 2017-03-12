@@ -43,7 +43,7 @@
 /* e.g. mapv(vec, sqrt(each)) */
 #define mapv(VEC, expr) do {			\
 	size_t _i;				\
-	void *each;				\
+	void **each;				\
 	Vector(void *) *_vec;			\
 						\
 	_vec = (void *)VEC;			\
