@@ -19,6 +19,7 @@ findcmd(State *st, char *name)
 	size_t i;
 
 	if (name == NULL) return NULL;
+
 	for (i = 0; i < st->cmds->c; ++i)
 		if (!strcmp(name, st->cmds->v[i].name)) 
 			return st->cmds->v + i;
@@ -28,16 +29,12 @@ findcmd(State *st, char *name)
 void
 freearg(Arg *arg)
 {
-	size_t i;
-
-	for (i = 0; i < arg->param->c; ++i)
-		free(arg->param->v[i]);
+	mapv(arg->param, free(*each));
 	free_vector(arg->param);
 	if (arg->name) free(arg->name);
 	if (arg->mode) free(arg->mode);
-	free_vector(arg->sel);
+	vec_free(arg->sel);
 	free(arg);
-
 }
 
 Arg *
@@ -45,7 +42,6 @@ makearg(void)
 {
 	Arg *ret;
 	ret = calloc(1, sizeof *ret);
-	make_vector(ret->sel);
 	return ret;
 }
 
@@ -75,7 +71,6 @@ cmdeval(State *st, Buffer *buf, String *s, char *err)
 		strcpy(err, "unknown command");
 		goto finally;
 	}
-
 
 	if (runcmd(st, buf, cmd, arg, err) == SUCC) ret = SUCC;
 
@@ -113,12 +108,10 @@ runcmd(State *st, Buffer *buf, Command *cmd, Arg *arg, char *err)
 		freestring(addr);
 		if (sel == NULL) goto fail;
 
-		free_vector(arg->sel);
-		make_vector(arg->sel);
+		vec_free(arg->sel);
 		arg->sel = vec_clone(sel);
 
 		free_vector(sel);
-		free(sel);
 	}
 
 	return cmd->func(st, buf, arg, err);
