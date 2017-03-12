@@ -79,9 +79,8 @@ set2vec(Set *A)
 	size_t i, j, t[32];
 	Vector(size_t) *ret;
 
-	ret = calloc(1, sizeof *ret);
-	if (!ret) die("calloc");
 	make_vector(ret);
+	if (!ret) die("make_vector");
 	B = cloneset(A);
 
 	for (i = 0; i < A->c; ++i) {
@@ -99,7 +98,7 @@ set2vec(Set *A)
 Set *
 setaddmemb(Set *A, size_t memb)
 {
-	if (memb / 32 > A->c) expandset (A);
+	if (memb / 32 > A->c) expandset(A);
 
 	A->v[memb / 32] |= BIT(memb % 32);
 
@@ -114,7 +113,7 @@ setaddrange(Set *A, size_t beg, size_t end)
 
 	if (beg > end) return NULL;
 
-	if (end > A->c) expandset (A);
+	if (end > A->c) expandset(A);
 
 	for (i = j = 0; i < end; i += 32, ++j) {
 		premask = postmask = 0;
