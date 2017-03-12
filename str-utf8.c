@@ -42,26 +42,25 @@ get_uchar(char *dest, char const *src)
 int
 uchar_extent(unsigned char const ch)
 {
-	if (!ch)
-		return 0;
-	else if (isascii(ch))
-		return 1;
-	else if (ch >= 0xC2 && ch <= 0xDF)
-		return 2;
-	else if (ch >= 0xE0 && ch <= 0xEF)
-		return 3;
-	else if (ch >= 0xF0 && ch <= 0xF4)
-		return 4;
-	else
-		return -1;
+	if (!ch) return 0;
+	else if (isascii(ch)) return 1;
+	else if (ch >= 0xC2 && ch <= 0xDF) return 2;
+	else if (ch >= 0xE0 && ch <= 0xEF) return 3;
+	else if (ch >= 0xF0 && ch <= 0xF4) return 4;
+	else return -1;
 } 
 
 size_t
 ustrlen(char const *s)
 {
+	int ext;
 	size_t ret = 0;
 
-	while (*s && ++ret) s += uchar_extent(*s);
+	while (*s) {
+		ext = uchar_extent(*s);
+		if (ext > 0) s += ext;
+		else if (ext == -1) s += 1;
+	}
 
 	return ret;
 }
