@@ -9,7 +9,7 @@ bool
 readline(String *str, FILE *file)
 {
 	char ch, buf[5];
-	int i, ext, ret = true;
+	int i, ext;
 
 	copychars(str, "");
 	for (;;) {
@@ -41,7 +41,8 @@ readline(String *str, FILE *file)
 	fail:
 
 		if (!feof(file)) die("fread");
+		return false;
 	}
 
-	return ret;
+	return true;
 }
