@@ -8,7 +8,7 @@
 
 #define VECSIZ 16
 #define GROWTH 2
-#define SHRINK .3
+//#define SHRINK .3
 
 static int vec_expand(void *);
 
@@ -47,27 +47,28 @@ vec_clone(void const *_vec)
 	memcpy(&vec, _vec, sizeof vec);
 	
 	ret = malloc(sizeof *ret);
+	if (!ret) return NULL;
 	memcpy(ret, _vec, sizeof *ret);
 	ret->v = malloc(vec.m * vec.z);
+	if (!ret->v) { free(ret); return NULL; }
 	memcpy(ret->v, vec.v, vec.m);
 
 	return ret;
 }
 
 int
-vec_concat(void *_vec, void const *data, size_t len)
+vec_concat(void *_vec, void const *data, size_t nmemb)
 {
-	size_t nmemb;
+	size_t len;
 	Vector(char) vec;
 
 	assert(_vec);
 	assert(data);
 
 	memcpy(&vec, _vec, sizeof vec);
-	nmemb = len / vec.z;
+	len = nmemb * vec.z;
 
-	if (vec.c + nmemb > vec.m)
-		if (vec_expand(&vec)) return ENOMEM;
+	while ((vec.c + nmemb) * vec.z >= vec.m) if (vec_expand(&vec)) return ENOMEM;
 	
 	memcpy(vec.v + vec.c, data, len);
 
@@ -125,8 +126,7 @@ vec_insert(void *_vec, void const *data, size_t pos)
 
 	assert(pos <= vec.c);
 
-	if ((vec.c + 1) * vec.z > vec.m)
-		if (vec_expand(&vec)) return ENOMEM;
+	if ((vec.c + 1) * vec.z >= vec.m && vec_expand(&vec)) return ENOMEM;
 
 	memmove(vec.v + (pos + 1) * vec.z, vec.v + pos * vec.z, (vec.c - pos) * vec.z);
 	memcpy(vec.v + pos * vec.z, data, vec.z);
