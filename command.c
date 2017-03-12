@@ -42,6 +42,7 @@ makearg(void)
 {
 	Arg *ret;
 	ret = calloc(1, sizeof *ret);
+	if (!ret) die("calloc");
 	return ret;
 }
 
@@ -101,7 +102,7 @@ runcmd(State *st, Buffer *buf, Command *cmd, Arg *arg, char *err)
 		strcpy(arg->mode, cmd->mode);
 	}
 
-	if (arg->sel->c == 0 && cmd->defaddr) {
+	if (!arg->sel && cmd->defaddr) {
 		addr = chartostr(cmd->defaddr);
 
 		sel = getaddr(addr, &pos, buf, err);

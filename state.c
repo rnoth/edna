@@ -17,12 +17,12 @@ checkoutbuf(Buffer *dest, State *st, size_t which)
 {
 	Buffer *src;
 
-	if (which >= st->buffers->c)
-		return FAIL;
+	if (which >= len(st->buffers)) return FAIL;
 
 	src = st->buffers->v[which];
 	memcpy(dest, src, sizeof *dest);
 
+	free(arr(st->buffers)[which]);
 	vec_delete(st->buffers, which);
 
 	return SUCC;
@@ -44,7 +44,7 @@ returnbuf(State *st, Buffer *src)
 	Buffer *tmp;
 
 	tmp = clonebuf(src);
-	vec_append (st->buffers, tmp);
+	vec_append(st->buffers, &tmp);
 	
 	return SUCC;
 }
