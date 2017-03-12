@@ -19,7 +19,7 @@ checkoutbuf(Buffer *dest, State *st, size_t which)
 
 	if (which >= len(st->buffers)) return FAIL;
 
-	src = st->buffers->v[which];
+	src = arr(st->buffers)[which];
 	memcpy(dest, src, sizeof *dest);
 
 	free(arr(st->buffers)[which]);
