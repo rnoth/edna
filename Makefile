@@ -1,6 +1,6 @@
 # Makefile for edna v0.2
 CC	?= cc
-CFLAGS  ?= -std=c99 -fPIC -W -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter
+CFLAGS  ?= -std=c99 -fPIC -W -Wall -Wextra -Werror -pedantic -Wno-unused-parameter
 LDFLAGS ?= -lc
 SOFLAGS ?= -lc -fPIC -shared -Wl,-rpath=$(shell pwd)
 ARFLAGS ?= rcs
