@@ -23,7 +23,7 @@ const Evaluator numsyms[] = {
  */
 
 Node *
-tryarith (String *s, size_t *pos)
+tryarith(String *s, size_t *pos)
 {
 	Node *ret;
 	size_t i, j, len;
@@ -31,72 +31,67 @@ tryarith (String *s, size_t *pos)
 	len = 0;
 
 	for (i = j = 0; symbols[OP_ARITH][i]; i += len + 1, ++j) {
-		len = strlen (symbols[OP_ARITH] + i);
-		if (!strncmp (s->v + *pos, symbols[OP_ARITH] + i, len))
+		len = strlen(symbols[OP_ARITH] + i);
+		if (!strncmp(s->v + *pos, symbols[OP_ARITH] + i, len))
 			break;
 	}
 
-	if (!symbols[OP_ARITH] + i)
-		return (NULL);
+	if (!symbols[OP_ARITH] + i) return NULL;
 
-	ret = makenode ();
+	ret = makenode();
 
 	ret->op = arithops[j];
-	strncpy (ret->str->v, symbols[OP_ARITH] + i, len);
-	ret->str->b = len + 1;
+	vec_append(ret->str, symbols[OP_ARITH]);
 	ret->tok = OP_ARITH;
 
 	*pos += len;
 
-	return (ret);
+	return ret;
 }
 
 Node *
-trynum (String *s, size_t *pos)
+trynum(String *s, size_t *pos)
 {
 	Node *ret;
 
-	ret = makenode ();
+	ret = makenode();
 
-	for (; isdigit (s->v[*pos]); ++(*pos))
-		appendchar (ret->str, s->v[*pos]);
+	for (; isdigit(s->v[*pos]); ++(*pos))
+		vec_append(ret->str, s->v + *pos);
 
-	if (!ret->str->c) { /* no numbers */
-		freenode (ret);
+	if (!len(ret->str)) { /* no numbers */
+		freenode(ret);
 		ret = NULL;
 	} else {
 		ret->ev = addr_num;
 		ret->tok = NUM_LITERAL;
 	}
-	return (ret);
+	return ret;
 
 }
 
 Node *
-trysym (String *s, size_t *pos)
+trysym(String *s, size_t *pos)
 {
 	Node *ret;
 	size_t i, j, len;
 
 	for (i = j = 0; symbols[NUM_SYMBOL] + i; i += len + 1, ++j) {
-		len = strlen (symbols[NUM_SYMBOL] + i);
-		if (!strncmp (s->v + *pos, symbols[NUM_SYMBOL] + i, len))
+		len = strlen(symbols[NUM_SYMBOL] + i);
+		if (!strncmp(s->v + *pos, symbols[NUM_SYMBOL] + i, len))
 			break;
 	}
 
 	if (!symbols[NUM_SYMBOL] + i)
-		return (NULL);
+		return NULL;
 
-	ret = makenode ();
+	ret = makenode();
 
 	ret->ev = numsyms[j];
 	ret->tok = NUM_SYMBOL;
-	/* TODO: put this in its own function */
-	strncpy (ret->str->v, symbols[NUM_SYMBOL] + i, len);
-	ret->str->b = len + 1;
-	/* TODO: set ret->str->c (needs a ustrlen() function */
+	vec_concat(ret->str, symbols[NUM_SYMBOL] + i, len);
 
 	*pos += len;
 
-	return (ret);
+	return ret;
 }
