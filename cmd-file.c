@@ -32,20 +32,19 @@ force:
 }
 
 int
-cmd_filename(State *st, Buffer *buf, Arg *arg, char *error)
+cmd_filename(State *st, Buffer *buf, Arg *arg, char *err)
 {
 	char *fn;
-	if (!arg->param->c) {
-		fn = bufgetname(buf);
-		if (printf("%s\n", fn) < 0) die ("printf");
-		free(fn);
-		return 0;
-	}
-
-		if (bufsetname(buf, arg->param->v[0]) == FAIL) {
-		strcpy(error, "invalid filename");
+	if (len(arg->param)) {
+		chomp(arr(arg->param)[0]);
+		if (!bufsetname(buf, arr(arg->param)[0]))
+			return 0;
+		strcpy(err, "invalid filename");
 		return -1;
-	}
+	} else if (!(fn = bufgetname(buf))) {
+		strcpy(err, "no filename");
+		return -1;
+	} else if (printf("%s\n", fn) < 0) die("printf");
 
 	return 0;
 }
