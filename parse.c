@@ -33,7 +33,7 @@ getseq(const String *s, size_t *pos,
 		bool (*check)(char const *, void *),
 		void *context)
 {
-	char cur[5], tmp[s->b - *pos], *ret;
+	char cur[5], tmp[len(s) - *pos], *ret;
 	short esc, ext;
 	size_t off;
 
@@ -102,12 +102,10 @@ setdelim(const String *s, size_t *pos)
 int
 parseline (String *s, Buffer *buf, Arg *arg, char *error)
 {
-	int ret;
 	void *tmp;
 	char *delim;
 	size_t pos;
 
-	ret = FAIL;
 	pos = 0;
 	/* line address */
 	tmp = getaddr(s, &pos, buf, error);
@@ -139,7 +137,6 @@ parseline (String *s, Buffer *buf, Arg *arg, char *error)
 	free(delim);
 
 finally:
-	ret = SUCC;
-	return ret;
+	return 0;
 
 }
