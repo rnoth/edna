@@ -44,6 +44,8 @@ vec_clone(void const *_vec)
 {
 	Vector(char) vec, *ret;
 
+	assert(_vec != NULL);
+
 	memcpy(&vec, _vec, sizeof vec);
 	
 	ret = malloc(sizeof *ret);
@@ -62,8 +64,8 @@ vec_concat(void *_vec, void const *data, size_t nmemb)
 	size_t len;
 	Vector(char) vec;
 
-	assert(_vec);
-	assert(data);
+	assert(_vec != NULL);
+	assert(data != NULL);
 
 	memcpy(&vec, _vec, sizeof vec);
 	len = nmemb * vec.z;
@@ -83,6 +85,8 @@ vec_delete(void *_vec, size_t which)
 {
 	Vector(char) vec;
 
+	assert(_vec != NULL);
+
 	memcpy(&vec, _vec, sizeof vec);
 	if (which > vec.c) return;
 
@@ -99,10 +103,11 @@ vec_expand(void *_vec)
 	Vector(char) vec;
 	void *tmp;
 
-	assert(_vec);
+	assert(_vec != NULL);
 
 	memcpy(&vec, _vec, sizeof vec);
-	assert(vec.m);
+	
+	if (!vec.m) return ENOMEM;
 
 	tmp = realloc(vec.v, vec.m * GROWTH);
 	if (!tmp) return ENOMEM;
@@ -119,8 +124,8 @@ vec_insert(void *_vec, void const *data, size_t pos)
 {
 	Vector(char) vec;
 
-	assert(_vec);
-	assert(data);
+	assert(_vec != NULL);
+	assert(data != NULL);
 
 	memcpy(&vec, _vec, sizeof vec);
 
@@ -142,6 +147,9 @@ int
 vec_join(void *_dest, void const *_src)
 {
 	Vector(char) src;
+
+	assert(_src != NULL);
+	assert(_dest != NULL);
 
 	memcpy(&src, _src, sizeof src);
 
@@ -172,7 +180,12 @@ void
 vec_shift(void *_vec, size_t off)
 {
 	Vector(char) vec;
+
+	assert(_vec != NULL);
+
 	memcpy(&vec, _vec, sizeof vec);
+
+	assert(vec.c >= off);
 	vec_slice(_vec, off, vec.c - off);
 	return;
 }
@@ -182,6 +195,8 @@ vec_slice(void *_vec, size_t beg, size_t ext)
 {
 	size_t min;
 	Vector(char) vec;
+
+	assert(_vec != NULL);
 
 	memcpy(&vec, _vec, sizeof vec);
 	if (beg >= vec.c) {
@@ -203,7 +218,7 @@ vec_truncate(void *_vec, size_t off)
 {
 	Vector(char) vec;
 
-	assert(_vec);
+	assert(_vec != NULL);
 
 	memcpy(&vec, _vec, sizeof vec);
 
