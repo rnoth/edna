@@ -102,28 +102,21 @@ setdelim(const String *s, size_t *pos)
 int
 parseline (String *s, Buffer *buf, Arg *arg, char *error)
 {
-	void *tmp;
+	char *tmp;
 	char *delim;
 	size_t pos;
 
 	pos = 0;
 	/* line address */
-	tmp = getaddr(s, &pos, buf, error);
-	if (tmp) {
-		arg->sel = vec_clone(tmp);
-		if (!arg->sel) die("vec_clone");
-		vec_free(tmp);
-	}
+	arg->sel = getaddr(s, &pos, buf, error);
 
 	/* command name */
-	tmp = getname(s, &pos);
-	if (!tmp) goto finally;
-	arg->name = tmp;
+	arg->name = getname(s, &pos);
+	if (!arg->name) goto finally;
 
 	/* delimiter */
-	tmp = setdelim(s, &pos);
-	if (!tmp) goto finally;
-	delim = tmp;
+	delim = setdelim(s, &pos);
+	if (!delim) goto finally;
 
 	/* argument vector */
 	make_vector(arg->param);
