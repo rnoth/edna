@@ -7,9 +7,9 @@
 #include "edna.h"
 
 int
-readbuf(Buffer *buf, char *err)
+readbuf(Buffer *buf, char *errmsg)
 {
-	int ret = FAIL;
+	int err;
 	String *s;
 	Line *new;
 	FILE *f;
@@ -21,45 +21,39 @@ readbuf(Buffer *buf, char *err)
 	f = buf->file;
 
 	errno = 0;
-	while (feof(f) == 0) {
-		if (readline(s, f) == FAIL) {
-			if (errno) {
-				strncpy (err, strerror (errno), 20);
-				goto finally;
-			} else
-				continue;
+	while (!feof(f)) {
+		err = readline(s, f);
+		if (err == -1) break;
+		else if (err > 0) {
+			freestring(s);
+			return err;
 		}
 
-		new = makeline ();
-		if (changeline (new, s) == FAIL) {
-			strcpy (err, "readbuf(): changeline() failed. memory errors?");
-			freelines (new, new->next);
-			goto finally;
-		} else if (addline (buf, new) == FAIL) {
-			strcpy (err, "readbuf(): changeline() failed. buffer inconsistency?");
-			freelines (new, new->next);
-			goto finally;
-		}
+		new = makeline();
+		if (!new) return ENOMEM;
+		changeline(new, s);
+		addline(buf, new);
 	}
-	clearerr (f);
+	clearerr(f);
 
-finally:
-	freestring (s);
-	return (ret);
+	freestring(s);
+	return 0;
 }
 
 int
-writebuf (Buffer *buf, char *err)
+writebuf (Buffer *buf, char *errmsg)
 {
+	int err;
 	FILE *f;
 	Line *tmp;
 
 	errno = 0;
-	if (bufopen(buf, "w+") == FAIL) return FAIL;
+	err = bufopen(buf, "w+");
+	if (err) return err;
 		
 	f = buf->file;
 	for (tmp = bufprobe(buf, 1); tmp; tmp = getnext(tmp))
-		fputs (tmp->str->v, f);
+		fputs(tmp->str->v, f);
 
-	return SUCC;
+	return 0;
 }
