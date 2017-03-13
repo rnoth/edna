@@ -5,100 +5,80 @@
 #include "edna.h"
 
 int
-changeline (Line *l, String *s)
+changeline(Line *l, String *s)
 {
-	if (l->str == NULL)
-		l->str = makestring ();
+	if (!l->str) l->str = makestring();
 
-	if (FAIL == copystring (l->str, s))
-		return (FAIL);
-
-	return (SUCC);
+	vec_truncate(l->str, 0);
+	return vec_join(l->str, s);
 }
 
 size_t
-getlineno (Line *targ)
+getlineno(Line *targ)
 {
 	size_t lineno;
 
 	lineno = 0;
-	while ((targ = getprev(targ)))
-		++lineno;
+	while ((targ = getprev(targ))) ++lineno;
 
-	return (lineno);
+	return lineno;
 }
 
 Line *
-getnext (Line *li)
+getnext(Line *li)
 {
-	if (li == NULL)
-		return (NULL);
-	return (li->next);
+	if (!li) return 0;
+	return li->next;
 }
 
 Line *
-getprev (Line *li)
+getprev(Line *li)
 {
-	if (li == NULL)
-		return (NULL);
-	return (li->prev);
+	if (!li) return 0;
+	return li->prev;
 }
 
 void
-freelines (Line *start, Line *stop)
+freelines(Line *start, Line *stop)
 {
 	Line *cur, *next, *prev, *tmp;
 
-	prev = getprev (start);
+	prev = getprev(start);
 	cur = start;
-	next = getnext (cur);
+	next = getnext(cur);
 	while (cur && cur != stop) {
-		tmp = getnext (next);
-		freestring (cur->str);
-		free (cur);
+		tmp = getnext(next);
+		freestring(cur->str);
+		free(cur);
 		cur = next;
 		next = tmp;
 	}
 
-	linklines (prev, stop);
-	return;
+	linklines(prev, stop);
 }
 
 void
 linklines(Line *left, Line *right)
 {
-	if (left)
-		left->next = right;
-	if (right)
-		right->prev = left;
-	return;
+	if (left) left->next = right;
+	if (right) right->prev = left;
 }
 
 Line*
-makeline ()
+makeline(void)
 {
-	Line* new;
-
-	if (!(new = calloc (1, sizeof *new)))
-		die("calloc");
-
-	return (new);
+	return calloc(1, sizeof(Line));
 }
 
 Line *
-walk (Line *cur, int offset)
+walk(Line *cur, int offset)
 {
 	Line *li = cur;
-	if (0 > offset) {
-		for (; (li = getprev(li));)
-			if (!++offset)
-				return (li);
-		return (NULL);
-	} else if (0 < offset) {
-		for (; (li = getnext(li));)
-			if (!--offset)
-				return (li);
-		return (NULL);
-	} else /* offset == 0 */
-		return (cur);
+	if (offset < 0) {
+		while ((li = getprev(li))) if (!++offset) return (li);
+		return NULL;
+	} else if (offset > 0) {
+		while ((li = getnext(li))) if (!--offset) return (li);
+		return NULL;
+	} else return cur;
 }
