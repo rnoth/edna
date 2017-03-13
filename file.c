@@ -15,7 +15,7 @@ readbuf(Buffer *buf, char *errmsg)
 	FILE *f;
 
 	errno = 0;
-	if (bufopen(buf, "r") == FAIL) return FAIL;
+	if (bufopen(buf, "r")) return -1;
 
 	s = makestring();
 	f = buf->file;
