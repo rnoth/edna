@@ -1,6 +1,7 @@
 #ifndef _edna_
 #define _edna_
 #include <assert.h>
+#include <errno.h>
 #include <stdbool.h>
 
 #include "set.h"
