@@ -11,6 +11,8 @@ char *
 bufgetname(Buffer *buf)
 {
 	assert(buf != NULL);
+
+	if (!buf->name) return NULL;
 	return arr(buf->name);
 }
 
@@ -19,6 +21,10 @@ bufsetname(Buffer *buf, char *name)
 {
 	assert(buf != NULL);
 
+	if (!buf->name) {
+		make_vector(buf->name);
+		if (!buf->name) die("make_vector");
+	}
 	vec_truncate(buf->name, 0);
 	return vec_concat(buf->name, name, strlen(name));
 }
