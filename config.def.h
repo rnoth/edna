@@ -11,4 +11,7 @@
 extern const Mode modes[];
 extern const Command commands[];
 
+size_t sizeof_modes(void);
+size_t sizeof_commands(void);
+
 #endif

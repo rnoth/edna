@@ -31,3 +31,14 @@ const Command commands[] = {
 	{ NULL },
 };
 
+size_t
+sizeof_modes(void)
+{
+	return sizeof modes / sizeof *modes;
+}
+
+size_t
+sizeof_commands(void)
+{
+	return sizeof commands / sizeof *commands;
+}

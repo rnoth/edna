@@ -18,22 +18,20 @@ freestate (State *st)
 void
 initst(State *st)
 {
-	size_t i;
+	size_t len;
 
 	make_vector(st->buffers);
 	if (!st->buffers) die("make_vector");
 
 	make_vector(st->cmds);
 	if (!st->cmds) die("make_vector");
-	for (i = 0; commands[i].name; ++i)
-		;
-	vec_concat(st->cmds, commands, i);
+	len = sizeof_commands();
+	vec_concat(st->cmds, commands, len);
 
 	make_vector(st->modes);
 	if (!st->modes) die("make_vector");
-	for (i = 0; modes[i].name; ++i)
-		;
-	vec_concat(st->modes, modes, i);
+	len = sizeof_modes();
+	vec_concat(st->modes, modes, len);
 
 	setmode(st, "command");
 }
