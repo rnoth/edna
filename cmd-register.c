@@ -8,11 +8,11 @@ cmd_delete (State *st, Buffer *buf, Arg *arg, char *error)
 
 	targ = *arg->sel->v;
 
-	if (rmline (buf, targ) == FAIL) {
+	if (rmline(buf, targ)) {
 		strcpy (error, "empty selection");
-		return FAIL;
+		return -1;
 	}
 
-	return SUCC;
+	return 0;
 }
 

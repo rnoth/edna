@@ -21,7 +21,7 @@ addline(Buffer *buf, Line *new)
 	++buf->pos;
 	buf->cur = new;
 
-	return SUCC;
+	return 0;
 }
 
 
@@ -36,13 +36,13 @@ rmcurline(Buffer *buf)
 
 	if (bufseek(buf, BUF_CUR, 1) == FAIL)
 		if (bufseek(buf, BUF_CUR, 1) == FAIL)
-			return FAIL;
+			return -1;
 
 	freelines(del, getnext(del));
 	buf->dirty = 1;
 	--buf->len;
 
-	return SUCC;
+	return 0;
 }
 
 int
@@ -55,12 +55,11 @@ rmline(Buffer *buf, Line *li)
 
 	if (bufseek(buf, BUF_CUR, 1) == FAIL)
 		if (bufseek(buf, BUF_CUR, -1) == FAIL)
-			return FAIL;
+			return -1;
 
 	freelines(li, getnext(li));
 	buf->dirty = 1;
 	--buf->len;
 
-	return SUCC;	
+	return 0;
 }
-

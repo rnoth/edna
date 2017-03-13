@@ -12,7 +12,7 @@ cmd_help(State *st, Buffer *buf, Arg *arg, char *error)
 		if (printf("%s\n", error) < 0) die("printf");
 		if (fflush(stdout) == EOF) die("fflush");
 	}
-	return SUCC;
+	return 0;
 }
 
 int
@@ -20,11 +20,11 @@ cmd_print(State *st, Buffer *buf, Arg *arg, char *error)
 {
 	if (!(arg->sel->v[0] && arg->sel->v[0]->str)) {
 		strcpy(error, "empty selection");
-		return FAIL;
+		return -1;
 	}
 
 	if (printf(PRINT_FMT) < 0) die("printf");
 	if (fflush(stdout) == EOF) die("fflush");
 	bufseekline(buf, *arg->sel->v);
-	return SUCC;
+	return 0;
 }

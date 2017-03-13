@@ -36,7 +36,7 @@ bufseek(Buffer *buf, int whence, long off)
 	assert(off > 0 || whence != BUF_SET);
 	assert(off < 0 || whence != BUF_END);
 
-	if (off == 0) return SUCC;
+	if (off == 0) return 0;
 
 	switch (whence) {
 	 case BUF_SET:
@@ -49,7 +49,7 @@ bufseek(Buffer *buf, int whence, long off)
 		 li = buf->bot;
 		 break;
 	 default:
-		 return FAIL;
+		 return -1;
 	}
 
 	if (off > 0) {
@@ -69,8 +69,8 @@ bufseek(Buffer *buf, int whence, long off)
 		if (--off == 0) break;
 	} 
 
-	if (off == 0) 	return SUCC;
-	else 		return FAIL;
+	if (off == 0) return 0;
+	else return -1;
 }
 
 int
@@ -82,12 +82,12 @@ bufseekline(Buffer *buf, Line *li)
 	off = 0;
 	for (tmp = buf->top; tmp && tmp != li; tmp = getnext(tmp))
 		++off;
-	if (!tmp) return FAIL;
+	if (!tmp) return -1;
 
 	buf->pos = off;
 	buf->cur = tmp;
 
-	return SUCC;
+	return 0;
 }
 
 Line *

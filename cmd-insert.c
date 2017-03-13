@@ -13,14 +13,14 @@ cmd_insert(State *st, Buffer *buf, Arg *arg, char *error)
 		} else if (!strcmp(arg->mode, "append")) {
 			;
 		} else if (!strcmp(arg->mode, "change")) {
-			if (cmd_delete(st, buf, arg, error) == FAIL)
-				return FAIL;
+			if (cmd_delete(st, buf, arg, error))
+				return -1;
 		} else {
 			strcpy(error, "unknown option");
-			return SUCC;
+			return 0;
 		}
 	}
 
 	setmode(st, "insert");
-	return SUCC;
+	return 0;
 }

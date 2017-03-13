@@ -33,7 +33,7 @@ initbuf(Buffer *buf, char *fn)
 	buf->cur = buf->top = buf->bot = makeline();
 	buf->len = 1;
 
-	return SUCC;
+	return 0;
 }
 
 

@@ -33,7 +33,7 @@ cmd_listbuf(State *st, Buffer *buf, Arg *arg, char *error)
 
 	listbuf_helper(buf, '*');
 
-	return SUCC;
+	return 0;
 }
 
 int
@@ -44,7 +44,7 @@ cmd_openbuf(State *st, Buffer *buf, Arg *arg, char *error)
 
 	if (!arg->param->c) {
 		strcpy(error, "no filenames provided");
-		return FAIL;
+		return -1;
 	}
 
 	i = 0;
@@ -57,7 +57,7 @@ cmd_openbuf(State *st, Buffer *buf, Arg *arg, char *error)
 		addbuf(st, tmp);
 	} while (++i < arg->param->c);
 
-	return SUCC;
+	return 0;
 }
 
 int
@@ -65,21 +65,21 @@ cmd_switchbuf(State *st, Buffer *buf, Arg *arg, char *error)
 {
 	if (!arg->mode) {
 		strcpy(error, "no option specified");
-		return FAIL;
+		return -1;
 
 	} else if (!strcmp(arg->mode, "next")) {
 		returnbuf(st, buf);
 		checkoutbuf(buf, st, 0);
 
-		return SUCC;
+		return 0;
 
 	} else if (!strcmp(arg->mode, "prev")) {
 		returnbuf(st, buf);
 		checkoutbuf(buf, st, (st->buffers->c != 1) ? st->buffers->c - 2 : 0 );
 
-		return SUCC;
+		return 0;
 	}
 
 	strcpy (error, "unknown option");
-	return FAIL;
+	return -1;
 }
