@@ -18,7 +18,7 @@ listbuf_helper(Buffer *buf, char prefix)
 
 	if (!fn) fn = "";
 	if (dirty) mod = " [modified]";
-	if (printf("%c \"%s\"%s, line %ld of %ld\n", prefix, fn, mod, pos, len - 1) < 0)
+	if (printf("%c \"%s\"%s, %ld / %ld\n", prefix, fn, mod, pos, len - 1) < 0)
 		die("printf");
 }
 
@@ -52,10 +52,13 @@ cmd_openbuf(State *st, Buffer *buf, Arg *arg, char *error)
 		tmp = makebuf();
 		chomp(arg->param->v[i]);
 		initbuf(tmp, arg->param->v[i]);
-		readbuf(tmp, error);
+		if (readbuf(tmp, error)) {
+			strcpy(error, "error reading file");
+			return -1;
+		}
 		bufclean(tmp);
 		addbuf(st, tmp);
-	} while (++i < arg->param->c);
+	} while (++i < len(arg->param));
 
 	return 0;
 }
