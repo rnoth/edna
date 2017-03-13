@@ -18,7 +18,7 @@ findcmd(State *st, char *name)
 {
 	size_t i;
 
-	if (name == NULL) return NULL;
+	if (!name) return NULL;
 
 	for (i = 0; i < st->cmds->c; ++i)
 		if (!strcmp(name, st->cmds->v[i].name)) 
@@ -29,8 +29,10 @@ findcmd(State *st, char *name)
 void
 freearg(Arg *arg)
 {
-	mapv(arg->param, free(*each));
-	free_vector(arg->param);
+	if (arg->param) {
+		mapv(arg->param, free(*each));
+		vec_free(arg->param);
+	}
 	if (arg->name) free(arg->name);
 	if (arg->mode) free(arg->mode);
 	vec_free(arg->sel);
@@ -40,19 +42,16 @@ freearg(Arg *arg)
 Arg *
 makearg(void)
 {
-	Arg *ret;
-	ret = calloc(1, sizeof *ret);
-	if (!ret) die("calloc");
-	return ret;
+	return calloc(1, sizeof(Arg));
 }
 
 int
 cmderror (State *st, Buffer *buf, String *s, char *err)
 {
-	if (!strcmp (err, "quit")) return FAIL;
+	if (!strcmp (err, "quit")) return -1;
 	if (printf (ERROR) < 0) die ("printf");
 	if (fflush (stdout) == EOF) warn ("fflush");
-	return SUCC;
+	return 0;
 }
 
 int
@@ -62,10 +61,11 @@ cmdeval(State *st, Buffer *buf, String *s, char *err)
 	Arg *arg;
 	Command *cmd;
 
-	ret = FAIL;
 	arg = makearg();
+	if (!arg) return ENOMEM;
 
-	if (parseline(s, buf, arg, err) == FAIL) goto finally;
+	ret = parseline(s, buf, arg, err);
+	if (ret) goto finally;
 
 	cmd = findcmd(st, arg->name);
 	if (!cmd) {
@@ -73,12 +73,11 @@ cmdeval(State *st, Buffer *buf, String *s, char *err)
 		goto finally;
 	}
 
-	if (runcmd(st, buf, cmd, arg, err) == SUCC) ret = SUCC;
+	ret = runcmd(st, buf, cmd, arg, err);
 
 finally:
 	freearg(arg);
 	return ret;
-
 }
 
 int
@@ -86,7 +85,7 @@ cmdprompt (State *st, Buffer *buf, String *s, char *err)
 {
 	if (printf (PROMPT) < 0) die ("printf");
 	if (fflush (stdout) == EOF) warn ("fflush");
-	return SUCC;
+	return 0;
 }
 
 int
@@ -103,7 +102,8 @@ runcmd(State *st, Buffer *buf, Command *cmd, Arg *arg, char *err)
 	}
 
 	if (!arg->sel && cmd->defaddr) {
-		addr = chartostr(cmd->defaddr);
+		make_vector(addr);
+		vec_concat(addr, cmd->defaddr, strlen(cmd->defaddr));
 
 		sel = getaddr(addr, &pos, buf, err);
 		freestring(addr);
@@ -118,5 +118,5 @@ runcmd(State *st, Buffer *buf, Command *cmd, Arg *arg, char *err)
 	return cmd->func(st, buf, arg, err);
 
 fail:
-	return FAIL;
+	return -1;
 }
