@@ -23,4 +23,6 @@ typedef Vector(Line *)	Selection;
 #include "line.h"
 #include "state.h"
 
+int readline(String *, FILE *);
+
 #endif
