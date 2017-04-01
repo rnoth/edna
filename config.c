@@ -1,9 +1,10 @@
 #include "config.h"
 
 const Mode modes[] = {
-       /* name,	       init,   prompter,    reader      evaluator,   handler, */
-        { "command",   NULL,   cmdprompt,   grabline,   cmdeval,     cmderror, },
-        { "insert",    NULL,   insprompt,   grabline,   insline,     inserror, },
+       /* name,	       init,     prompter,    reader      evaluator,   handler, */
+        { "command",   NULL,     cmdprompt,   grabline,   cmdeval,     cmderror, },
+        { "insert",    NULL,     insprompt,   grabline,   insline,     inserror, },
+	{ "quit",      quit,  NULL,        NULL,       NULL,        NULL, }
 };
 
 const Command commands[] = {
