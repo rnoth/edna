@@ -10,6 +10,7 @@ int
 inserror(State *st, Buffer *buf, String *s, char *err)
 {
 	if (feof(stdin)) clearerr(stdin);
+	if (printf("\r") == -1) return errno;
 	setmode(st, "command");
 	return 0;
 }

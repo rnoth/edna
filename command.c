@@ -48,9 +48,19 @@ makearg(void)
 }
 
 int
-cmderror (State *st, Buffer *buf, String *s, char *err)
+cmderror(State *st, Buffer *buf, String *s, char *err)
 {
 	if (!strcmp(err, "quit")) return -1;
+	else if (!strcmp(err, "eof")) {
+		if (printf("\r") == -1) return errno;
+		if (fflush(stdout) == -1) return errno;
+		if (isdirty(buf)) {
+			strcpy(err, "buffer has unsaved changes");
+			return 0;
+		} else  {
+			return -1;
+		}
+	}
 	if (printf(ERROR) < 0) return errno;
 	if (fflush(stdout) == EOF) return errno;
 	return 0;
