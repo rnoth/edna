@@ -34,16 +34,22 @@ main (int argc, char** argv)
 	err = checkoutbuf(buf, st, 0);
 	if (err) goto exit;
 
-	for (;;) {
+	while (st->running) {
 
-		/* TODO: error handling */
-		if (st->mode->prompt(st, buf, str, errmsg)) goto finally;
-		if (st->mode->input(st, buf, str, errmsg)) goto finally;
-		if (st->mode->eval(st, buf, str, errmsg)) goto finally;
+		err = callq(st->mode->prompt, st, buf, str, errmsg);
+		if (err) goto error;
+
+		err = callq(st->mode->input, st, buf, str, errmsg);
+		if (err) goto error;
+
+		err = callq(st->mode->eval, st, buf, str, errmsg);
+		if (err) goto error;
+
 		continue;
 
-	finally:
-		if (st->mode->error(st, buf, str, errmsg)) break;
+	error:
+		err = callr(st->mode->error, st, buf, str, errmsg);
+		if (err) break;
 	}
 	/* end main */
 
