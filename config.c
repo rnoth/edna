@@ -4,7 +4,6 @@ const Mode modes[] = {
        /* name,	       init,   prompter,    reader      evaluator,   handler, */
         { "command",   NULL,   cmdprompt,   grabline,   cmdeval,     cmderror, },
         { "insert",    NULL,   insprompt,   grabline,   insline,     inserror, },
-	{ NULL, },
 };
 
 const Command commands[] = {
@@ -28,7 +27,6 @@ const Command commands[] = {
 	{ "w",		cmd_write,	NULL,		NULL, },
 	{ "wq",		cmd_quit,	"write",	NULL, },
 	{ "Q", 		cmd_quit,	"force",	NULL, },
-	{ NULL },
 };
 
 size_t
