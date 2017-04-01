@@ -11,8 +11,6 @@ grabline(State *st, Buffer *buf, String *s, char *errmsg)
 	err = readline(s, stdin);
 	if (err == -1) {
 		strcpy(errmsg, "eof");
-		printf("^D\n");
-		fflush(stdout);
 
 	} else if (err > 0)  {
 		err = errno;
