@@ -5,12 +5,15 @@
 #include "edna.h"
 
 int
-changeline(Line *l, String *s)
+changeline(Line *ln, String *s)
 {
-	if (!l->str) l->str = str_alloc();
+	if (!ln->str) {
+		ln->str = str_alloc();
+		if (!ln->str) return ENOMEM;
+	}
 
-	vec_truncate(l->str, 0);
-	return vec_join(l->str, s);
+	vec_truncate(ln->str, 0);
+	return vec_join(ln->str, s);
 }
 
 size_t
@@ -27,14 +30,14 @@ getlineno(Line *targ)
 Line *
 getnext(Line *li)
 {
-	if (!li) return 0;
+	if (!li) return NULL;
 	return li->next;
 }
 
 Line *
 getprev(Line *li)
 {
-	if (!li) return 0;
+	if (!li) return NULL;
 	return li->prev;
 }
 
@@ -75,10 +78,10 @@ walk(Line *cur, int offset)
 {
 	Line *li = cur;
 	if (offset < 0) {
-		while ((li = getprev(li))) if (!++offset) return (li);
+		while ((li = getprev(li))) if (!++offset) return li;
 		return NULL;
 	} else if (offset > 0) {
-		while ((li = getnext(li))) if (!--offset) return (li);
+		while ((li = getnext(li))) if (!--offset) return li;
 		return NULL;
 	} else return cur;
 }
