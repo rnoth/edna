@@ -17,17 +17,26 @@ inserror(State *st, Buffer *buf, String *s, char *err)
 
 
 int
-insline(State *st, Buffer *buf, String *str, char *err)
+insline(State *st, Buffer *buf, String *str, char *errmsg)
 {
+	int err;
 	Line *new;
 
 	if (!strcmp(str->v, ".\n")) return -1;
 
 	new = makeline();
-	changeline(new, str);
-	addline(buf, new);
+	if (!new) return ENOMEM;
+
+	err = changeline(new, str);
+	if (err) goto fail;
+
+	err = addline(buf, new);
+	if (err) goto fail;
 
 	return 0;
+fail:
+	freelines(new, NULL);
+	return err;
 }
 
 int
