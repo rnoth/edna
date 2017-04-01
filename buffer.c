@@ -17,18 +17,19 @@ clonebuf(Buffer *src)
 void
 freebuf(Buffer *buf)
 {
-	freelines(buf->top, NULL);
-	if (buf->file) fclose(buf->file);
-	str_free(buf->name);
+	killbuf(buf);
 	free(buf);
-
 	return;
 }
 
 int
 initbuf(Buffer *buf, char *fn)
 {
-	if (fn) bufsetname (buf, fn);
+	int err;
+	if (fn) {
+		err = bufsetname(buf, fn);
+		if (err) return err;
+	}
 	
 	buf->cur = buf->top = buf->bot = makeline();
 	buf->len = 1;
@@ -40,8 +41,13 @@ initbuf(Buffer *buf, char *fn)
 void
 killbuf(Buffer *buf)
 {
+	freelines(buf->top, NULL);
+	if (buf->file) {
+		if (fflush(buf->file) == -1) abort();
+		if (fclose(buf->file) == -1) abort();
+	}
+	str_free(buf->name);
 	memset(buf, 0, sizeof *buf);
-	freebuf(buf);
 	return;
 }
 
