@@ -40,8 +40,8 @@ initbuf(Buffer *buf, char *fn)
 void
 killbuf(Buffer *buf)
 {
-	freebuf(buf);
 	memset(buf, 0, sizeof *buf);
+	freebuf(buf);
 	return;
 }
 
