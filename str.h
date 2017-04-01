@@ -15,8 +15,8 @@ typedef Vector(char) String;
 
 /* string.c */
 void	chomp		(char *);
-void	freestring	(String *);
-String *makestring	(void);
+void	str_free	(String *);
+String *str_alloc	(void);
 
 /* utf8.c */
 int 	get_uchar	(char *, const char *);

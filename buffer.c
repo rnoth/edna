@@ -19,7 +19,7 @@ freebuf(Buffer *buf)
 {
 	freelines(buf->top, NULL);
 	if (buf->file) fclose(buf->file);
-	freestring(buf->name);
+	str_free(buf->name);
 	free(buf);
 
 	return;

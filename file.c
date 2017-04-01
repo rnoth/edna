@@ -17,7 +17,7 @@ readbuf(Buffer *buf, char *errmsg)
 	errno = 0;
 	if (bufopen(buf, "r")) return -1;
 
-	s = makestring();
+	s = str_alloc();
 	f = buf->file;
 
 	errno = 0;
@@ -25,7 +25,7 @@ readbuf(Buffer *buf, char *errmsg)
 		err = readline(s, f);
 		if (err == -1) break;
 		else if (err > 0) {
-			freestring(s);
+			str_free(s);
 			return err;
 		}
 
@@ -36,7 +36,7 @@ readbuf(Buffer *buf, char *errmsg)
 	}
 	clearerr(f);
 
-	freestring(s);
+	str_free(s);
 	return 0;
 }
 

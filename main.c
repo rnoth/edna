@@ -15,7 +15,7 @@ main (int argc, char** argv)
 	/* init stuff */
 	st   = makestate();
 	buf  = makebuf();
-	str  = makestring();
+	str  = str_alloc();
 	*errmsg = 0;
 
 	if (!(st && buf && str)) {
@@ -52,7 +52,7 @@ exit:
 		
 	freebuf(buf);
 	freestate(st);
-	freestring(str);
+	str_free(str);
 
 	return 0;
 }

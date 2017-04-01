@@ -7,7 +7,7 @@
 int
 changeline(Line *l, String *s)
 {
-	if (!l->str) l->str = makestring();
+	if (!l->str) l->str = str_alloc();
 
 	vec_truncate(l->str, 0);
 	return vec_join(l->str, s);
@@ -48,7 +48,7 @@ freelines(Line *start, Line *stop)
 	next = getnext(cur);
 	while (cur && cur != stop) {
 		tmp = getnext(next);
-		freestring(cur->str);
+		str_free(cur->str);
 		free(cur);
 		cur = next;
 		next = tmp;

@@ -27,7 +27,7 @@ getroot(Node *cur)
 void
 freenode(Node *cur)
 {
-	freestring(cur->str);
+	str_free(cur->str);
 	free(cur);
 }
 
@@ -37,7 +37,7 @@ freetree(Node *cur)
 	if (cur) {
 		freetree(cur->left);
 		freetree(cur->right);
-		freestring(cur->str);
+		str_free(cur->str);
 		free(cur);
 	}
 	return;
@@ -51,6 +51,6 @@ makenode(void)
 	ret = calloc(1, sizeof *ret);
 	if (!ret)
 		die("calloc");
-	ret->str = makestring();
+	ret->str = str_alloc();
 	return ret;
 }

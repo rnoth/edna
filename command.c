@@ -108,7 +108,7 @@ runcmd(State *st, Buffer *buf, Command *cmd, Arg *arg, char *err)
 		vec_concat(addr, cmd->defaddr, strlen(cmd->defaddr));
 
 		sel = getaddr(addr, &pos, buf, err);
-		freestring(addr);
+		str_free(addr);
 		if (sel == NULL) goto nomem;
 
 		vec_free(arg->sel);
