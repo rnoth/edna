@@ -14,11 +14,13 @@ readbuf(Buffer *buf, char *errmsg)
 	Line *new;
 	FILE *f;
 
-	errno = 0;
-	if (bufopen(buf, "r")) return -1;
+	err = bufopen(buf, "r");
+	if (err) return err;
 
-	s = str_alloc();
 	f = buf->file;
+	if (!f) return 0;
+	s = str_alloc();
+	if (!s) return ENOMEM;
 
 	errno = 0;
 	while (!feof(f)) {
