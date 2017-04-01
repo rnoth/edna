@@ -42,7 +42,7 @@ cmd_openbuf(State *st, Buffer *buf, Arg *arg, char *error)
 	Buffer *tmp;
 	size_t i;
 
-	if (!arg->param->c) {
+	if (!arg->param || !arg->param->c) {
 		strcpy(error, "no filenames provided");
 		return -1;
 	}
@@ -50,6 +50,7 @@ cmd_openbuf(State *st, Buffer *buf, Arg *arg, char *error)
 	i = 0;
 	do {
 		tmp = makebuf();
+		if (!tmp) return ENOMEM;
 		chomp(arg->param->v[i]);
 		initbuf(tmp, arg->param->v[i]);
 		if (readbuf(tmp, error)) {
