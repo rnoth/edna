@@ -104,11 +104,10 @@ setdelim(const String *s, size_t *pos)
 int
 parseline (String *s, Buffer *buf, Arg *arg, char *error)
 {
-	char *tmp;
-	char *delim;
-	size_t pos;
+	char *tmp = 0;
+	char *delim  = 0;
+	size_t pos = 0;
 
-	pos = 0;
 	arg->sel = getaddr(s, &pos, buf, error);
 
 	arg->name = getname(s, &pos);
@@ -118,6 +117,7 @@ parseline (String *s, Buffer *buf, Arg *arg, char *error)
 	if (!delim) goto finally;
 
 	make_vector(arg->param);
+	if (!arg->param) goto nomem;
 	do {
 		tmp = getarg(s, &pos, delim);
 		if (!tmp) break;
@@ -130,4 +130,9 @@ parseline (String *s, Buffer *buf, Arg *arg, char *error)
 finally:
 	return 0;
 
+nomem:
+	free(delim);
+	free(arg->name);
+	vec_free(arg->sel);
+	return ENOMEM;
 }
