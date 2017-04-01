@@ -4,20 +4,23 @@
 #include "edna.h"
 
 int
-grabline(State *st, Buffer *buf, String *s, char *err)
+grabline(State *st, Buffer *buf, String *s, char *errmsg)
 {
-	int ret = 0;
+	int err = 0;
 
-	errno = 0;
-	if (readline(s, stdin)) {
-		if (feof(stdin)) strcpy(err, "quit");
-		else strcpy(err, strerror(errno));
+	err = readline(s, stdin);
+	if (err == -1) {
+		strcpy(errmsg, "eof");
+		printf("^D\n");
+		fflush(stdout);
 
-		ret = errno;
+	} else if (err > 0)  {
+		err = errno;
+		strcpy(errmsg, strerror(errno));
 		clearerr(stdin);
 	}
 
-	return ret;
+	return err;
 
 }
 
