@@ -7,6 +7,9 @@
 /* unsafe macros */
 #define MAX(X,Y)	((X) > (Y) ? (X) : (Y))
 #define MIN(X,Y)	((X) < (Y) ? (X) : (Y))
+#define callq(func, ...) ((func) ? func(__VA_ARGS__) : 0)
+#define callr(func, ...) ((func) ? func(__VA_ARGS__) : -1)
+
 
 /* safe macros */
 #define bit(off)	(1UL << (off))
