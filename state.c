@@ -50,10 +50,11 @@ returnbuf(State *st, Buffer *src)
 int
 setmode(State *st, char *name)
 {
-	Mode *m;
+	Mode *md;
 
-	m = findmode(st, name);
-	if (!m) return -1;
-	st->mode = m;
+	md = findmode(st, name);
+	if (!md) return -1;
+	st->mode = md;
+	callq(st->mode->init, st);
 	return 0;
 }
