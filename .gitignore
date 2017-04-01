@@ -5,3 +5,6 @@ deps.mk
 config.h
 !examples/*
 *~
+vgcore.*
+.*.swp
+tags
