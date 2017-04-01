@@ -20,9 +20,11 @@ findcmd(State *st, char *name)
 
 	if (!name) return NULL;
 
-	for (i = 0; i < st->cmds->c; ++i)
-		if (!strcmp(name, st->cmds->v[i].name)) 
+	for (i = 0; i < st->cmds->c; ++i) {
+		if (strlen(name) != strlen(arr(st->cmds)[i].name)) continue;
+		if (!strcmp(name, st->cmds->v[i].name))
 			return st->cmds->v + i;
+	}
 	return NULL;
 }
 
