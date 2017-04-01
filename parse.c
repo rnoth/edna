@@ -54,10 +54,7 @@ getseq(const String *s, size_t *pos,
 			continue;
 		}
 
-		if (!esc && !check(cur, context)) {
-			*pos += ext;
-			break;
-		}
+		if (!esc && !check(cur, context)) break;
 
 		memcpy(tmp + off, cur, ext);
 		off += ext;
