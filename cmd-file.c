@@ -56,25 +56,24 @@ cmd_quit (State *st, Buffer *buf, Arg *arg, char *error)
 {
 	int err;
 	if (arg->mode) {
-		if (!strcmp (arg->mode, "force"))
-			goto end;
-		if (!strcmp (arg->mode, "write")) {
+		if (!strcmp(arg->mode, "force"))
+			goto force;
+		if (!strcmp(arg->mode, "write")) {
 			err = cmd_write (st, buf, arg, error);
 			if (err) return err;
 		}
-		strcpy (error, "unknown option");
+		strcpy(error, "unknown option");
 		return -1;
 	}
 
-	/* note: quit should become a mode, and handle this on its own */
 	if (isdirty(buf)) {
-		strcpy (error, "buffer has unsaved changes");
+		strcpy(error, "buffer has unsaved changes");
 		return -1;
 	}
 
-end:
-	strcpy (error, "quit");
-	return -1;
+force:
+	setmode(st, "quit");
+	return 0;
 }	
 
 int

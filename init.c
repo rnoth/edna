@@ -35,6 +35,8 @@ initst(State *st)
 
 	setmode(st, "command");
 
+	st->running = 1;
+
 	return 0;
 
 nomem:
@@ -45,7 +47,7 @@ nomem:
 }
 
 State *
-makestate (void)
+makestate(void)
 {
 	State *st = 0;
 
@@ -55,7 +57,7 @@ makestate (void)
 }
 
 int
-parse_argv (State *st, char **argv, char *errmsg)
+parse_argv(State *st, char **argv, char *errmsg)
 {
 	int err = 0;
 	Buffer *tmp = 0;
@@ -89,3 +91,9 @@ parse_argv (State *st, char **argv, char *errmsg)
 	return 0;
 }
 
+int
+quit(State *st)
+{
+	st->running = 0;
+	return 0;
+}

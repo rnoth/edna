@@ -6,7 +6,7 @@
 
 struct Mode {
 	char*	name;
-	int	(*init)	   (State *, Buffer *, String *, char *);
+	int	(*init)	   (State *);
 	int	(*prompt)  (State *, Buffer *, String *, char *);
 	int	(*input)   (State *, Buffer *, String *, char *);
 	int	(*eval)    (State *, Buffer *, String *, char *);
@@ -18,6 +18,7 @@ struct State {
 	Vector(Command)	 *cmds;
 	Vector(Buffer *) *buffers;
 	Vector(Mode)	 *modes;
+	uint8_t		  running:1;
 };
 
 /* state.c */
@@ -31,4 +32,5 @@ extern void	freestate	(State *);
 extern int	initst		(State *);
 extern State*	makestate	(void);
 extern int	parse_argv	(State *, char **, char *);
+extern int	quit		(State *);
 #endif
