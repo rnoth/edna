@@ -6,28 +6,30 @@ int
 cmd_edit(State *st, Buffer *buf, Arg *arg, char *error)
 {
 	char *fn;
+	int err;
 
-	if (arg->mode && !strcmp (arg->mode, "force"))
+	if (arg->mode && !strcmp(arg->mode, "force"))
 		goto force;
 
 	if (isdirty(buf)) {
-		strcpy (error, "buffer has unsaved changes");
+		strcpy(error, "buffer has unsaved changes");
 		return -1;
 	}
 
 force:
-	if (arg->param->c) {
-		fn = arg->param->v[0];
+	if (arg->param && len(arg->param)) {
+		fn = arr(arg->param)[0];
 		chomp(fn);
 	} else fn = bufgetname(buf);
 
 	killbuf(buf);
-	initbuf(buf, fn);
-	readbuf(buf, error);
+	err = initbuf(buf, fn);
+	if (err) return err;
+	err = readbuf(buf, error);
+	if (err) return err;
 	bufclean(buf);
 	setmode(st, "command");
 
-	if (!arg->param->c) free(fn);
 	return 0;
 }
 
