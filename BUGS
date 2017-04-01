@@ -1,0 +1,2 @@
+- line numbers glitch at odd points
+- crashes if you edit a file (``e file'')
