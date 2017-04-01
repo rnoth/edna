@@ -1,2 +1,1 @@
-- line numbers glitch at odd points
-- crashes if you edit a file (``e file'')
+there's an uninitialized value error lurking somewhere near cmd_print when using the example config.
