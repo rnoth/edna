@@ -48,43 +48,44 @@ makearg(void)
 int
 cmderror (State *st, Buffer *buf, String *s, char *err)
 {
-	if (!strcmp (err, "quit")) return -1;
-	if (printf (ERROR) < 0) die ("printf");
-	if (fflush (stdout) == EOF) warn ("fflush");
+	if (!strcmp(err, "quit")) return -1;
+	if (printf(ERROR) < 0) return errno;
+	if (fflush(stdout) == EOF) return errno;
 	return 0;
 }
 
 int
-cmdeval(State *st, Buffer *buf, String *s, char *err)
+cmdeval(State *st, Buffer *buf, String *s, char *errmsg)
 {
-	int ret;
-	Arg *arg;
-	Command *cmd;
+	int err = 0;
+	Arg *arg = 0;
+	Command *cmd = 0;
 
 	arg = makearg();
 	if (!arg) return ENOMEM;
 
-	ret = parseline(s, buf, arg, err);
-	if (ret) goto finally;
+	err = parseline(s, buf, arg, errmsg);
+	if (err) goto finally;
 
 	cmd = findcmd(st, arg->name);
 	if (!cmd) {
-		strcpy(err, "unknown command");
+		strcpy(errmsg, "unknown command");
+		err = ENOENT;
 		goto finally;
 	}
 
-	ret = runcmd(st, buf, cmd, arg, err);
+	err = runcmd(st, buf, cmd, arg, errmsg);
 
 finally:
 	freearg(arg);
-	return ret;
+	return err;
 }
 
 int
 cmdprompt (State *st, Buffer *buf, String *s, char *err)
 {
-	if (printf (PROMPT) < 0) die ("printf");
-	if (fflush (stdout) == EOF) warn ("fflush");
+	if (printf (PROMPT) < 0) return errno;
+	if (fflush (stdout) == EOF) return errno;
 	return 0;
 }
 
@@ -92,22 +93,23 @@ int
 runcmd(State *st, Buffer *buf, Command *cmd, Arg *arg, char *err)
 {
 	size_t pos = 0;
-	Selection *sel;
-	String *addr;
+	Selection *sel = 0;
+	String *addr = 0;
 
 	if (cmd->mode) {
 		arg->mode = malloc((strlen(cmd->mode) + 1) * sizeof *arg->mode);
-		if (!arg->mode) die("malloc");
+		if (!arg->mode) return ENOMEM;
 		strcpy(arg->mode, cmd->mode);
 	}
 
 	if (!arg->sel && cmd->defaddr) {
 		make_vector(addr);
+		if (!addr) goto nomem;
 		vec_concat(addr, cmd->defaddr, strlen(cmd->defaddr));
 
 		sel = getaddr(addr, &pos, buf, err);
 		freestring(addr);
-		if (sel == NULL) goto fail;
+		if (sel == NULL) goto nomem;
 
 		vec_free(arg->sel);
 		arg->sel = vec_clone(sel);
@@ -117,6 +119,7 @@ runcmd(State *st, Buffer *buf, Command *cmd, Arg *arg, char *err)
 
 	return cmd->func(st, buf, arg, err);
 
-fail:
-	return -1;
+nomem:
+	free(arg->mode);
+	return ENOMEM;
 }

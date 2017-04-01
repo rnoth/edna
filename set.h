@@ -12,8 +12,8 @@ struct Set {
 };
 
 extern Set *	cloneset	(Set *);
-extern void	free_set	(Set *);
-extern Set *	make_set	(void);
+extern void	freeset		(Set *);
+extern Set *	makeset		(void);
 extern size_t	offset		(uint32_t);
 extern void *	set2vec		(Set *);
 extern Set *	setaddmemb	(Set *, size_t memb);

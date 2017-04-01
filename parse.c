@@ -8,9 +8,9 @@
 
 #include "edna.h"
 
-static char*	getname		(String const *, size_t *);
-static char*	setdelim	(String const *, size_t *);
-static char*	getarg		(String const *, size_t *, char *);
+static char *	getname		(String const *, size_t *);
+static char *	setdelim	(String const *, size_t *);
+static char *	getarg		(String const *, size_t *, char *);
 
 bool
 alphacheck(char const *cur, void *_)
@@ -54,8 +54,10 @@ getseq(const String *s, size_t *pos,
 			continue;
 		}
 
-		if (!esc && !check(cur, context))
+		if (!esc && !check(cur, context)) {
+			*pos += ext;
 			break;
+		}
 
 		memcpy(tmp + off, cur, ext);
 		off += ext;
@@ -107,18 +109,14 @@ parseline (String *s, Buffer *buf, Arg *arg, char *error)
 	size_t pos;
 
 	pos = 0;
-	/* line address */
 	arg->sel = getaddr(s, &pos, buf, error);
 
-	/* command name */
 	arg->name = getname(s, &pos);
 	if (!arg->name) goto finally;
 
-	/* delimiter */
 	delim = setdelim(s, &pos);
 	if (!delim) goto finally;
 
-	/* argument vector */
 	make_vector(arg->param);
 	do {
 		tmp = getarg(s, &pos, delim);

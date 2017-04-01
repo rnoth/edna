@@ -4,10 +4,10 @@
 
 #include "edna.h"
 
-#define VALUE		BIT(0)	/* 0-ary operator */
-#define OPERATOR	BIT(1)	/* binary operator */
-#define NUMBER		BIT(2)	/* context-sensitive numerical value */
-#define LINE		BIT(3)  /* raw line address */
+#define VALUE		bit(0)	/* 0-ary operator */
+#define OPERATOR	bit(1)	/* binary operator */
+#define NUMBER		bit(2)	/* context-sensitive numerical value */
+#define LINE		bit(3)  /* raw line address */
 
 enum Token {
 	NUM_LITERAL,

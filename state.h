@@ -14,7 +14,7 @@ struct Mode {
 };
 
 struct State {
-	Mode *mode;
+	Mode		 *mode;
 	Vector(Command)	 *cmds;
 	Vector(Buffer *) *buffers;
 	Vector(Mode)	 *modes;
@@ -28,7 +28,7 @@ extern int	returnbuf	(State *, Buffer *);
 
 /* init.c */
 extern void	freestate	(State *);
-extern void	initst		(State *);
+extern int	initst		(State *);
 extern State*	makestate	(void);
 extern int	parse_argv	(State *, char **, char *);
 #endif

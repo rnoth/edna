@@ -1,43 +1,58 @@
 /* edna -- ed-like text editor */
 #include "edna.h"
 
+char *strerror(int);
+
 int
 main (int argc, char** argv)
 {
-	char	 err[80];
-	String	*s;
+	int	 err;
+	char	 errmsg[80];
+	String	*str;
 	State	*st;
 	Buffer	*buf;
 
 	/* init stuff */
 	st   = makestate();
 	buf  = makebuf();
-	s    = makestring();
-	*err = 0;
+	str  = makestring();
+	*errmsg = 0;
 
-	initst(st);
-	if (parse_argv (st, argv, err) == FAIL) goto exit;
+	if (!(st && buf && str)) {
+		err = ENOMEM;
+		goto exit;
+	}
+
+	err = initst(st);
+	if (err) goto exit;
+
+	err = parse_argv(st, argv, errmsg);
+	if (err) goto exit;
 	/* end init */
 
 	/* main execution */
-	if (checkoutbuf (buf, st, 0) == FAIL) goto exit;
+	err = checkoutbuf(buf, st, 0);
+	if (err) goto exit;
 
 	for (;;) {
 
-		if (st->mode->prompt(st, buf, s, err)) goto finally;
-		if (st->mode->input (st, buf, s, err)) goto finally;
-		if (st->mode->eval  (st, buf, s, err)) goto finally;
+		/* TODO: error handling */
+		if (st->mode->prompt(st, buf, str, errmsg)) goto finally;
+		if (st->mode->input(st, buf, str, errmsg)) goto finally;
+		if (st->mode->eval(st, buf, str, errmsg)) goto finally;
 		continue;
 
 	finally:
-		if (st->mode->error(st, buf, s, err)) break;
+		if (st->mode->error(st, buf, str, errmsg)) break;
 	}
 	/* end main */
 
 exit:
+	if (err) fprintf(stderr, "edna: %s\n", strerror(err));
+		
 	freebuf(buf);
 	freestate(st);
-	freestring(s);
+	freestring(str);
 
-	return (0);
+	return 0;
 }

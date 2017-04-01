@@ -1,3 +1,4 @@
+#include <string.h>
 #include <stdio.h>
 
 #include "edna.h"
@@ -7,8 +8,7 @@ static Mode *findmode(State *, char *);
 int
 addbuf(State *st, Buffer *buf)
 {
-	vec_append(st->buffers, &buf);
-	return SUCC;
+	return vec_append(st->buffers, &buf);
 }
 
 
@@ -17,7 +17,7 @@ checkoutbuf(Buffer *dest, State *st, size_t which)
 {
 	Buffer *src;
 
-	if (which >= len(st->buffers)) return FAIL;
+	if (which >= len(st->buffers)) return EINVAL;
 
 	src = arr(st->buffers)[which];
 	memcpy(dest, src, sizeof *dest);
@@ -25,7 +25,7 @@ checkoutbuf(Buffer *dest, State *st, size_t which)
 	free(arr(st->buffers)[which]);
 	vec_delete(st->buffers, which);
 
-	return SUCC;
+	return 0;
 }
 
 Mode *
@@ -44,9 +44,7 @@ returnbuf(State *st, Buffer *src)
 	Buffer *tmp;
 
 	tmp = clonebuf(src);
-	vec_append(st->buffers, &tmp);
-	
-	return SUCC;
+	return vec_append(st->buffers, &tmp);
 }
 
 int
@@ -55,6 +53,7 @@ setmode(State *st, char *name)
 	Mode *m;
 
 	m = findmode(st, name);
+	if (!m) return -1;
 	st->mode = m;
-	return SUCC;
+	return 0;
 }

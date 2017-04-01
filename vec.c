@@ -44,8 +44,6 @@ vec_clone(void const *_vec)
 {
 	Vector(char) vec, *ret;
 
-	assert(_vec != NULL);
-
 	memcpy(&vec, _vec, sizeof vec);
 	
 	ret = malloc(sizeof *ret);
@@ -64,15 +62,15 @@ vec_concat(void *_vec, void const *data, size_t nmemb)
 	size_t len;
 	Vector(char) vec;
 
-	assert(_vec != NULL);
-	assert(data != NULL);
+	assert(_vec);
+	assert(data);
 
 	memcpy(&vec, _vec, sizeof vec);
 	len = nmemb * vec.z;
 
 	while ((vec.c + nmemb) * vec.z >= vec.m) if (vec_expand(&vec)) return ENOMEM;
 	
-	memcpy(vec.v + vec.c, data, len);
+	memcpy(vec.v + vec.c * vec.z, data, len);
 
 	vec.c += nmemb;
 	memcpy(_vec, &vec, sizeof vec);
@@ -84,8 +82,6 @@ void
 vec_delete(void *_vec, size_t which)
 {
 	Vector(char) vec;
-
-	assert(_vec != NULL);
 
 	memcpy(&vec, _vec, sizeof vec);
 	if (which > vec.c) return;
@@ -103,11 +99,10 @@ vec_expand(void *_vec)
 	Vector(char) vec;
 	void *tmp;
 
-	assert(_vec != NULL);
+	assert(_vec);
 
 	memcpy(&vec, _vec, sizeof vec);
-	
-	if (!vec.m) return ENOMEM;
+	assert(vec.m);
 
 	tmp = realloc(vec.v, vec.m * GROWTH);
 	if (!tmp) return ENOMEM;
@@ -124,8 +119,8 @@ vec_insert(void *_vec, void const *data, size_t pos)
 {
 	Vector(char) vec;
 
-	assert(_vec != NULL);
-	assert(data != NULL);
+	assert(_vec);
+	assert(data);
 
 	memcpy(&vec, _vec, sizeof vec);
 
@@ -147,9 +142,6 @@ int
 vec_join(void *_dest, void const *_src)
 {
 	Vector(char) src;
-
-	assert(_src != NULL);
-	assert(_dest != NULL);
 
 	memcpy(&src, _src, sizeof src);
 
@@ -180,12 +172,7 @@ void
 vec_shift(void *_vec, size_t off)
 {
 	Vector(char) vec;
-
-	assert(_vec != NULL);
-
 	memcpy(&vec, _vec, sizeof vec);
-
-	assert(vec.c >= off);
 	vec_slice(_vec, off, vec.c - off);
 	return;
 }
@@ -196,8 +183,6 @@ vec_slice(void *_vec, size_t beg, size_t ext)
 	size_t min;
 	Vector(char) vec;
 
-	assert(_vec != NULL);
-
 	memcpy(&vec, _vec, sizeof vec);
 	if (beg >= vec.c) {
 		vec_truncate(_vec, 0);
@@ -207,7 +192,7 @@ vec_slice(void *_vec, size_t beg, size_t ext)
 	min = MIN(ext, vec.c - beg);
 
 	memmove(vec.v, vec.v + beg * vec.z, min * vec.z);
-	memset(vec.v + (beg + min) * vec.z, 0, (vec.c - min) * vec.z);
+	memset(vec.v + (beg + min) * vec.z, 0, (vec.c - min - beg) * vec.z);
 
 	vec.c = min;
 	memcpy(_vec, &vec, sizeof vec);
@@ -218,7 +203,7 @@ vec_truncate(void *_vec, size_t off)
 {
 	Vector(char) vec;
 
-	assert(_vec != NULL);
+	assert(_vec);
 
 	memcpy(&vec, _vec, sizeof vec);
 

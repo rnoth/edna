@@ -2,56 +2,55 @@
 #include "edna.h"
 
 int
-addnode (Node *mother, Node *child)
+addnode(Node *mother, Node *child)
 {
-	int ret = FAIL;
+	int ret = -1;
 	if (!mother->left) {
 		mother->left = child;
 		child->up = mother;
-		ret = SUCC;
+		ret = 0;
 	} else if (!mother->right) {
 		mother->right = child;
 		child->up = mother;
-		ret = SUCC;
+		ret = 0;
 	}
 	return ret;
 }
 
 Node *
-getroot (Node *cur)
+getroot(Node *cur)
 {
-	while (cur && cur->up)
-		cur = cur->up;
+	while (cur && cur->up) cur = cur->up;
 	return cur;
 }
 
 void
-freenode (Node *cur)
+freenode(Node *cur)
 {
-	freestring (cur->str);
-	free (cur);
+	freestring(cur->str);
+	free(cur);
 }
 
 void
-freetree (Node *cur)
+freetree(Node *cur)
 {
 	if (cur) {
-		freetree (cur->left);
-		freetree (cur->right);
-		freestring (cur->str);
-		free (cur);
+		freetree(cur->left);
+		freetree(cur->right);
+		freestring(cur->str);
+		free(cur);
 	}
 	return;
 }
 	
 
 Node *
-makenode (void)
+makenode(void)
 {
 	Node *ret;
-	ret = calloc (1, sizeof *ret);
+	ret = calloc(1, sizeof *ret);
 	if (!ret)
-		die ("calloc");
-	ret->str = makestring ();
-	return (ret);
+		die("calloc");
+	ret->str = makestring();
+	return ret;
 }

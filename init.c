@@ -6,7 +6,7 @@
 #include "config.h"
 
 void
-freestate (State *st)
+freestate(State *st)
 {
 	mapv(st->buffers, freebuf(*each));
 	vec_free(st->buffers);
@@ -15,53 +15,77 @@ freestate (State *st)
 	free(st);
 }
 
-void
+int
 initst(State *st)
 {
 	size_t len;
 
 	make_vector(st->buffers);
-	if (!st->buffers) die("make_vector");
+	if (!st->buffers) return ENOMEM;
 
 	make_vector(st->cmds);
-	if (!st->cmds) die("make_vector");
+	if (!st->cmds) goto nomem;
 	len = sizeof_commands();
 	vec_concat(st->cmds, commands, len);
 
 	make_vector(st->modes);
-	if (!st->modes) die("make_vector");
+	if (!st->modes) goto nomem;
 	len = sizeof_modes();
 	vec_concat(st->modes, modes, len);
 
 	setmode(st, "command");
+
+	return 0;
+
+nomem:
+	vec_free(st->buffers);
+	vec_free(st->cmds);
+	vec_free(st->modes);
+	return ENOMEM;
 }
 
 State *
 makestate (void)
 {
-	State *st;
+	State *st = 0;
+
 	st = calloc(1, sizeof *st);
-	if (!st) die("calloc");
+
 	return st;
 }
 
 int
-parse_argv (State *st, char **argv, char *err)
+parse_argv (State *st, char **argv, char *errmsg)
 {
-	Buffer *tmp;
+	int err = 0;
+	Buffer *tmp = 0;
 
 	if (argv[1]) while (*++argv) {
 		tmp = makebuf();
-		initbuf(tmp, *argv);
-		readbuf(tmp, err);
+		if (!tmp) return ENOMEM;
+
+		err = initbuf(tmp, *argv);
+		if (err) return err;
+		
+		err = readbuf(tmp, errmsg);
+		if (err) return err;
+
 		bufclean(tmp);
-		addbuf(st, tmp);
+
+		err = addbuf(st, tmp);
+		if (err) return err;
+
 	} else {
 		tmp = makebuf();
-		initbuf(tmp, NULL);
-		addbuf(st, tmp);
+		if (!tmp) return ENOMEM;
+
+		err = initbuf(tmp, NULL);
+		if (err) return err;
+
+		err = addbuf(st, tmp);
+		if (err) return err;
 	}
 
-	return SUCC;
+	return 0;
 }
 

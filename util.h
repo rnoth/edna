@@ -1,27 +1,36 @@
-/* util.h -- various useful macros */
 #ifndef _util_
 #define _util_
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <wchar.h>
 
-#define FAIL (0)
-#define SUCC (1)
-
-#define BIT(X)		(1UL << (X))
-#define COPY(D,S)	(memcpy((D), (S), sizeof *(D)))
-#define LEN(X)		(sizeof X / sizeof *X)
+/* unsafe macros */
 #define MAX(X,Y)	((X) > (Y) ? (X) : (Y))
 #define MIN(X,Y)	((X) < (Y) ? (X) : (Y))
 
-#define die(X) do { \
-	perror (X); \
-	abort (); \
-} while (0);
+/* safe macros */
+#define bit(off)	(1UL << (off))
+#define die(blame) do { perror(blame); abort(); } while (0);
 
-#define warn(X) do { \
-	perror (X); \
-} while (0);
+#define eat(ret, buf, expr)			\
+do {						\
+        char *_buf = buf;			\
+        int _ext;				\
+        size_t _len = strlen(buf);		\
+        size_t *_ret = &(ret);			\
+        wchar_t wc;				\
+						\
+	*_ret = 0;				\
+	while ((_ext = mbtowc(&wc, _buf, _len))	\
+		&& (expr)) {			\
+                if (_ext == -1) {		\
+			*_ret = -1;		\
+			break;			\
+		}				\
+		*_ret += (size_t)_ext;		\
+		 _buf += (size_t)_ext;		\
+		 _len -= (size_t)_ext;		\
+	}					\
+} while (0)
 
-#endif
+#endif /* _util_ */

@@ -32,7 +32,7 @@ addr_plus(Node *left, Node *right, Buffer *buf, char *err)
 
 	} else {
 
-		inc = make_set();
+		inc = makeset();
 
 		off = 1;
 
@@ -41,13 +41,13 @@ addr_plus(Node *left, Node *right, Buffer *buf, char *err)
 
 	}
 
-	free_set(inc);
+	freeset(inc);
 	return ret;
 
 fail:
 	strcpy(err, "invalid line address");
-	free_set(ret);
-	free_set(inc);
+	freeset(ret);
+	freeset(inc);
 	return NULL;
 	
 }

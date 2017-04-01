@@ -25,7 +25,7 @@ const Rule ruleset[] = {
 };
 
 void *
-getaddr (String *s, size_t *pos, Buffer *buf, char *err)
+getaddr(String *s, size_t *pos, Buffer *buf, char *err)
 {
 	Set *sel;
 	Selection *ret;
@@ -35,12 +35,12 @@ getaddr (String *s, size_t *pos, Buffer *buf, char *err)
 	sel  = evaltree(tree, buf, err);
 	ret  = resolveset(sel, buf, err);
 	freetree(tree);
-	free_set(sel);
-	return (ret);
+	freeset(sel);
+	return ret;
 }
 
 Set *
-evaltree (Node *cur, Buffer *buf, char *err)
+evaltree(Node *cur, Buffer *buf, char *err)
 {
 	if (!cur) return NULL;
 
@@ -49,13 +49,14 @@ evaltree (Node *cur, Buffer *buf, char *err)
 
 	} else if (ruleset[cur->tok] & OPERATOR) {
 		return ((cur->op) (cur->left, cur->right, buf, err));
+
 	} else
 		strcpy (err, "evaltree(): unknown token");
 		return NULL;
 }
 
 Node *
-next (String *s, size_t *pos)
+next(String *s, size_t *pos)
 {
 	size_t i, j;
 	Node *tmp, *ret = NULL;
@@ -64,18 +65,17 @@ next (String *s, size_t *pos)
 
 	i =j = 0;
 	for (; i < IDENT_LEN; ++i) {
-		tmp = (lexers[i]) (s, pos); /* try and find a match */
-		if (!tmp)
-			continue;
+		tmp = lexers[i](s, pos); /* try and find a match */
+		if (!tmp) continue;
 		ret = tmp;
 		break;
 	}
 
-	return (ret);
+	return ret;
 }
 
 Node *
-parseaddr (String *s, size_t *pos, char *err)
+parseaddr(String *s, size_t *pos, char *err)
 {
 	Node *cur, *new;
 
@@ -87,8 +87,8 @@ parseaddr (String *s, size_t *pos, char *err)
 		}
 		if (ruleset[new->tok] & VALUE) {
 
-			if (addnode (cur, new) == FAIL) {
-				sprintf (err, "invalid sequence of values %lu bytes in", *pos);
+			if (addnode(cur, new)) {
+				sprintf(err, "invalid sequence of values %lu bytes in", *pos);
 				goto fail;
 			}
 
@@ -96,25 +96,25 @@ parseaddr (String *s, size_t *pos, char *err)
 
 		} else if (ruleset[new->tok] & OPERATOR) {
 			if (ruleset[cur->tok] & VALUE) {
-				addnode (new, cur);
+				addnode(new, cur);
 				cur = new;
 				continue;
 			}
 			for (;;) {
 				if (cur->tok >= new->tok) {
-					if (SUCC == addnode (cur, new)) {
+					if (addnode(cur, new)) {
 						cur = new;
 						break;
 					}
 				} else {
-					if (SUCC == addnode (new, cur)) {
+					if (addnode(new, cur)) {
 						cur = new;
 						break;
 					}
 				}
 
 				if (cur->up == NULL) {
-					addnode (new, cur);
+					addnode(new, cur);
 					cur = new;
 					break;
 				}
@@ -123,10 +123,10 @@ parseaddr (String *s, size_t *pos, char *err)
 		}
 	}
 
-	return (getroot (cur));
+	return getroot(cur);
 
 fail:
-	cur = getroot (cur);
-	freetree (cur);
-	return (NULL);
+	cur = getroot(cur);
+	freetree(cur);
+	return NULL;
 }

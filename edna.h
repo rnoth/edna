@@ -16,6 +16,7 @@ typedef struct Mode	Mode;
 typedef struct Node	Node;
 typedef struct Line	Line;
 typedef struct State	State;
+typedef struct Span	Span;
 typedef Vector(Line *)	Selection;
 
 #include "addr.h"

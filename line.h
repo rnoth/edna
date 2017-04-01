@@ -9,6 +9,11 @@ struct Line {
 	Line*	prev;
 };
 
+struct Span {
+	char *ptr;
+	size_t ext;
+};
+
 /* line.c */
 extern size_t	getlineno	(Line *);
 extern Line*	getnext		(Line *);

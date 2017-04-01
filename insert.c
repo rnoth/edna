@@ -32,7 +32,7 @@ insline(State *st, Buffer *buf, String *str, char *err)
 int
 insprompt (State *st, Buffer *buf, String *s, char *err)
 {
-	if (printf(INS_PROMPT) < 0) die("printf");
-	if (fflush(stdout) == EOF) warn("fflush");
+	if (printf(INS_PROMPT) < 0) return errno;
+	if (fflush(stdout) == EOF) return errno;
 	return 0;
 }

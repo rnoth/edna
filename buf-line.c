@@ -34,9 +34,7 @@ rmcurline(Buffer *buf)
 
 	del = buf->cur;
 
-	if (bufseek(buf, BUF_CUR, 1) == FAIL)
-		if (bufseek(buf, BUF_CUR, 1) == FAIL)
-			return -1;
+	if (bufseek(buf, BUF_CUR, 1) && bufseek(buf, BUF_CUR, -1)) return -1;
 
 	freelines(del, getnext(del));
 	buf->dirty = 1;
@@ -53,9 +51,7 @@ rmline(Buffer *buf, Line *li)
 
 	bufseekline(buf, li);
 
-	if (bufseek(buf, BUF_CUR, 1) == FAIL)
-		if (bufseek(buf, BUF_CUR, -1) == FAIL)
-			return -1;
+	if (bufseek(buf, BUF_CUR, 1) && bufseek(buf, BUF_CUR, -1)) return -1;
 
 	freelines(li, getnext(li));
 	buf->dirty = 1;

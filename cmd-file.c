@@ -11,7 +11,7 @@ cmd_edit(State *st, Buffer *buf, Arg *arg, char *error)
 		goto force;
 
 	if (isdirty(buf)) {
-		strcpy (error, "buffer has unsved changes");
+		strcpy (error, "buffer has unsaved changes");
 		return -1;
 	}
 
@@ -52,12 +52,14 @@ cmd_filename(State *st, Buffer *buf, Arg *arg, char *err)
 int
 cmd_quit (State *st, Buffer *buf, Arg *arg, char *error)
 {
+	int err;
 	if (arg->mode) {
 		if (!strcmp (arg->mode, "force"))
 			goto end;
-		if (!strcmp (arg->mode, "write"))
-			if (cmd_write (st, buf, arg, error) == FAIL)
-				return FAIL;
+		if (!strcmp (arg->mode, "write")) {
+			err = cmd_write (st, buf, arg, error);
+			if (err) return err;
+		}
 		strcpy (error, "unknown option");
 		return -1;
 	}
