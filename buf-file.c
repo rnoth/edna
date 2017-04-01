@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 #include "edna.h"
 
@@ -23,8 +24,8 @@ bufsetname(Buffer *buf, char *name)
 	assert(buf != NULL);
 
 	if (!buf->name) {
-		make_vector(buf->name);
-		if (!buf->name) die("make_vector");
+		buf->name = str_alloc();
+		if (!buf->name) return ENOMEM;
 	}
 	vec_truncate(buf->name, 0);
 	return vec_concat(buf->name, name, strlen(name));
@@ -36,7 +37,11 @@ bufopen(Buffer *buf, char *mode)
 	char *fn;
 
 	assert(buf != NULL);
-	assert(buf->name != NULL);
+	if (buf->file) {
+		if (fflush(buf->file) == -1) return errno;
+		if (fclose(buf->file) == -1) return errno;
+	}
+	if (buf->name == NULL) return 0;
 
 	if (buf->file) fclose(buf->file);
 	buf->file = NULL;
