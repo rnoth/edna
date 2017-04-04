@@ -24,7 +24,7 @@ bufsetname(Buffer *buf, char *name)
 	assert(buf != NULL);
 
 	if (!buf->name) {
-		buf->name = str_alloc();
+		buf->name = edna_str_alloc();
 		if (!buf->name) return ENOMEM;
 	}
 	vec_truncate(buf->name, 0);

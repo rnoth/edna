@@ -10,8 +10,7 @@
 #include "edna.h"
 #include "config.h"
 
-static int	runcmd	(State *, Buffer *, Command *, Arg *, char *err);
-static Command *findcmd	(State *, char *);
+//static int	runcmd	(State *, Buffer *, Command *, Arg *, char *err);
 
 Command *
 findcmd(State *st, char *name)
@@ -32,7 +31,7 @@ void
 freearg(Arg *arg)
 {
 	if (arg->param) {
-		mapv(arg->param, free(*each));
+		mapv(void **each, arg->param) free(*each);
 		vec_free(arg->param);
 	}
 	if (arg->name) free(arg->name);
@@ -44,7 +43,14 @@ freearg(Arg *arg)
 Arg *
 makearg(void)
 {
-	return calloc(1, sizeof(Arg));
+	Arg *ret;
+
+	ret = calloc(1, sizeof *ret);
+	if (!ret) return NULL;
+	make_vector(ret->param);
+	if (!ret) { free(ret); return NULL; }
+
+	return ret;
 }
 
 int
@@ -71,22 +77,23 @@ cmdeval(State *st, Buffer *buf, String *s, char *errmsg)
 {
 	int err = 0;
 	Arg *arg = 0;
-	Command *cmd = 0;
+	//Command *cmd = 0;
+	Expr *ex = 0;
 
 	arg = makearg();
 	if (!arg) return ENOMEM;
 
-	err = parseline(s, buf, arg, errmsg);
-	if (err) goto finally;
+	ex = expr_ctor();
+	if (!ex) goto finally;
 
-	cmd = findcmd(st, arg->name);
-	if (!cmd) {
-		strcpy(errmsg, "unknown command");
-		err = ENOENT;
+	err = parseline(ex, st, s);
+	if (err == EILSEQ) {
+		strcpy(errmsg, "parse error");
 		goto finally;
-	}
+	} else if (err) goto finally;
 
-	err = runcmd(st, buf, cmd, arg, errmsg);
+	err = evalexpr(NULL, ex, st, buf, arg, errmsg);
+	if (err) goto finally;
 
 finally:
 	freearg(arg);
@@ -101,6 +108,7 @@ cmdprompt (State *st, Buffer *buf, String *s, char *err)
 	return 0;
 }
 
+#if 0
 int
 runcmd(State *st, Buffer *buf, Command *cmd, Arg *arg, char *err)
 {
@@ -135,3 +143,4 @@ nomem:
 	free(arg->mode);
 	return ENOMEM;
 }
+#endif

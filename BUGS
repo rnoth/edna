@@ -1,1 +1,0 @@
-there's an uninitialized value error lurking somewhere near cmd_print when using the example config.

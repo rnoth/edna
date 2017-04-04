@@ -13,13 +13,13 @@ chomp(char *s)
 }
 
 void
-str_free(String *str)
+edna_str_free(String *str)
 {
 	vec_free(str);
 }
 
 String *
-str_alloc(void)
+edna_str_alloc(void)
 {
 	String *ret;
 	make_vector(ret);

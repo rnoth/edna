@@ -18,6 +18,7 @@ struct State {
 	Vector(Command)	 *cmds;
 	Vector(Buffer *) *buffers;
 	Vector(Mode)	 *modes;
+	Vector(Symbol)	 *syms;
 	uint8_t		  running:1;
 };
 

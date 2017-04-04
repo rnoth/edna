@@ -46,7 +46,7 @@ killbuf(Buffer *buf)
 		if (fflush(buf->file) == -1) abort();
 		if (fclose(buf->file) == -1) abort();
 	}
-	str_free(buf->name);
+	edna_str_free(buf->name);
 	memset(buf, 0, sizeof *buf);
 	return;
 }

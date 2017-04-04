@@ -19,7 +19,7 @@ readbuf(Buffer *buf, char *errmsg)
 
 	f = buf->file;
 	if (!f) return 0;
-	s = str_alloc();
+	s = edna_str_alloc();
 	if (!s) return ENOMEM;
 
 	errno = 0;
@@ -27,7 +27,7 @@ readbuf(Buffer *buf, char *errmsg)
 		err = readline(s, f);
 		if (err == -1) break;
 		else if (err > 0) {
-			str_free(s);
+			edna_str_free(s);
 			return err;
 		}
 
@@ -38,7 +38,7 @@ readbuf(Buffer *buf, char *errmsg)
 	}
 	clearerr(f);
 
-	str_free(s);
+	edna_str_free(s);
 	return 0;
 }
 

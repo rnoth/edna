@@ -28,3 +28,9 @@ cmd_print(State *st, Buffer *buf, Arg *arg, char *error)
 	if (fflush(stdout) == EOF) die("fflush");
 	return 0;
 }
+
+int
+cmd_eval(State *st, Buffer *buf, Arg *arg, char *error)
+{
+	return 0;
+}

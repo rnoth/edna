@@ -8,7 +8,7 @@
 void
 freestate(State *st)
 {
-	mapv(st->buffers, freebuf(*each));
+	mapv (void **each, st->buffers) freebuf(*each);
 	vec_free(st->buffers);
 	vec_free(st->cmds);
 	vec_free(st->modes);
@@ -32,6 +32,11 @@ initst(State *st)
 	if (!st->modes) goto nomem;
 	len = sizeof_modes();
 	vec_concat(st->modes, modes, len);
+
+	make_vector(st->syms);
+	if (!st->syms) goto nomem;
+	len = sizeof_symbols();
+	vec_concat(st->syms, symbols_, len);
 
 	setmode(st, "command");
 

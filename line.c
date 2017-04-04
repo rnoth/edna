@@ -8,7 +8,7 @@ int
 changeline(Line *ln, String *s)
 {
 	if (!ln->str) {
-		ln->str = str_alloc();
+		ln->str = edna_str_alloc();
 		if (!ln->str) return ENOMEM;
 	}
 
@@ -51,7 +51,7 @@ freelines(Line *start, Line *stop)
 	next = getnext(cur);
 	while (cur && cur != stop) {
 		tmp = getnext(next);
-		str_free(cur->str);
+		edna_str_free(cur->str);
 		free(cur);
 		cur = next;
 		next = tmp;

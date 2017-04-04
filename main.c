@@ -15,7 +15,7 @@ main (int argc, char** argv)
 	/* init stuff */
 	st   = makestate();
 	buf  = makebuf();
-	str  = str_alloc();
+	str  = edna_str_alloc();
 	*errmsg = 0;
 
 	if (!(st && buf && str)) {
@@ -58,7 +58,7 @@ exit:
 		
 	freebuf(buf);
 	freestate(st);
-	str_free(str);
+	edna_str_free(str);
 
 	return 0;
 }
