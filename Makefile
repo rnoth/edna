@@ -1,6 +1,6 @@
 # Makefile for edna v0.2
 CC	?= cc
-CFLAGS  ?= -std=c99 -fPIC -W -Wall -Wextra -Werror -pedantic -Wno-unused-parameter
+CFLAGS  ?= -std=c99 -fPIC -W -Wall -Wextra -Werror -pedantic -Wno-unused-parameter -Wno-missing-field-initializers
 LDFLAGS ?= -lc
 SOFLAGS ?= -lc -fPIC -shared -Wl,-rpath=$(shell pwd)
 DEBUG   ?= yes
